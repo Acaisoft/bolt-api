@@ -1,0 +1,40 @@
+- args:
+    table:
+      name: configuration
+      schema: public
+  type: untrack_table
+- args:
+    table:
+      name: configuration_type
+      schema: public
+  type: untrack_table
+- args:
+    table:
+      name: execution
+      schema: public
+  type: untrack_table
+- args:
+    table:
+      name: parameter
+      schema: public
+  type: untrack_table
+- args:
+    table:
+      name: project
+      schema: public
+  type: untrack_table
+- args:
+    table:
+      name: repository
+      schema: public
+  type: untrack_table
+- args:
+    table:
+      name: user
+      schema: public
+  type: untrack_table
+- args:
+    table:
+      name: user_project
+      schema: public
+  type: untrack_table

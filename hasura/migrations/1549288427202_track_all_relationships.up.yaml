@@ -1,0 +1,140 @@
+- args:
+    name: projectByprojectId
+    table:
+      name: configuration
+      schema: public
+    using:
+      foreign_key_constraint_on: project_id
+  type: create_object_relationship
+- args:
+    name: repositoryByrepositoryId
+    table:
+      name: configuration
+      schema: public
+    using:
+      foreign_key_constraint_on: repository_id
+  type: create_object_relationship
+- args:
+    name: configurationTypeBytypeId
+    table:
+      name: configuration
+      schema: public
+    using:
+      foreign_key_constraint_on: type_id
+  type: create_object_relationship
+- args:
+    name: executionsByconfigurationId
+    table:
+      name: configuration
+      schema: public
+    using:
+      foreign_key_constraint_on:
+        column: configuration_id
+        table:
+          name: execution
+          schema: public
+  type: create_array_relationship
+- args:
+    name: configurationsBytypeId
+    table:
+      name: configuration_type
+      schema: public
+    using:
+      foreign_key_constraint_on:
+        column: type_id
+        table:
+          name: configuration
+          schema: public
+  type: create_array_relationship
+- args:
+    name: configurationByconfigurationId
+    table:
+      name: execution
+      schema: public
+    using:
+      foreign_key_constraint_on: configuration_id
+  type: create_object_relationship
+- args:
+    name: configurationsByprojectId
+    table:
+      name: project
+      schema: public
+    using:
+      foreign_key_constraint_on:
+        column: project_id
+        table:
+          name: configuration
+          schema: public
+  type: create_array_relationship
+- args:
+    name: userProjectsByprojectId
+    table:
+      name: project
+      schema: public
+    using:
+      foreign_key_constraint_on:
+        column: project_id
+        table:
+          name: user_project
+          schema: public
+  type: create_array_relationship
+- args:
+    name: userByuserId
+    table:
+      name: repository
+      schema: public
+    using:
+      foreign_key_constraint_on: user_id
+  type: create_object_relationship
+- args:
+    name: configurationsByrepositoryId
+    table:
+      name: repository
+      schema: public
+    using:
+      foreign_key_constraint_on:
+        column: repository_id
+        table:
+          name: configuration
+          schema: public
+  type: create_array_relationship
+- args:
+    name: repositorysByuserId
+    table:
+      name: user
+      schema: public
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          name: repository
+          schema: public
+  type: create_array_relationship
+- args:
+    name: userProjectsByuserId
+    table:
+      name: user
+      schema: public
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          name: user_project
+          schema: public
+  type: create_array_relationship
+- args:
+    name: projectByprojectId
+    table:
+      name: user_project
+      schema: public
+    using:
+      foreign_key_constraint_on: project_id
+  type: create_object_relationship
+- args:
+    name: userByuserId
+    table:
+      name: user_project
+      schema: public
+    using:
+      foreign_key_constraint_on: user_id
+  type: create_object_relationship
