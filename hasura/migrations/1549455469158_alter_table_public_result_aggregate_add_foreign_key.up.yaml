@@ -1,0 +1,4 @@
+- args:
+    sql: ALTER TABLE "public"."result_aggregate" ADD FOREIGN KEY ("execution_id")
+      REFERENCES "public"."execution" ("id")
+  type: run_sql

@@ -2,6 +2,7 @@ import string
 
 from gql import gql, Client
 from gql.transport.requests import RequestsHTTPTransport
+from schema import upstream
 from schema.upstream import user, result
 
 
@@ -14,16 +15,16 @@ def insert_users(client: Client):
 
 
 def insert_user(client: Client) -> str:
-    objects = user.User(client)
-    ret = objects.insert(objects.input_type(email="admin@acaisoft.net", active="true"))
+    objects = upstream.User(client)
+    ret = objects.insert(upstream.User.input_type(email="admin@acaisoft.net", active="true"))
     return ret['insert_user']['returning'][0]['id']
 
 
 def insert_execution_results(client: Client, execution_id):
-    dd = result.Result(client)
+    dd = upstream.Result(client)
     data_set = []
-    for i in range(10000):
-        data_set.append(dd.input_type(
+    for i in range(1000):
+        data_set.append(upstream.Result.input_type(
             execution_id=execution_id,
             endpoint="/stats/",
             exception="",
@@ -36,6 +37,20 @@ def insert_execution_results(client: Client, execution_id):
     dd.bulk_insert(data_set)
 
 
+def insert_aggregated_results(client: Client, execution_id):
+    dd = upstream.ResultAggregate(client)
+    data = upstream.ResultAggregate.input_type(
+        execution_id=execution_id,
+        fail=0,
+        av_resp_time=23.45,
+        succes=123,
+        error=124,
+        av_size=200,
+        timestamp=1231231231321,
+    )
+    dd.insert(data)
+
+
 def insert_project(client):
     ret = client.execute(
         gql('mutation{insert_project(objects:[{name:"project1", contact:"admin@adm.in"}]) {returning {id}}}'))
@@ -44,7 +59,8 @@ def insert_project(client):
 
 def insert_repository(client):
     ret = client.execute(
-        gql('mutation{insert_repository(objects:[{name:"repo1", url:"http://url.url", username:"admin", password:"secret"}]) {returning {id}}}'))
+        gql(
+            'mutation{insert_repository(objects:[{name:"repo1", url:"http://url.url", username:"admin", password:"secret"}]) {returning {id}}}'))
     return ret['insert_repository']['returning'][0]['id']
 
 
@@ -74,7 +90,8 @@ def insert_data(client: Client):
     repository = insert_repository(client)
     configuration = insert_configuration(client, project, repository)
     execution = insert_execution(client, configuration)
-    insert_execution_results(client, execution)
+    # insert_execution_results(client, execution)
+    insert_aggregated_results(client, execution)
 
 
 def purge_data(client: Client):
