@@ -1,0 +1,8 @@
+- args:
+    name: executionByparameterId
+    table:
+      name: execution_parameter
+      schema: public
+    using:
+      foreign_key_constraint_on: parameter_id
+  type: create_object_relationship

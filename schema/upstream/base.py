@@ -35,10 +35,16 @@ class BaseQuery(object):
         self.name = self.name or self.__class__.__module__.split('.')[-1]
 
     def execute(self, query):
-        # print(query)
+        """
+        Execute any query
+        :param query: the query
+        :return: response[<query_name>]["returning"] list
+        """
+        print(query)
         start = time.time()
         ret = self.client.execute(gql(query))
         print('query took %.2f seconds' % (time.time() - start))
+        # unwrap the pointless (in case of single-query) <query-name>-returning keys
         for k in ret:
             query_type_result = ret[k]
             if isinstance(query_type_result, list):
@@ -64,9 +70,9 @@ class BaseQuery(object):
         }
         return self.execute(query)
 
-    def insert(self, objects_str_or_type):
+    def insert(self, objects_str_or_type, returning=None):
         obj = self.serialize(objects_str_or_type)
-        return self.insert_string(obj)
+        return self.insert_string(obj, returning)
 
     def bulk_insert(self, data):
         bulk = ""
@@ -84,12 +90,12 @@ class BaseQuery(object):
         if bulk:
             return self.insert_string(bulk)
 
-    def insert_string(self, objects_string: string):
+    def insert_string(self, objects_string: string, returning=None):
         query = self.mutation_template % {
             'op': 'insert',
             'ityp': self.name,
             'objects': objects_string,
-            'returning': 'id',
+            'returning': returning or 'id',
         }
         return self.execute(query)
 
