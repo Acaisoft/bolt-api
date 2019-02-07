@@ -2,28 +2,20 @@ import string
 
 from gql import gql, Client
 from gql.transport.requests import RequestsHTTPTransport
-from schema.upstream import user, result
-
-
-def insert_users(client: Client):
-    for i in range(100):
-        ee = "u{}@acaisoft.pl".format(i)
-        qq = user.upsert.substitute(email=ee, active="true")
-        rr = client.execute(gql(qq))
-        print(rr)
+from schema import upstream
 
 
 def insert_user(client: Client) -> str:
-    objects = user.User(client)
-    ret = objects.insert(objects.input_type(email="admin@acaisoft.net", active="true"))
-    return ret['insert_user']['returning'][0]['id']
+    objects = upstream.user.Query(client)
+    ret = objects.insert(upstream.user.User(email="admin@acaisoft.net", active=True))
+    return ret[0]['id']
 
 
 def insert_execution_results(client: Client, execution_id):
-    dd = result.Result(client)
+    objects = upstream.execution_result.Query(client)
     data_set = []
-    for i in range(10000):
-        data_set.append(dd.input_type(
+    for i in range(1000):
+        data_set.append(objects.input_type(
             execution_id=execution_id,
             endpoint="/stats/",
             exception="",
@@ -33,29 +25,39 @@ def insert_execution_results(client: Client, execution_id):
             status="200",
             timestamp=1231231231321,
         ))
-    dd.bulk_insert(data_set)
+    objects.bulk_insert(data_set)
+
+
+def insert_aggregated_results(client: Client, execution_id):
+    objects = upstream.result_aggregate.Query(client)
+    data = objects.input_type(
+        execution_id=execution_id,
+        fail=0,
+        av_resp_time=23.45,
+        succes=123,
+        error=124,
+        av_size=200,
+        timestamp=1231231231321,
+    )
+    objects.insert(data)
 
 
 def insert_project(client):
-    ret = client.execute(
-        gql('mutation{insert_project(objects:[{name:"project1", contact:"admin@adm.in"}]) {returning {id}}}'))
-    return ret['insert_project']['returning'][0]['id']
+    ret = upstream.project.Query(client).insert(upstream.project.Project(name="pro1", contact="admin@adm.in"))
+    return ret[0]['id']
 
 
 def insert_repository(client):
-    ret = client.execute(
-        gql('mutation{insert_repository(objects:[{name:"repo1", url:"http://url.url", username:"admin", password:"secret"}]) {returning {id}}}'))
-    return ret['insert_repository']['returning'][0]['id']
+    o = upstream.repository.Query(client)
+    ret = o.insert(upstream.repository.Repository(name="repo 1", url="http://url.url/url", username="root", password="password"))
+    return ret[0]['id']
 
 
 def insert_configuration(client, project, repository):
-    query = string.Template('''mutation{insert_configuration(objects:[{
-    name:"conf1", 
-    repository_id:"$repo",
-    project_id:"$project",
-    }]) {returning {id}}}''').substitute(repo=repository, project=project)
-    ret = client.execute(gql(query))
-    return ret['insert_configuration']['returning'][0]['id']
+    ret = upstream.configuration.Query(client).insert(
+        upstream.configuration.Conf(name="conf 1", repository_id=repository, project_id=project)
+    )
+    return ret[0]['id']
 
 
 def insert_execution(client, configuration):
@@ -75,10 +77,11 @@ def insert_data(client: Client):
     configuration = insert_configuration(client, project, repository)
     execution = insert_execution(client, configuration)
     insert_execution_results(client, execution)
+    insert_aggregated_results(client, execution)
 
 
 def purge_data(client: Client):
-    client.execute(gql(user.purge.substitute()))
+    upstream.user.Query(client).purge()
 
 
 def new_client() -> Client:
@@ -93,5 +96,5 @@ def new_client() -> Client:
 
 if __name__ == "__main__":
     cl = new_client()
-    # purge_data(cl)
+    purge_data(cl)
     insert_data(cl)
