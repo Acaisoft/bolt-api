@@ -1,17 +1,12 @@
-import string
-from collections import namedtuple
-
-from schema.upstream.base import BaseQuery
+import typing
+from schema.upstream.base import BaseQuery, InputType
 
 
-class User(BaseQuery):
-    input_type = namedtuple("user", [
-        "email",
-        "active",
-    ])
+class User(typing.NamedTuple, InputType):
+    email: str
+    active: bool
 
-    object_template = string.Template('''{
-      email:"$email",
-      active:"$active",
-    },''')
+
+class Query(BaseQuery):
+    input_type = User
 

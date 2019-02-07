@@ -1,26 +1,16 @@
-import string
-from collections import namedtuple
-
-from schema.upstream.base import BaseQuery
+import typing
+from schema.upstream.base import BaseQuery, InputType
 
 
-class ResultAggregate(BaseQuery):
-    input_type = namedtuple("result_aggregate", [
-        "execution_id",
-        "timestamp",
-        "fail",
-        "av_resp_time",
-        "succes",
-        "error",
-        "av_size",
-    ])
+class ResultAggregate(typing.NamedTuple, InputType):
+    execution_id: str
+    timestamp: str
+    fail: str
+    av_resp_time: str
+    succes: str
+    error: str
+    av_size: str
 
-    object_template = string.Template('''{
-        execution_id:"$execution_id",
-        timestamp:$timestamp,
-        fail:$fail,
-        av_resp_time:"$av_resp_time",
-        succes:"$succes",
-        error:"$error",
-        av_size:"$av_size",
-    },''')
+
+class Query(BaseQuery):
+    input_type = ResultAggregate

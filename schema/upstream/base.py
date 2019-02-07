@@ -1,37 +1,72 @@
 import string
-from collections import namedtuple
+import time
+import typing
 
 from gql import gql, Client
 
 
+class InputType(typing.NamedTuple):
+    id: str
+
+
 class BaseQuery(object):
     client = None
+    name = None
     bulk_size = 200
-    input_type = namedtuple("override_me", [
-        "id",
-    ])
+    input_type: InputType
 
-    object_template = string.Template('''{
-      id:"$id",
-    },''')
+    query_template = '''
+    query {
+        %(ityp)s %(args)s { %(returning)s } 
+    }'''
 
-    insert_template = string.Template('''
+    mutation_template = '''
     mutation {
-        insert_$classname(objects: [ $objects ]) { returning { id } } 
-    }
-    ''')
+        %(op)s_%(ityp)s(objects: [ %(objects)s ]) { returning { %(returning)s } } 
+    }'''
+
+    deletion_template = '''
+    mutation {
+        delete_%(ityp)s(where:{id:{%(op)s: "%(id)s"}}) { affected_rows }
+    }'''
 
     def __init__(self, client: Client):
         self.client = client
+        self.name = self.name or self.__class__.__module__.split('.')[-1]
 
-    def serialize(self, input_type_object):
-        if isinstance(input_type_object, str):
-            return input_type_object
-        if isinstance(input_type_object, self.input_type):
-            return self.object_template.substitute(**input_type_object._asdict())
-        if isinstance(input_type_object, dict):
-            return self.object_template.substitute(**input_type_object)
-        raise TypeError("input_type_object must be a dict or an instance of self.input_type type")
+    def execute(self, query):
+        # print(query)
+        start = time.time()
+        ret = self.client.execute(gql(query))
+        print('query took %.2f seconds' % (time.time() - start))
+        for k in ret:
+            query_type_result = ret[k]
+            if isinstance(query_type_result, list):
+                return query_type_result
+            for l in query_type_result:
+                return query_type_result[l]
+
+    def query(self, where: str = None, returning: str = None):
+        if where and where[0] != "(":
+            raise RuntimeError("query WHERE clause must be enclosed in ( braces )")
+        query = self.query_template % {
+            'ityp': self.name,
+            'args': where or "",
+            'returning': returning or 'id',
+        }
+        return self.execute(query)
+
+    def purge(self):
+        query = self.deletion_template % {
+            'ityp': self.name,
+            'op': '_neq',
+            'id': '00000000-0000-0000-0000-000000000000',
+        }
+        return self.execute(query)
+
+    def insert(self, objects_str_or_type):
+        obj = self.serialize(objects_str_or_type)
+        return self.insert_string(obj)
 
     def bulk_insert(self, data):
         bulk = ""
@@ -50,11 +85,23 @@ class BaseQuery(object):
             return self.insert_string(bulk)
 
     def insert_string(self, objects_string: string):
-        body = self.insert_template.substitute(classname=self.input_type.__name__, objects=objects_string)
-        print(body)
-        query = gql(body)
-        return self.client.execute(query)
+        query = self.mutation_template % {
+            'op': 'insert',
+            'ityp': self.name,
+            'objects': objects_string,
+            'returning': 'id',
+        }
+        return self.execute(query)
 
-    def insert(self, objects_str_or_type):
-        obj = self.serialize(objects_str_or_type)
-        return self.insert_string(obj)
+    @staticmethod
+    def serialize(input_type_object):
+        out = '{\n'
+        for i, f in enumerate(input_type_object._fields):
+            t = input_type_object._field_types[f]
+            if t == str:
+                out += '''%(f)s:"%(v)s",\n''' % {'f': f, 'v': input_type_object[i]}
+            elif t == bool:
+                out += '''%(f)s:%(v)s,\n''' % {'f': f, 'v': str(input_type_object[i]).lower()}
+            else:
+                out += '''%(f)s:%(v)s,\n''' % {'f': f, 'v': str(input_type_object[i])}
+        return out + '},\n'
