@@ -17,9 +17,12 @@ def timing_middleware(next, root, info, **args):
 
 
 def auth_middleware(next, root, info, **args):
-    # TODO: !!!
-    import ipdb; ipdb.set_trace()
-    info.context["user"] = 1
+    # pull authinfo from flask request
+    info.context.authorization = {
+        'user': '1',
+        'roles': [0, 2],
+        'projects': ['p1', 'p2'],
+    }
     return next(root, info, **args)
 
 

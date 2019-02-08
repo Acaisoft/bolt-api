@@ -1,6 +1,6 @@
 import graphene
 
-from schema.downstream.util import get_selected_fields, clients
+from app.appgraph.util import get_selected_fields, clients
 
 
 class RepositoryInterface(graphene.Interface):

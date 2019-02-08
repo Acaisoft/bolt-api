@@ -1,4 +1,5 @@
 import string
+from datetime import datetime
 
 from gql import gql, Client
 from gql.transport.requests import RequestsHTTPTransport
@@ -42,6 +43,18 @@ def insert_aggregated_results(client: Client, execution_id):
     objects.insert(data)
 
 
+def insert_distribution_results(client, execution_id):
+    objects = upstream.result_distribution.Query(client)
+    data = upstream.result_distribution.ResultDistribution(
+        execution_id=execution_id,
+        start=datetime.now(),
+        end=datetime.now(),
+        request_result={"type": "request", "result": "ok"},
+        distribution_result={"type": "distribution", "result": 400},
+    )
+    objects.insert(data)
+
+
 def insert_project(client):
     ret = upstream.project.Query(client).insert(upstream.project.Project(name="pro1", contact="admin@adm.in"))
     return ret[0]['id']
@@ -78,6 +91,7 @@ def insert_data(client: Client):
     execution = insert_execution(client, configuration)
     insert_execution_results(client, execution)
     insert_aggregated_results(client, execution)
+    insert_distribution_results(client, execution)
 
 
 def purge_data(client: Client):

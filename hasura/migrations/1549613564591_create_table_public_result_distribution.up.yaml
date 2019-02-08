@@ -1,0 +1,10 @@
+- args:
+    sql: CREATE TABLE "public"."result_distribution"("id" bigserial NOT NULL UNIQUE,
+      "execution_id" uuid NOT NULL, "request_result" json , "distribution_result"
+      json , "start" timestamptz NOT NULL, "end" timestamptz NOT NULL, PRIMARY KEY
+      ("id") );
+  type: run_sql
+- args:
+    name: result_distribution
+    schema: public
+  type: add_existing_table_or_view

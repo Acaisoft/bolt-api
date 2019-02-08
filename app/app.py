@@ -1,7 +1,8 @@
 from flask import Flask
 from flask_graphql import GraphQLView
 
-from schema.downstream import schema, middleware
+from app.appgraph import middleware
+from app.appgraph import schema
 
 
 def create_app(test_config=None):
@@ -15,4 +16,3 @@ def create_app(test_config=None):
     ))
 
     return app
-

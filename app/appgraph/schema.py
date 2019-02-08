@@ -1,6 +1,7 @@
 import graphene
 
-from schema.downstream import user, repository, configuration
+from app.appgraph import configuration
+from app.appgraph import user, repository
 
 
 class RootQuery(user.QueryUser, repository.QueryRepository, configuration.QueryConfiguration):
