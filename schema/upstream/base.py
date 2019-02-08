@@ -110,9 +110,9 @@ class BaseQuery(object):
                 out += '''%(f)s:"%(v)s",\n''' % {'f': f, 'v': input_type_object[i]}
             elif t == bool:
                 out += '''%(f)s:%(v)s,\n''' % {'f': f, 'v': str(input_type_object[i]).lower()}
-            elif t == dict:
+            elif t in (dict, typing.Any):
                 v = json.dumps(input_type_object[i])
-                out += '''%(f)s:"%(v)s",\n''' % {'f': f, 'v': v.replace('"', '\\"')}
+                out += '''%(f)s:"%(v)s",\n''' % {'f': f, 'v': v.replace('"', r'\"')}
             elif t == datetime.datetime or t == datetime.date:
                 v = input_type_object[i].isoformat()
                 out += '''%(f)s:"%(v)s",\n''' % {'f': f, 'v': v}

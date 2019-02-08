@@ -1,10 +1,21 @@
-FROM hasura/graphql-engine:v1.0.0-alpha37.cli-migrations
+FROM python:3.6-alpine as base
 
-ARG POSTGRES_SERVER="postgres://postgres:@localhost:5432/postgres"
+FROM base as builder
 
-ADD hasura/migrations /hasura-migrations
+RUN apk add --no-cache --virtual .build-deps gcc musl-dev
+RUN pip install cython greenlet
+RUN apk del .build-deps gcc musl-dev
 
-ENV HASURA_GRAPHQL_DATABASE_URL $POSTGRES_SERVER
-ENV HASURA_GRAPHQL_ENABLE_CONSOLE "true"
+RUN mkdir /install
+WORKDIR /install
+COPY requirements/prod.txt /requirements.txt
+RUN pip install --install-option="--prefix=/install" -r /requirements.txt
 
-CMD ["graphql-engine", "serve"]
+FROM base
+COPY --from=builder /install /usr/local
+
+COPY app /app
+COPY schema /schema
+COPY wsgi.py wsgi.py
+WORKDIR /
+CMD gunicorn wsgi:application --bind 0.0.0.0:80

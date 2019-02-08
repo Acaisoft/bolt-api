@@ -8,8 +8,8 @@ class ResultDistribution(typing.NamedTuple, InputType):
     execution_id: str
     start: datetime
     end: datetime
-    request_result: dict
-    distribution_result: dict
+    request_result: typing.Any
+    distribution_result: typing.Any
 
 
 class Query(BaseQuery):
