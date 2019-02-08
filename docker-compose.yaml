@@ -8,7 +8,7 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
   hasura:
-    image: hasura/graphql-engine:v1.0.0-alpha37.cli-migrations
+    image: hasura/graphql-engine:v1.0.0-alpha37
     ports:
       - "8080:8080"
     depends_on:
@@ -22,6 +22,17 @@ services:
       # HASURA_GRAPHQL_ACCESS_KEY: mysecretaccesskey
     volumes:
       - ./hasura/migrations:/hasura-migrations
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app
+    ports:
+      - "5000:5000"
+    environment:
+      HASURA_GQL: http://hasura:8080/v1alpha1/graphql
+    entrypoint: ["flask", "run", "--host", "0.0.0.0"]
 volumes:
   hasura_migrations:
   db_data:

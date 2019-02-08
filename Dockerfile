@@ -14,8 +14,9 @@ RUN pip install --install-option="--prefix=/install" -r /requirements.txt
 FROM base
 COPY --from=builder /install /usr/local
 
-COPY app /app
-COPY schema /schema
+RUN mkdir /app
+COPY app /app/app
+COPY schema /app/schema
 COPY wsgi.py wsgi.py
-WORKDIR /
+WORKDIR /app
 CMD gunicorn wsgi:application --bind 0.0.0.0:80

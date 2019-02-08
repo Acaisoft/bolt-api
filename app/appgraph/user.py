@@ -16,21 +16,7 @@ class User(graphene.ObjectType):
 
 
 class QueryUser(graphene.ObjectType):
-    user = graphene.Field(
-        UserInterface,
-        required=False,
-        user_id=graphene.UUID(required=True),
-    )
     users = graphene.List(UserInterface)
-
-    def resolve_user(self, info, user_id=None):
-        if user_id:
-            print(info.return_type.fields)
-            o = clients().user.query(
-                where=f'(where:{{id:{{_eq: "{user_id}" }} }})',
-                returning=get_selected_fields(info),
-            )
-            return User(**o[0])
 
     def resolve_users(self, info):
         return [User(**i) for i in clients().user.query(returning=get_selected_fields(info))]
