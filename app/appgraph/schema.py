@@ -1,9 +1,10 @@
 import graphene
 
 from app.appgraph import configuration
+from app.appgraph.oauth import QueryOauth
 
 
-class RootQuery(configuration.QueryConfiguration):
+class RootQuery(configuration.QueryConfiguration, QueryOauth):
     pass
 
 

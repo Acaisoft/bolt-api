@@ -8,18 +8,22 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
   hasura:
-    image: hasura/graphql-engine:v1.0.0-alpha37
+#    image: hasura/graphql-engine:v1.0.0-alpha37
+    image: hasura/graphql-engine:v1.0.0-alpha37.cli-migrations
     ports:
       - "8080:8080"
     depends_on:
       - "postgres"
+#      - "api"
     restart: always
     environment:
       HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:@postgres:5432/postgres
       HASURA_GRAPHQL_ENABLE_CONSOLE: "true" # set to "false" to disable console
       HASURA_GRAPHQL_MIGRATIONS_DIR:
+      ## execute ./toos/encode_jwt_secret.py to obtain HASURA_GRAPHQL_JWT_SECRET from Flask config
+      HASURA_GRAPHQL_JWT_SECRET: '{"type": "HS256", "key": "slkd1o8wnO*#LUFHNO4islkd1o8wnO*#"}'
       ## uncomment next line to set an access key
-      # HASURA_GRAPHQL_ACCESS_KEY: mysecretaccesskey
+      HASURA_GRAPHQL_ACCESS_KEY: slkd1o8wnO*#LUFHNO4islkd1o8wnO*#
     volumes:
       - ./hasura/migrations:/hasura-migrations
   api:
@@ -30,8 +34,12 @@ services:
       - .:/app
     ports:
       - "5000:5000"
+    depends_on:
+      - "postgres"
+    restart: always
     environment:
       HASURA_GQL: http://hasura:8080/v1alpha1/graphql
+      HASURA_GRAPHQL_ACCESS_KEY: slkd1o8wnO*#LUFHNO4islkd1o8wnO*#
     entrypoint: ["flask", "run", "--host", "0.0.0.0"]
 volumes:
   hasura_migrations:
