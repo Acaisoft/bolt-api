@@ -37,7 +37,8 @@ class BoltAPIClient(object):
         """
         objects = upstream.result_aggregate.Query(self._gcl_client)
         data = objects.input_type(**data)
-        objects.insert(data)
+        response = objects.insert(data)
+        return response[0]['id']
 
     def insert_distribution_results(self, data):
         """
@@ -51,7 +52,23 @@ class BoltAPIClient(object):
         """
         objects = upstream.result_distribution.Query(self._gcl_client)
         data = upstream.result_distribution.ResultDistribution(**data)
-        objects.insert(data)
+        response = objects.insert(data)
+        return response[0]['id']
+
+    def insert_error_results(self, data):
+        """
+        :param data: Dict:
+            - execution_id: uuid
+            - name: str
+            - error_type: str
+            - exception_data: str
+            - number_of_occurrences: int
+        :return: id
+        """
+        objects = upstream.result_error.Query(self._gcl_client)
+        data = upstream.result_error.ResultError(**data)
+        response = objects.insert(data)
+        return response[0]['id']
 
     def insert_project(self, data):
         """
