@@ -1,0 +1,9 @@
+- args:
+    sql: CREATE TABLE "public"."result_error"("id" bigserial NOT NULL, "error_type"
+      text NOT NULL, "name" text NOT NULL, "exception_data" text , "number_of_occurrences"
+      integer NOT NULL, "execution_id" uuid NOT NULL, PRIMARY KEY ("id") );
+  type: run_sql
+- args:
+    name: result_error
+    schema: public
+  type: add_existing_table_or_view

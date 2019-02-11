@@ -1,0 +1,3 @@
+- args:
+    sql: DROP TABLE "public"."result_error"
+  type: run_sql
