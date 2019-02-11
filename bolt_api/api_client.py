@@ -1,6 +1,6 @@
 import string
 
-from schema import upstream
+from bolt_api import upstream
 from gql import gql
 
 

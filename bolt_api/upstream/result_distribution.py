@@ -1,7 +1,7 @@
 import typing
 from datetime import datetime
 
-from schema.upstream.base import BaseQuery, InputType
+from bolt_api.upstream.base import BaseQuery, InputType
 
 
 class ResultDistribution(typing.NamedTuple, InputType):

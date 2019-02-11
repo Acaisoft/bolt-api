@@ -3,7 +3,7 @@ from datetime import datetime
 
 from gql import gql, Client
 from gql.transport.requests import RequestsHTTPTransport
-from schema import upstream
+from bolt_api import upstream
 
 
 def insert_user(client: Client) -> str:

@@ -1,7 +1,7 @@
 import typing
 from graphql.language.ast import FragmentSpread
-from schema import upstream
-from schema.upstream.devclient import devclient
+from bolt_api import upstream
+from bolt_api.upstream.devclient import devclient
 
 
 def get_selections(info):

@@ -1,5 +1,5 @@
 import typing
-from schema.upstream.base import BaseQuery, InputType
+from bolt_api.upstream.base import BaseQuery, InputType
 
 
 class Repository(typing.NamedTuple, InputType):

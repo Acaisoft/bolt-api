@@ -1,6 +1,6 @@
 import unittest
 
-from schema.upstream import user
+from bolt_api.upstream import user
 
 
 class DataTestCase(unittest.TestCase):

@@ -15,15 +15,4 @@ def timing_middleware(next, root, info, **args):
     ))
     return return_value
 
-
-def auth_middleware(next, root, info, **args):
-    # pull authinfo from flask request
-    info.context.authorization = {
-        'user': '1',
-        'roles': [0, 2],
-        'projects': ['p1', 'p2'],
-    }
-    return next(root, info, **args)
-
-
-middleware_list = [timing_middleware, auth_middleware]
+middleware_list = [timing_middleware]

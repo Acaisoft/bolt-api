@@ -3,7 +3,7 @@ from setuptools import setup
 setup(
     name='boltapi',
     version='0.1',
-    packages=['schema', 'schema.upstream', 'schema.upstream.tests', 'dev_setup', 'hasura', 'hasura.migrations'],
+    packages=['bolt_api', 'bolt_api.upstream', 'bolt_api.upstream.tests', 'dev_setup', 'hasura', 'hasura.migrations'],
     url='https://bitbucket.org/acaisoft/bolt-api/',
     license='',
     author='piotr',
