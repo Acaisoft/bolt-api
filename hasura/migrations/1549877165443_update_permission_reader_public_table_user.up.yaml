@@ -1,0 +1,13 @@
+- args:
+    permission:
+      allow_upsert: true
+      check:
+        email:
+          _eq: X-HASURA-USER-ID
+      columns: []
+      set: {}
+    role: reader
+    table:
+      name: user
+      schema: public
+  type: create_insert_permission

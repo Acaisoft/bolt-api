@@ -1,0 +1,25 @@
+- args:
+    role: reader
+    table:
+      name: user
+      schema: public
+  type: drop_select_permission
+- args:
+    permission:
+      allow_aggregations: false
+      columns:
+      - active
+      - created
+      - email
+      - id
+      - is_admin
+      - is_reader
+      - is_superadmin
+      filter:
+        email:
+          _eq: X-HASURA-USER-ID
+    role: reader
+    table:
+      name: user
+      schema: public
+  type: create_select_permission

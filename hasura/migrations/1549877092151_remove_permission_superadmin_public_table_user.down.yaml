@@ -1,0 +1,48 @@
+- args:
+    permission:
+      filter:
+        _and:
+        - email:
+            _eq: X-HASURA-USER-ID
+        - active:
+            _eq: "true"
+        - is_superadmin:
+            _eq: "true"
+    role: superadmin
+    table:
+      name: user
+      schema: public
+  type: create_delete_permission
+- args:
+    permission:
+      allow_aggregations: false
+      columns: []
+      filter:
+        _and:
+        - email:
+            _eq: X-HASURA-USER-ID
+        - active:
+            _eq: "true"
+        - is_superadmin:
+            _eq: "true"
+    role: superadmin
+    table:
+      name: user
+      schema: public
+  type: create_select_permission
+- args:
+    permission:
+      columns: []
+      filter:
+        _and:
+        - email:
+            _eq: X-HASURA-USER-ID
+        - active:
+            _eq: "true"
+        - is_superadmin:
+            _eq: "true"
+    role: superadmin
+    table:
+      name: user
+      schema: public
+  type: create_update_permission

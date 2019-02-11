@@ -1,0 +1,16 @@
+- args:
+    permission:
+      allow_aggregations: false
+      columns:
+      - id
+      - name
+      - param_type
+      - default_value
+      - param_name
+      filter: {}
+      limit: null
+    role: reader
+    table:
+      name: parameter
+      schema: public
+  type: create_select_permission

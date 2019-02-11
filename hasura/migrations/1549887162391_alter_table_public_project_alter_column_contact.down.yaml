@@ -1,0 +1,6 @@
+- args:
+    sql: ALTER TABLE "public"."project" ALTER COLUMN "contact" SET NOT NULL;
+  type: run_sql
+- args:
+    sql: COMMENT ON COLUMN "public"."project"."contact" IS 'undefined'
+  type: run_sql

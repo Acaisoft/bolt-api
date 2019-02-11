@@ -1,0 +1,13 @@
+- args:
+    permission:
+      allow_aggregations: false
+      columns: []
+      filter:
+        email:
+          _eq: X-HASURA-USER-ID
+      limit: null
+    role: reader
+    table:
+      name: user
+      schema: public
+  type: create_select_permission

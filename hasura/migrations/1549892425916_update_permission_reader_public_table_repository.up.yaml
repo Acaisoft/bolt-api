@@ -1,0 +1,25 @@
+- args:
+    permission:
+      allow_aggregations: false
+      columns:
+      - id
+      - name
+      - password
+      - project_id
+      - url
+      - user_id
+      - username
+      filter:
+        _or:
+        - project:
+            userProjects:
+              user_id:
+                _eq: X-HASURA-USER-ID
+        - user_id:
+            _eq: X-HASURA-USER-ID
+      limit: null
+    role: reader
+    table:
+      name: repository
+      schema: public
+  type: create_select_permission

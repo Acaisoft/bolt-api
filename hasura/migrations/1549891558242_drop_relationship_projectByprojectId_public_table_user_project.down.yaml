@@ -1,0 +1,8 @@
+- args:
+    name: projectByprojectId
+    table:
+      name: user_project
+      schema: public
+    using:
+      foreign_key_constraint_on: project_id
+  type: create_object_relationship

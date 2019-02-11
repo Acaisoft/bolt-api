@@ -1,0 +1,12 @@
+- args:
+    name: configurationsBytypeId
+    table:
+      name: configuration_type
+      schema: public
+    using:
+      foreign_key_constraint_on:
+        column: type_id
+        table:
+          name: configuration
+          schema: public
+  type: create_array_relationship

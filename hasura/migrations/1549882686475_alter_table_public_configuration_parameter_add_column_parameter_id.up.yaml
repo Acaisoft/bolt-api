@@ -1,0 +1,4 @@
+- args:
+    sql: ALTER TABLE "public"."configuration_parameter" ADD COLUMN "parameter_id"
+      uuid NULL
+  type: run_sql

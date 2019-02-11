@@ -1,0 +1,36 @@
+- args:
+    name: configurationParametersByconfigurationId
+    table:
+      name: configuration
+      schema: public
+    using:
+      foreign_key_constraint_on:
+        column: configuration_id
+        table:
+          name: configuration_parameter
+          schema: public
+  type: create_array_relationship
+- args:
+    name: resultDistributionsByexecutionId
+    table:
+      name: execution
+      schema: public
+    using:
+      foreign_key_constraint_on:
+        column: execution_id
+        table:
+          name: result_distribution
+          schema: public
+  type: create_array_relationship
+- args:
+    name: configurationParametersByparameterId
+    table:
+      name: parameter
+      schema: public
+    using:
+      foreign_key_constraint_on:
+        column: parameter_id
+        table:
+          name: configuration_parameter
+          schema: public
+  type: create_array_relationship

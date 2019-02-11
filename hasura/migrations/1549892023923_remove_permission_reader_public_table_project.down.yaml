@@ -1,0 +1,16 @@
+- args:
+    permission:
+      allow_aggregations: false
+      columns:
+      - contact
+      - id
+      - name
+      filter:
+        userProjectsByprojectId:
+          user_id:
+            _eq: X-HASURA-USER-ID
+    role: reader
+    table:
+      name: project
+      schema: public
+  type: create_select_permission

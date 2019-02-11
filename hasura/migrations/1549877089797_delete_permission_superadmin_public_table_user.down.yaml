@@ -1,0 +1,26 @@
+- args:
+    permission:
+      check:
+        _and:
+        - email:
+            _eq: X-HASURA-USER-ID
+        - active:
+            _eq: "true"
+        - is_superadmin:
+            _eq: "true"
+      columns:
+      - active
+      - created
+      - email
+      - id
+      - is_admin
+      - is_reader
+      localSet:
+      - key: ""
+        value: ""
+      set: {}
+    role: superadmin
+    table:
+      name: user
+      schema: public
+  type: create_insert_permission
