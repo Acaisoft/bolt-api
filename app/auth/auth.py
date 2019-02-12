@@ -1,5 +1,5 @@
 from authlib.flask.client import OAuth
-from flask import Flask
+from flask import Flask, jsonify
 from loginpass import create_flask_blueprint, Google, GitHub
 from app.auth.hasura import hasura_token_for_user
 
@@ -22,11 +22,6 @@ class Cache(object):
 
 def register_oauth(app: Flask):
     oauth = OAuth(app, Cache())
-
-    @app.route('/')
-    def index():
-        return '<ul><li><a href="/google/login">Login with Google</a></li>' \
-               '<li><a href="/github/login">or with GitHub</a></li></ul>'
 
     @app.route('/')
     def index():
