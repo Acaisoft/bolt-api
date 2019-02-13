@@ -1,0 +1,6 @@
+- args:
+    relationship: execution
+    table:
+      name: result_error
+      schema: public
+  type: drop_relationship

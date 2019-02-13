@@ -1,0 +1,25 @@
+- args:
+    role: manager
+    table:
+      name: result_aggregate
+      schema: public
+  type: drop_select_permission
+- args:
+    permission:
+      allow_aggregations: false
+      columns:
+      - execution_id
+      - id
+      - timestamp
+      filter:
+        execution:
+          configuration:
+            project:
+              userProjects:
+                user_id:
+                  _eq: X-HASURA-USER-ID
+    role: manager
+    table:
+      name: result_aggregate
+      schema: public
+  type: create_select_permission

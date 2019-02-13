@@ -45,11 +45,6 @@ class QueryOauth(graphene.ObjectType):
                 client_id=conf.get('GITHUB_CLIENT_ID'),
             ),
         ]
-        if conf.debug:
-            providers.append(Oauth(
-                provider='DevServer',
-                client_id=conf.get('DEVSERVER_CLIENT_ID'),
-            ))
         return providers
 
     def resolve_oauth_authtoken(self, info, provider, state, code):

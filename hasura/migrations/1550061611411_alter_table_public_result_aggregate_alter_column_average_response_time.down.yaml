@@ -1,0 +1,8 @@
+- args:
+    sql: ALTER TABLE "public"."result_aggregate" ALTER COLUMN "average_response_time"
+      TYPE integer;
+  type: run_sql
+- args:
+    sql: COMMENT ON COLUMN "public"."result_aggregate"."average_response_time" IS
+      'undefined'
+  type: run_sql

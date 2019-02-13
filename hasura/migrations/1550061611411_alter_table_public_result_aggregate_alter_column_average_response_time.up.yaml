@@ -1,0 +1,8 @@
+- args:
+    sql: ALTER TABLE "public"."result_aggregate" ALTER COLUMN "average_response_time"
+      TYPE numeric;
+  type: run_sql
+- args:
+    sql: COMMENT ON COLUMN "public"."result_aggregate"."average_response_time" IS
+      ''
+  type: run_sql

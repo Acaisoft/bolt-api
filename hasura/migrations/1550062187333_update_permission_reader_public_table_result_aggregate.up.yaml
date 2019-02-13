@@ -1,0 +1,30 @@
+- args:
+    role: reader
+    table:
+      name: result_aggregate
+      schema: public
+  type: drop_select_permission
+- args:
+    permission:
+      allow_aggregations: false
+      columns:
+      - average_response_size
+      - average_response_time
+      - execution_id
+      - id
+      - number_of_errors
+      - number_of_fails
+      - number_of_successes
+      - timestamp
+      filter:
+        execution:
+          configuration:
+            project:
+              userProjects:
+                user_id:
+                  _eq: X-HASURA-USER-ID
+    role: reader
+    table:
+      name: result_aggregate
+      schema: public
+  type: create_select_permission

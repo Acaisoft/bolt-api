@@ -1,0 +1,4 @@
+- args:
+    sql: ALTER TABLE "public"."result_aggregate" ADD COLUMN "number_of_fails" integer
+      NULL
+  type: run_sql

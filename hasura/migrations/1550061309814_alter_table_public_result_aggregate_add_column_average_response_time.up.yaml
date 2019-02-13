@@ -1,0 +1,4 @@
+- args:
+    sql: ALTER TABLE "public"."result_aggregate" ADD COLUMN "average_response_time"
+      integer NULL
+  type: run_sql
