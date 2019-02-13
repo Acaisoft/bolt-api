@@ -1,0 +1,9 @@
+GOOGLE_CLIENT_ID = '397503896505-i6rhbac9sb63uhi05pu3oo6h70tv9vhj.apps.googleusercontent.com'
+GOOGLE_CLIENT_SECRET = '8j_eRseVrcO2rrDAQyDUdXFL'
+
+GITHUB_CLIENT_ID = '6f1b565171e2f15e2afd'
+GITHUB_CLIENT_SECRET = 'e2d99b8b46ccdb958d110f70015ffce1a9762e7f'
+
+OAUTH_REDIRECT = 'http://localhost:5000'
+SECRET_KEY = 'slkd1o8wnO*#LUFHNO4islkd1o8wnO*#'
+JWT_ALGORITHM = 'HS256'

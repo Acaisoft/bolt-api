@@ -44,6 +44,9 @@ def register_oauth(app: Flask):
 
     if app.debug:
 
+        app.config.set('DEVSERVER_CLIENT_ID', 'devserver_oauth_client_id')
+        auth_devserver = create_flask_blueprint(DevServer, _authlib, handle_authorize)
+
         @app.route('/')
         def index():
             return '<ul><li><a href="/google/login">Login with Google</a></li>' \
@@ -51,3 +54,4 @@ def register_oauth(app: Flask):
 
         app.register_blueprint(auth_google, url_prefix='/google')
         app.register_blueprint(auth_github, url_prefix='/github')
+        app.register_blueprint(auth_devserver, url_prefix='/devserver')
