@@ -11,3 +11,5 @@ python-dotenv==0.10.1
 six==1.12.0
 gunicorn==19.9.0
 requests==2.21.0
+loginpass==0.2.1
+redis==3.1.0

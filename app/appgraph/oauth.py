@@ -1,5 +1,6 @@
 import graphene
 from flask import current_app
+from app.auth.auth import handle_authorize, get_authlib
 
 
 class OauthInterface(graphene.Interface):
@@ -12,11 +13,28 @@ class Oauth(graphene.ObjectType):
         interfaces = (OauthInterface,)
 
 
-class QueryOauth(graphene.ObjectType):
-    oauth_confs = graphene.List(OauthInterface)
+class OauthAuthtokenInterface(graphene.Interface):
+    jwt_token = graphene.String()
 
-    def resolve_oauth_confs(self, info):
-        conf = current_app().config
+
+class OauthAuthtoken(graphene.ObjectType):
+    class Meta:
+        interfaces = (OauthAuthtokenInterface,)
+
+
+class QueryOauth(graphene.ObjectType):
+    oauth_conf = graphene.List(OauthInterface, name='oauth_conf')
+    oauth_authtoken = graphene.Field(
+        OauthAuthtokenInterface,
+        name="oauth_authtoken",
+        required=False,
+        provider=graphene.String(),
+        state=graphene.String(),
+        code=graphene.String(),
+    )
+
+    def resolve_oauth_conf(self, info):
+        conf = current_app.config
         return [
             Oauth(
                 provider='Google',
@@ -27,3 +45,16 @@ class QueryOauth(graphene.ObjectType):
                 client_id=conf.get('GITHUB_CLIENT_ID'),
             ),
         ]
+
+    def resolve_oauth_authtoken(self, info, provider, state, code):
+        provider = provider.lower()
+        remote = get_authlib()._clients.get(provider)
+        params = {
+            'code': code,
+            'state': state,
+        }
+        redirect_uri = '{}/{}/auth'.format(current_app.config.get('OAUTH_REDIRECT'), provider)
+        token = remote.fetch_access_token(redirect_uri, **params)
+        user_info = remote.profile(token=token)
+        jwt_token = handle_authorize(remote, token, user_info)
+        return OauthAuthtoken(jwt_token=str(jwt_token))

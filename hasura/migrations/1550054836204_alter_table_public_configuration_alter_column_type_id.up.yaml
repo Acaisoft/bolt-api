@@ -1,0 +1,12 @@
+- args:
+    sql: INSERT INTO "public"."configuration_type" (name, description) VALUES ('Daily Tests', 'Ensure nothing broke overnight');
+  type: run_sql
+- args:
+    sql: INSERT INTO "public"."configuration_type" (name, description) VALUES ('Extreme Load', 'Lets kill that server');
+  type: run_sql
+- args:
+    sql: ALTER TABLE "public"."configuration" ALTER COLUMN "type_id" SET NOT NULL;
+  type: run_sql
+- args:
+    sql: COMMENT ON COLUMN "public"."configuration"."type_id" IS ''
+  type: run_sql

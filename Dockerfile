@@ -2,14 +2,12 @@ FROM python:3.6-alpine as base
 
 FROM base as builder
 
-RUN apk add --no-cache --virtual .build-deps gcc musl-dev openssl-dev libffi-dev
-RUN pip install cython greenlet Authlib==0.10
-RUN apk del .build-deps gcc musl-dev
-
 RUN mkdir /install
 WORKDIR /install
-COPY requirements/prod.txt /requirements.txt
+RUN apk add --no-cache --virtual .build-deps gcc musl-dev openssl-dev libffi-dev
+COPY requirements/core.txt /requirements.txt
 RUN pip install --install-option="--prefix=/install" -r /requirements.txt
+RUN apk del .build-deps gcc musl-dev
 
 FROM base
 COPY --from=builder /install /usr/local

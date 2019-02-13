@@ -1,0 +1,6 @@
+- args:
+    sql: ALTER TABLE "public"."configuration" ALTER COLUMN "type_id" DROP NOT NULL;
+  type: run_sql
+- args:
+    sql: COMMENT ON COLUMN "public"."configuration"."type_id" IS 'undefined'
+  type: run_sql

@@ -2,6 +2,8 @@ from flask import Flask
 from flask.logging import default_handler
 from logging.config import dictConfig
 
+from app.cache import get_cache
+
 
 def configure(app: Flask):
     app.logger.removeHandler(default_handler)
@@ -23,3 +25,5 @@ def configure(app: Flask):
     })
 
     app.config.from_pyfile('conf.py')
+
+    get_cache(app.config)

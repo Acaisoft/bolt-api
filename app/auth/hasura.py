@@ -5,7 +5,7 @@ from flask import make_response
 from gql import gql
 
 from app import const
-from upstream.devclient import devclient
+from bolt_api.upstream.devclient import devclient
 
 
 def hasura_token_for_user(config, user_email):

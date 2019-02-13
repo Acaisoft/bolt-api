@@ -1,10 +1,10 @@
 import graphene
 
 from app.appgraph import configuration
-from app.appgraph.oauth import QueryOauth
+from app.appgraph import oauth
 
 
-class RootQuery(configuration.QueryConfiguration, QueryOauth):
+class RootQuery(configuration.QueryConfiguration, oauth.QueryOauth):
     pass
 
 
@@ -15,5 +15,5 @@ class RootMutations(graphene.ObjectType):
 AppSchema = graphene.Schema(
     query=RootQuery,
     mutation=RootMutations,
-    types=[configuration.Configuration],
+    types=[configuration.Configuration, oauth.Oauth, oauth.OauthAuthtoken],
 )

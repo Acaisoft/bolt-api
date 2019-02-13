@@ -1,0 +1,7 @@
+- args:
+    sql: ALTER TABLE "public"."configuration_type" ADD CONSTRAINT "configuration_type_name_key"
+      UNIQUE ("name")
+  type: run_sql
+- args:
+    sql: COMMENT ON COLUMN "public"."configuration_type"."name" IS ''
+  type: run_sql

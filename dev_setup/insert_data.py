@@ -4,6 +4,7 @@ from datetime import datetime
 from gql import gql, Client
 from gql.transport.requests import RequestsHTTPTransport
 from bolt_api import upstream
+from bolt_api.upstream.devclient import devclient
 
 
 def insert_user(client: Client) -> str:
@@ -99,13 +100,7 @@ def purge_data(client: Client):
 
 
 def new_client() -> Client:
-    return Client(
-        retries=0,
-        transport=RequestsHTTPTransport(
-            url='http://localhost:8080/v1alpha1/graphql',
-            use_json=True
-        )
-    )
+    return devclient()
 
 
 if __name__ == "__main__":

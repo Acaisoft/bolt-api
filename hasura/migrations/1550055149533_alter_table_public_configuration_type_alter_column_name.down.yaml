@@ -1,0 +1,6 @@
+- args:
+    sql: ALTER TABLE "public"."configuration_type" DROP CONSTRAINT "configuration_type_name_key"
+  type: run_sql
+- args:
+    sql: COMMENT ON COLUMN "public"."configuration_type"."name" IS 'undefined'
+  type: run_sql
