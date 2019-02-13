@@ -1,0 +1,14 @@
+- args:
+    permission:
+      allow_aggregations: false
+      columns:
+      - id
+      - name
+      - public
+      filter: {}
+      limit: null
+    role: manager
+    table:
+      name: repository_keys
+      schema: public
+  type: create_select_permission

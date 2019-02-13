@@ -1,0 +1,19 @@
+- args:
+    permission:
+      allow_aggregations: false
+      columns:
+      - execution_id
+      - status_code
+      filter:
+        execution:
+          configuration:
+            project:
+              userProjects:
+                user_id:
+                  _eq: X-HASURA-USER-ID
+      limit: null
+    role: manager
+    table:
+      name: job_status
+      schema: public
+  type: create_select_permission

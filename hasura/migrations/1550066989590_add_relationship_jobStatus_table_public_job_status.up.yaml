@@ -1,0 +1,8 @@
+- args:
+    name: jobStatus
+    table:
+      name: job_status
+      schema: public
+    using:
+      foreign_key_constraint_on: status_code
+  type: create_object_relationship

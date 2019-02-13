@@ -1,0 +1,1 @@
+TRUNCATE public.job_status_dict;

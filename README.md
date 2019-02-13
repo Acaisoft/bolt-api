@@ -22,7 +22,11 @@ Deployment requirements:
     from https://github.com/settings/applications/
     * `OAUTH_REDIRECT` 
     base address to redirect oauth responses to, 
-    must be common for all oauth app providers
+    must be common for all oauth app providers, will most likely point to a frontend 
+    address, eg.:
+    if redirect address is configured in app is:  
+    https://appfrontend.appspot.com/google/auth
+    then OAUTH_REDIRECT will be https://appfrontend.appspot.com
     * `SECRET_KEY` 
     really secret, used for signing and verifying jwt tokens
     * `JWT_ALGORITHM` 
