@@ -10,7 +10,7 @@ from bolt_api.upstream.devclient import devclient
 
 def hasura_token_for_user(config, user_email):
     email = user_email.lower()
-    gql_client = devclient()
+    gql_client = devclient(config)
     allowed_roles = ['anonymous']
     role = ''
 

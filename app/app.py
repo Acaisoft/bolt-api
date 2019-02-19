@@ -1,10 +1,9 @@
 from flask import Flask
-from flask_graphql import GraphQLView
 
-from app.appgraph import middleware
-from app.appgraph import schema
+from app import healthcheck, graphql
 from app.auth import auth
 from app.configure import configure
+from bolt_api.upstream.devclient import devclient
 
 
 def create_app(test_config=None):
@@ -12,15 +11,20 @@ def create_app(test_config=None):
 
     configure(app)
 
-    ## graphql queries for hasura to be a remote for
-    app.add_url_rule('/graphql', view_func=GraphQLView.as_view(
-        'graphql',
-        schema=schema.AppSchema,
-        graphiql=True,
-        middleware=middleware.middleware_list,
-    ))
+    if test_config:
+        app.config.from_object(test_config)
+
+    ## configure hasura upstream client
+    devclient(app.config)
+
+    ## this app's graphs
+    graphql.register_app(app)
 
     ## authorization endpoints
-    auth.register_oauth(app)
+    auth.register_app(app)
+
+    ## healthchecks
+    healthcheck.register_app(app)
+
 
     return app
