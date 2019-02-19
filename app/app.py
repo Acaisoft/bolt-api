@@ -1,6 +1,6 @@
 from flask import Flask
 
-from app import healthcheck, graphql
+from app import healthcheck, graphql, deployer
 from app.auth import auth
 from app.configure import configure
 from bolt_api.upstream.devclient import devclient
@@ -22,6 +22,9 @@ def create_app(test_config=None):
 
     ## authorization endpoints
     auth.register_app(app)
+
+    ## deployer service
+    deployer.register_app(app)
 
     ## healthchecks
     healthcheck.register_app(app)

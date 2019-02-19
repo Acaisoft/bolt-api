@@ -20,7 +20,7 @@ services:
       - "postgres"
     restart: always
     environment:
-      HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:@postgres:5432/postgres
+      HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:@localhost:5432/postgres
       HASURA_GRAPHQL_ENABLE_CONSOLE: "true" # set to "false" to disable console
       HASURA_GRAPHQL_MIGRATIONS_DIR:
       ## execute ./toos/encode_jwt_secret.py to obtain HASURA_GRAPHQL_JWT_SECRET from Flask config
@@ -29,6 +29,7 @@ services:
       HASURA_GRAPHQL_ACCESS_KEY: devaccess
     volumes:
       - ./hasura/migrations:/hasura-migrations
+    network_mode: "host"
   api:
     build:
       context: .
@@ -43,12 +44,7 @@ services:
     environment:
       CONFIG_FILE_PATH: docker-compose-config.py
     entrypoint: ["flask", "run", "--host", "0.0.0.0"]
-  deployer:
-    build:
-      context: ../bolt-deployer
-      dockerfile: Dockerfile
-    ports:
-      - "7777:80"
+    network_mode: "host"
 volumes:
   hasura_migrations:
   db_data:

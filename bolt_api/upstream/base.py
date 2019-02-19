@@ -105,6 +105,8 @@ class BaseQuery(object):
     def serialize(input_type_object):
         out = '{\n'
         for i, f in enumerate(input_type_object._fields):
+            if input_type_object[i] is None:
+                continue
             t = input_type_object._field_types[f]
             if t == str:
                 out += '''%(f)s:"%(v)s",\n''' % {'f': f, 'v': input_type_object[i]}
