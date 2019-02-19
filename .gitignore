@@ -1,1 +1,4 @@
 *.pyc
+.DS_store
+
+charts/bolt-api/files/secrets.py
