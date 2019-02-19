@@ -29,7 +29,7 @@ def configure(app: Flask):
     conf_file_path = os.environ.get('CONFIG_FILE_PATH', 'localhost-config.py')
     app.config.from_pyfile(conf_file_path)
 
-    secrets_file_path = os.environ.get('SECRETS_FILE_PATH', 'secrets.py')
+    secrets_file_path = os.environ.get('SECRETS_FILE_PATH', 'localhost-secrets.py')
     app.config.from_pyfile(secrets_file_path)
 
     get_cache(app.config)

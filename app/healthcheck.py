@@ -25,4 +25,3 @@ def register_app(app):
     hc.add_check(hasura_up)
 
     return hc
-

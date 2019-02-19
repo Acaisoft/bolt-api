@@ -7,3 +7,5 @@ SECRET_KEY = 'slkd1o8wnO*#LUFHNO4islkd1o8wnO*#'
 HASURA_GRAPHQL_ACCESS_KEY = "devaccess"
 
 BOLT_DEPLOYER_TOKEN = '123'
+
+REDIS_PASS = None

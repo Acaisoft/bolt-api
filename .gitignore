@@ -2,3 +2,4 @@
 .DS_store
 
 charts/bolt-api/files/secrets.py
+instance/localhost-secrets.py
