@@ -1,0 +1,7 @@
+- args:
+    sql: ALTER TABLE ONLY "public"."configuration" ALTER COLUMN "performed" SET DEFAULT
+      false;
+  type: run_sql
+- args:
+    sql: COMMENT ON COLUMN "public"."configuration"."performed" IS ''
+  type: run_sql
