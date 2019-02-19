@@ -2,7 +2,7 @@ from gql import gql
 from healthcheck import HealthCheck, EnvironmentDump
 
 from app.cache import get_cache
-from upstream.devclient import devclient
+from bolt_api.upstream.devclient import devclient
 
 
 def register_app(app):

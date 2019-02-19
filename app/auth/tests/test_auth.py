@@ -2,7 +2,7 @@ from unittest import TestCase
 
 from gql import gql
 
-from upstream.devclient import devclient
+from bolt_api.upstream.devclient import devclient
 
 
 class TestAuth(TestCase):

@@ -26,5 +26,4 @@ def create_app(test_config=None):
     ## healthchecks
     healthcheck.register_app(app)
 
-
     return app
