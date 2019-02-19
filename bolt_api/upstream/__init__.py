@@ -6,5 +6,6 @@ from . import result_aggregate
 from . import result_distribution
 from . import result_error
 from . import repository
+from . import configuration_type
 from . import configuration
 from . import devclient

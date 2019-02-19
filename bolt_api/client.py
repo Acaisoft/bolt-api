@@ -27,12 +27,12 @@ class BoltAPIClient(object):
         """
         :param data: Dict:
             - execution_id: uuid
-            - fail: int
-            - av_resp_time: float
-            - succes: int
-            - error: int
-            - av_size: float
-            - timestamp: int
+            - number_of_fails: int
+            - number_of_successes: int
+            - number_of_errors: int
+            - average_response_time: float
+            - average_response_size: float
+            - timestamp: datetime
         :return: id
         """
         objects = upstream.result_aggregate.Query(self._gcl_client)
@@ -92,6 +92,17 @@ class BoltAPIClient(object):
         o = upstream.repository.Query(self._gcl_client)
         ret = o.insert(upstream.repository.Repository(**data))
         return ret[0]['id']
+
+    def insert_configuration_type(self, data):
+        """
+        :param data: Dict:
+            - name: str
+            - description: str
+        :return: id
+        """
+        query = upstream.configuration_type.Query(self._gcl_client)
+        result = query.insert(upstream.configuration_type.ConfigurationType(**data))
+        return result[0]['id']
 
     def insert_configuration(self, data):
         """

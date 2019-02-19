@@ -6,6 +6,7 @@ class Conf(typing.NamedTuple, InputType):
     name: str
     repository_id: str
     project_id: str
+    type_id: str
 
 
 class Query(BaseQuery):
