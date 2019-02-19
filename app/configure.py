@@ -1,3 +1,5 @@
+import os
+
 from flask import Flask
 from flask.logging import default_handler
 from logging.config import dictConfig
@@ -24,6 +26,10 @@ def configure(app: Flask):
         }
     })
 
-    app.config.from_pyfile('conf.py')
+    conf_file_path = os.environ.get('CONFIG_FILE_PATH', 'localhost-config.py')
+    app.config.from_pyfile(conf_file_path)
+
+    secrets_file_path = os.environ.get('SECRETS_FILE_PATH', 'secrets.py')
+    app.config.from_pyfile(secrets_file_path)
 
     get_cache(app.config)

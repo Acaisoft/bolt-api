@@ -9,7 +9,7 @@ class TestAuth(TestCase):
 
     def setUp(self) -> None:
         super().setUp()
-        self.client = devclient()
+        self.client = devclient({'test': '123'})
 
     def test_query(self):
         query = '''query ($email: String!) {
