@@ -2,14 +2,14 @@ from unittest import TestCase
 
 from gql import gql
 
-from upstream.devclient import devclient
+from bolt_api.upstream.devclient import devclient
 
 
 class TestAuth(TestCase):
 
     def setUp(self) -> None:
         super().setUp()
-        self.client = devclient()
+        self.client = devclient({'test': '123'})
 
     def test_query(self):
         query = '''query ($email: String!) {

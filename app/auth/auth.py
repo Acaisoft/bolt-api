@@ -35,7 +35,7 @@ def handle_authorize(remote, token, user_info):
     return hasura_token_for_user(current_app.config, email)
 
 
-def register_oauth(app: Flask):
+def register_app(app: Flask):
     global _authlib
     _authlib = OAuth(app, get_cache(app.config))
 

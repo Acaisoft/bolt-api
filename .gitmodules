@@ -1,0 +1,3 @@
+[submodule "bolt-deployer"]
+	path = bolt-deployer
+	url = piotrmonko@bitbucket.org:acaisoft/bolt-deployer.git

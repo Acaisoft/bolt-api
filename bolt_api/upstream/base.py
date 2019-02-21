@@ -103,6 +103,8 @@ class BaseQuery(object):
     def serialize(input_type_object):
         out = '{\n'
         for index, field_name in enumerate(input_type_object._fields):
+            if input_type_object[index] is None:
+                continue
             field_type = input_type_object._field_types[field_name]
             if field_type == str:
                 value = input_type_object[index]

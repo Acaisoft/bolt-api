@@ -8,11 +8,15 @@ from gql.transport.requests import RequestsHTTPTransport
 _client = None
 
 
-def devclient():
+def devclient(config=None):
     global _client
     if not _client:
-        target = os.environ.get('HASURA_GQL', 'http://localhost:8080/v1alpha1/graphql')
-        access_key = os.environ.get('HASURA_GRAPHQL_ACCESS_KEY')
+        # fallback to environment variables if app config is not specified
+        if not config:
+            config = os.environ
+
+        target = config.get('HASURA_GQL', 'http://localhost:8080/v1alpha1/graphql')
+        access_key = config.get('HASURA_GRAPHQL_ACCESS_KEY')
         assert access_key, 'HASURA_GRAPHQL_ACCESS_KEY is not set'
         logging.info("connecting hasura at %s", target)
         _client = Client(

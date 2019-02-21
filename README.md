@@ -57,6 +57,11 @@ and execute hasura CLI tool:
 
 Start redis and db first, then api, then hasura.
 
+Port forward to bolt-deployer using:
+```
+kubectl -n dev-bolt-deployer port-forward svc/bolt-deployer 7777:80
+```
+
 Order is important.
 
 Do not expose api graphql endpoint, patch it through hasura.
