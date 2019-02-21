@@ -1,20 +1,26 @@
 import graphene
 
-from app.appgraph import configuration, start_test
+from app.appgraph import configuration, testrun
 from app.appgraph import oauth
 
 
-class RootQuery(configuration.QueryConfiguration, oauth.QueryOauth):
+class RootQuery(oauth.QueryOauth, testrun.TestrunQueries):
     pass
 
 
 class RootMutations(graphene.ObjectType):
     create_configuration = configuration.CreateConfiguration.Field()
-    start_test = start_test.StartTestRun.Field(name="start_test")
+    testrun_start = testrun.TestrunStart.Field(name="testrun_start")
 
 
 AppSchema = graphene.Schema(
     query=RootQuery,
     mutation=RootMutations,
-    types=[configuration.Configuration, oauth.Oauth, oauth.OauthAuthtoken, start_test.StartTest],
+    types=[
+        configuration.Configuration,
+        oauth.Oauth,
+        oauth.OauthAuthtoken,
+        testrun.TestrunStartObject,
+        testrun.StatusResponse,
+    ],
 )

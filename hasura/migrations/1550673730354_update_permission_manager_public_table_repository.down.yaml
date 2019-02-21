@@ -1,0 +1,25 @@
+- args:
+    role: manager
+    table:
+      name: repository
+      schema: public
+  type: drop_update_permission
+- args:
+    permission:
+      columns:
+      - name
+      - url
+      filter:
+        project:
+          userProjects:
+            user_id:
+              _eq: X-HASURA-USER-ID
+      localSet:
+      - key: ""
+        value: ""
+      set: {}
+    role: manager
+    table:
+      name: repository
+      schema: public
+  type: create_update_permission

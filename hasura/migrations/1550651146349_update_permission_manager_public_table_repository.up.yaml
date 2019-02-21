@@ -1,0 +1,20 @@
+- args:
+    role: manager
+    table:
+      name: repository
+      schema: public
+  type: drop_insert_permission
+- args:
+    permission:
+      check: {}
+      columns:
+      - name
+      - project_id
+      - url
+      - user_id
+      set: {}
+    role: manager
+    table:
+      name: repository
+      schema: public
+  type: create_insert_permission

@@ -16,31 +16,6 @@ class Configuration(graphene.ObjectType):
         interfaces = (ConfigurationInterface,)
 
 
-class QueryConfiguration(graphene.ObjectType):
-    conf = graphene.Field(
-        ConfigurationInterface,
-        required=False,
-        conf_id=graphene.UUID(required=True),
-    )
-    confs = graphene.List(ConfigurationInterface)
-
-    def resolve_conf(self, info, conf_id=None):
-        if conf_id:
-            print(info.return_type.fields)
-            o = clients().conf.query(
-                where=f'(where:{{id:{{_eq: "{conf_id}" }} }})',
-                returning=get_selected_fields(info),
-            )
-            return Configuration(**o[0])
-
-    def resolve_confs(self, info):
-        o = clients().conf.query(
-            where=f'(where:{{ project_id:{{ _in:[] }} }}',
-            returning=get_selected_fields(info),
-        )
-        return [Configuration(**i) for i in o]
-
-
 class CreateConfiguration(graphene.Mutation):
     class Arguments:
         name = graphene.String(required=True)

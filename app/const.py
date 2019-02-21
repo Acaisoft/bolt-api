@@ -4,3 +4,5 @@ JWT_ALGORITHM = 'JWT_ALGORITHM'
 ROLE_ADMIN = 'admin'
 ROLE_MANAGER = 'manager'
 ROLE_READER = 'reader'
+
+TENANT_ID = '1'

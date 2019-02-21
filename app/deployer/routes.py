@@ -5,7 +5,13 @@ from app.deployer import clients
 bp = Blueprint('deployer_service', __name__)
 
 
-@bp.route('/jobs')
-def jobs():
-    resp = clients.jobs(current_app.config).jobs_get('b45c834e-caf1-4587-9c95-be4707aed2bd')
+@bp.route('/jobs/<tenant_id>')
+def jobs(tenant_id):
+    resp = clients.jobs(current_app.config).jobs_get(tenant_id=tenant_id)
+    return str(resp)
+
+
+@bp.route('/job/<job_id>')
+def job(job_id):
+    resp = clients.jobs(current_app.config).jobs_job_id_get(job_id=job_id)
     return str(resp)

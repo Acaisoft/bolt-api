@@ -3,6 +3,9 @@
       '27c6ee12-7cd9-410b-83fc-448e3c4b9272';
   type: run_sql
 - args:
+    sql: update repository set type_id = (select id from configuration_type limit 1) where type_id is null;
+  type: run_sql
+- args:
     sql: ALTER TABLE "public"."repository" ALTER COLUMN "type_id" SET NOT NULL;
   type: run_sql
 - args:
