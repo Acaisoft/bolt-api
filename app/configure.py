@@ -31,4 +31,7 @@ def configure(app: Flask):
     secrets_file_path = os.environ.get('SECRETS_FILE_PATH', 'localhost-secrets.py')
     app.config.from_pyfile(secrets_file_path)
 
-    logging.info(f'app configured using {conf_file_path} and {secrets_file_path}')
+    config_ver = app.config.get('CONFIG_VERSION', None)
+    secrets_ver = app.config.get('SECRETS_VERSION', None)
+
+    logging.info(f'app configured using {conf_file_path} v{config_ver} and {secrets_file_path} v{secrets_ver}')
