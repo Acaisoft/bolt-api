@@ -67,6 +67,38 @@ node('docker') {
             }
         }
 
+        stage('Deploy') {
+			if (env.BRANCH_NAME == DEV_BRANCH) {
+				echo "Deploy to dev"
+                withCredentials([file(credentialsId: DEV_SERVICE_ACCOUNT_KEY, variable: 'KEY_FILE')]) {
+                    docker.withRegistry("${GCR_URL}", "gcr:${GCR_CREDENTIALS}") {
+                        docker.image(JENKINS_DEPLOYER_IMAGE).inside("-v ${WORKSPACE}/gcloud:/.config/gcloud -v ${WORKSPACE}/kube:/.kube -u root") {
+                            sh "/root/google-cloud-sdk/bin/gcloud auth activate-service-account ${DEV_SERVICE_ACCOUNT} --key-file=${KEY_FILE}"
+                            sh "/root/google-cloud-sdk/bin/gcloud container clusters get-credentials ${DEV_CLUSTER_NAME} --zone ${DEV_ZONE} --project ${DEV_GCP_PROJECT}"
+                            sh "helm upgrade dev-bolt-api charts/bolt-api --set image.tag=${version} --wait --timeout 600"
+                        }
+                    }
+                }
+				return;
+			}
+
+            // if (env.BRANCH_NAME == PROD_BRANCH) {
+			// 	echo "Deploy to prod"
+            //     withCredentials([file(credentialsId: PROD_SERVICE_ACCOUNT_KEY, variable: 'KEY_FILE')]) {
+            //         docker.withRegistry("${GCR_URL}", "gcr:${GCR_CREDENTIALS}") {
+            //             docker.image(JENKINS_DEPLOYER_IMAGE).inside("-v ${WORKSPACE}/gcloud:/.config/gcloud -v ${WORKSPACE}/kube:/.kube -u root") {
+            //                 sh "gcloud auth activate-service-account ${PROD_SERVICE_ACCOUNT} --key-file=${KEY_FILE}"
+            //                 sh "gcloud container clusters get-credentials ${PROD_CLUSTER_NAME} --zone ${PROD_ZONE} --project ${PROD_GCP_PROJECT}"
+            //                 sh "helm upgrade prod-bolt-deployer charts/bolt-deployer --set image=${DOCKER_REPOSITORY}:${version} --wait --timeout 600"
+            //             }
+            //         }
+            //     }
+			// 	return;
+			// }
+
+            echo "Skipping. Runs only for ${DEV_BRANCH} and ${PROD_BRANCH} branches"
+		}
+
     }
     catch (ex) {
         currentBuild.result = "FAILED"
