@@ -8,11 +8,11 @@ _cache = None
 def get_cache(config):
     global _cache
     if not _cache:
-        logging.info("connecting redis at %s", config.get('REDIS_HOST'))
-        _cache = Redis(
-            host=config.get('REDIS_HOST'),
-            port=config.get('REDIS_PORT'),
-            password=config.get('REDIS_PASS', None),
-            db=config.get('REDIS_DB')
-        )
+        host = config.get('REDIS_HOST')
+        port = config.get('REDIS_PORT')
+        passwd = config.get('REDIS_PASS', None)
+        dbi = config.get('REDIS_DB')
+        logging.info(f'connecting redis at {host}:{port}/{dbi} with pass:{bool(passwd)}')
+        _cache = Redis(host=host, port=port, password=passwd, db=dbi)
+        logging.info("redis connected")
     return _cache

@@ -1,10 +1,9 @@
+import logging
 import os
 
 from flask import Flask
 from flask.logging import default_handler
 from logging.config import dictConfig
-
-from app.cache import get_cache
 
 
 def configure(app: Flask):
@@ -13,7 +12,7 @@ def configure(app: Flask):
     dictConfig({
         'version': 1,
         'formatters': {'default': {
-            'format': '[%(asctime)s] %(levelname)s in %(module)s: %(message)s',
+            'format': '[%(asctime)s] [%(levelname)s in %(module)s] %(message)s',
         }},
         'handlers': {'wsgi': {
             'class': 'logging.StreamHandler',
@@ -32,4 +31,4 @@ def configure(app: Flask):
     secrets_file_path = os.environ.get('SECRETS_FILE_PATH', 'localhost-secrets.py')
     app.config.from_pyfile(secrets_file_path)
 
-    get_cache(app.config)
+    logging.info(f'app configured using {conf_file_path} and {secrets_file_path}')

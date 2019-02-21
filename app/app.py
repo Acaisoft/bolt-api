@@ -1,7 +1,10 @@
+import logging
+
 from flask import Flask
 
 from app import healthcheck, graphql, deployer
 from app.auth import auth
+from app.cache import get_cache
 from app.configure import configure
 from bolt_api.upstream.devclient import devclient
 
@@ -9,13 +12,10 @@ from bolt_api.upstream.devclient import devclient
 def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
 
-    configure(app)
-
     if test_config:
         app.config.from_object(test_config)
 
-    ## configure hasura upstream client
-    devclient(app.config)
+    configure(app)
 
     ## this app's graphs
     graphql.register_app(app)
@@ -29,4 +29,9 @@ def create_app(test_config=None):
     ## healthchecks
     healthcheck.register_app(app)
 
+    ## initialize cache and hasura clients
+    get_cache(app.config)
+    devclient(app.config)
+
+    logging.info('app started')
     return app

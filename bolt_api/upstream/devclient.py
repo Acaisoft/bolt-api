@@ -18,7 +18,7 @@ def devclient(config=None):
         target = config.get('HASURA_GQL', 'http://localhost:8080/v1alpha1/graphql')
         access_key = config.get('HASURA_GRAPHQL_ACCESS_KEY')
         assert access_key, 'HASURA_GRAPHQL_ACCESS_KEY is not set'
-        logging.info("connecting hasura at %s", target)
+        logging.info(f'connecting hasura at {target} with access key:{bool(access_key)}')
         _client = Client(
             retries=0,
             transport=RequestsHTTPTransport(
@@ -27,4 +27,5 @@ def devclient(config=None):
                 headers={'X-Hasura-Access-Key': access_key},
             )
         )
+        logging.info('hasura connected')
     return _client
