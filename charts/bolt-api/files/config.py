@@ -14,4 +14,6 @@ GITHUB_CLIENT_ID = '6f1b565171e2f15e2afd'
 OAUTH_REDIRECT = 'http://localhost:5000'
 JWT_ALGORITHM = 'HS256'
 
+BOLT_DEPLOYER_ADDR = 'bolt-deployer.dev-bolt-deployer.svc.cluster.local'
+
 CONFIG_VERSION = 1

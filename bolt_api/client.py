@@ -113,7 +113,7 @@ class BoltAPIClient(object):
         :return: id
         """
         ret = upstream.configuration.Query(self._gcl_client).insert(
-            upstream.configuration.Conf(**data)
+            upstream.configuration.Configuration(**data)
         )
         return ret[0]['id']
 

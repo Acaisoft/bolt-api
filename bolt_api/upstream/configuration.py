@@ -1,8 +1,9 @@
 import typing
+
 from bolt_api.upstream.base import BaseQuery, InputType
 
 
-class Conf(typing.NamedTuple, InputType):
+class Configuration(typing.NamedTuple, InputType):
     name: str
     repository_id: str
     project_id: str
@@ -10,4 +11,4 @@ class Conf(typing.NamedTuple, InputType):
 
 
 class Query(BaseQuery):
-    input_type = Conf
+    input_type = Configuration

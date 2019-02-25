@@ -48,6 +48,13 @@ node('docker') {
             echo "Version: ${version}"
         }
 
+        stage('Prepare') {
+            withCredentials([file(credentialsId: '.bolt_key', variable: 'BOLT_KEY')]) {
+                sh "ln -s ${BOLT_KEY} .bolt_key"
+                sh "bin/decrypt"
+            }
+        }
+
         stage('Build image') {
             if (env.BRANCH_NAME != DEV_BRANCH && env.BRANCH_NAME != PROD_BRANCH) {
                 echo "Skipping. Runs only for ${DEV_BRANCH} and ${PROD_BRANCH} branches"
