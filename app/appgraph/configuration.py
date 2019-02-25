@@ -42,8 +42,4 @@ class CreateConfiguration(graphene.Mutation):
     def mutate(self, info, **kwargs):
         validators.validate_name(kwargs['name'])
         validate_test_configuration(kwargs)
-        o = clients().conf.insert(
-            clients().conf.input_type(**kwargs),
-            returning=get_selected_fields(info),
-        )
-        return Configuration(**o[0])
+        return Configuration()
