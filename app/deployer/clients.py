@@ -4,7 +4,10 @@ import deployer_cli
 def client(config):
     conf = deployer_cli.Configuration()
     conf.host = config.get('BOLT_DEPLOYER_ADDR')
-    conf.api_key['Authorization'] = config.get('BOLT_DEPLOYER_TOKEN')
+    token = config.get('BOLT_DEPLOYER_TOKEN')
+    assert token, 'BOLT_DEPLOYER_TOKEN undefined'
+    assert conf.host, 'BOLT_DEPLOYER_ADDR undefined'
+    conf.api_key['Authorization'] = token
     conf.api_key_prefix['Authorization'] = 'Bearer'
     return deployer_cli.ApiClient(conf)
 

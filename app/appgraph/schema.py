@@ -9,7 +9,7 @@ class RootQuery(oauth.QueryOauth, testrun.TestrunQueries):
 
 
 class RootMutations(graphene.ObjectType):
-    create_configuration = configuration.CreateConfiguration.Field()
+    testrun_configuration_create = configuration.CreateConfiguration.Field(name='testrun_configuration_create')
     testrun_start = testrun.TestrunStart.Field(name="testrun_start")
 
 

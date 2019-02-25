@@ -15,3 +15,9 @@ def jobs(tenant_id):
 def job(job_id):
     resp = clients.jobs(current_app.config).jobs_job_id_get(job_id=job_id)
     return str(resp)
+
+
+@bp.route('/image/<image_id>')
+def image(image_id):
+    resp = clients.images(current_app.config).image_builds_task_id_get(task_id=image_id)
+    return str(resp)

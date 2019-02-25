@@ -7,7 +7,7 @@ from bolt_api.upstream.base import BaseQuery, InputType
 class Exec(typing.NamedTuple, InputType):
     configuration_id: str
     status: str
-    test_preparation_job_id: str
+    test_preparation_job_id: str = None
     id: str = None
     start: datetime = None
     end: datetime = None

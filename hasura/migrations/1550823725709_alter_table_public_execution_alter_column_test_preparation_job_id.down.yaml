@@ -1,0 +1,7 @@
+- args:
+    sql: ALTER TABLE "public"."execution" ALTER COLUMN "test_preparation_job_id" TYPE
+      uuid;
+  type: run_sql
+- args:
+    sql: COMMENT ON COLUMN "public"."execution"."test_preparation_job_id" IS 'undefined'
+  type: run_sql

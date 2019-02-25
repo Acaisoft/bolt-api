@@ -1,0 +1,3 @@
+- args:
+    sql: ALTER TABLE "public"."execution" DROP COLUMN "test_preparation_job_statuscheck_timestamp"
+  type: run_sql

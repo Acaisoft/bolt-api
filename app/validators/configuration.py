@@ -33,7 +33,6 @@ def validate_test_configuration(conf: dict):
     """
     check parameter sanity
     >>> validate_test_configuration({
-    ...    "id": "f103be1b-dfad-44dd-84f6-1190ef3b96bf",
     ...    "name": "conf 1",
     ...    "repository": {
     ...      "url": "http://url.url/url"
@@ -78,7 +77,7 @@ def validate_test_configuration(conf: dict):
     ... ]})
     Traceback (most recent call last):
     ...
-    AssertionError: expected numeric value
+    AssertionError: expected numeric value of seconds for duration, got 30m
     """
     assert len(conf['repository']['url']), 'invalid repository address'
 
