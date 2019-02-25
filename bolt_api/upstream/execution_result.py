@@ -2,6 +2,7 @@ import typing
 from bolt_api.upstream.base import BaseQuery, InputType
 
 
+# TODO: WE DONT USING THIS ALREADY. DELETE THIS FROM CODE AND DATABASE
 class Result(typing.NamedTuple, InputType):
     execution_id: str
     endpoint: str

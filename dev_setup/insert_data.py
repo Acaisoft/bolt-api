@@ -2,7 +2,6 @@ import string
 from datetime import datetime
 
 from gql import gql, Client
-from gql.transport.requests import RequestsHTTPTransport
 from bolt_api import upstream
 from bolt_api.upstream.devclient import devclient
 
@@ -69,7 +68,7 @@ def insert_repository(client):
 
 def insert_configuration(client, project, repository):
     ret = upstream.configuration.Query(client).insert(
-        upstream.configuration.Conf(name="conf 1", repository_id=repository, project_id=project)
+        upstream.configuration.Configuration(name="conf 1", repository_id=repository, project_id=project)
     )
     return ret[0]['id']
 

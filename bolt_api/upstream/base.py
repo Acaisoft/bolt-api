@@ -1,8 +1,8 @@
 import json
 import string
 import time
-import typing
 import datetime
+import typing
 
 from gql import gql, Client
 
@@ -36,7 +36,7 @@ class BaseQuery(object):
         self.client = client
         self.name = self.name or self.__class__.__module__.split('.')[-1]
 
-    def execute(self, query):
+    def execute(self, query, *args):
         """
         Execute any query
         :param query: the query
@@ -44,7 +44,7 @@ class BaseQuery(object):
         """
         print(query)
         start = time.time()
-        ret = self.client.execute(gql(query))
+        ret = self.client.execute(gql(query), *args)
         print('query took %.2f seconds' % (time.time() - start))
         # unwrap the pointless (in case of single-query) <query-name>-returning keys
         for k in ret:
@@ -54,7 +54,7 @@ class BaseQuery(object):
             for l in query_type_result:
                 return query_type_result[l]
 
-    def query(self, where: str = None, returning: str = None):
+    def query(self, variable_values: typing.Dict = None, where: str = None, returning: str = None):
         if where and where[0] != "(":
             raise RuntimeError("query WHERE clause must be enclosed in ( braces )")
         query = self.query_template % {
@@ -62,7 +62,7 @@ class BaseQuery(object):
             'args': where or "",
             'returning': returning or 'id',
         }
-        return self.execute(query)
+        return self.execute(query, variable_values)
 
     def purge(self):
         query = self.deletion_template % {
@@ -79,7 +79,6 @@ class BaseQuery(object):
     def bulk_insert(self, data):
         bulk = ""
         bulked = self.bulk_size
-
         for i in iter(data):
             if bulked > 0:
                 bulk += self.serialize(i)
@@ -88,7 +87,6 @@ class BaseQuery(object):
                 self.insert_string(bulk)
                 bulk = ""
                 bulked = self.bulk_size
-
         if bulk:
             return self.insert_string(bulk)
 
@@ -104,20 +102,23 @@ class BaseQuery(object):
     @staticmethod
     def serialize(input_type_object):
         out = '{\n'
-        for i, f in enumerate(input_type_object._fields):
-            if input_type_object[i] is None:
+        for index, field_name in enumerate(input_type_object._fields):
+            if input_type_object[index] is None:
                 continue
-            t = input_type_object._field_types[f]
-            if t == str:
-                out += '''%(f)s:"%(v)s",\n''' % {'f': f, 'v': input_type_object[i]}
-            elif t == bool:
-                out += '''%(f)s:%(v)s,\n''' % {'f': f, 'v': str(input_type_object[i]).lower()}
-            elif t in (dict, typing.Any):
-                v = json.dumps(input_type_object[i])
-                out += '''%(f)s:"%(v)s",\n''' % {'f': f, 'v': v.replace('"', r'\"')}
-            elif t == datetime.datetime or t == datetime.date:
-                v = input_type_object[i].isoformat()
-                out += '''%(f)s:"%(v)s",\n''' % {'f': f, 'v': v}
+            field_type = input_type_object._field_types[field_name]
+            if field_type == str:
+                value = input_type_object[index]
+                out += f'{field_name}:"{value}",\n'
+            elif field_type == bool:
+                value = str(input_type_object[index]).lower()
+                out += f'{field_name}:{value},\n'
+            elif field_type in (dict, typing.Any):
+                value = json.dumps(input_type_object[index]).replace('"', r'\"')
+                out += f'{field_name}:"{value}",\n'
+            elif field_type == datetime.datetime or field_type == datetime.date:
+                value = input_type_object[index].isoformat()
+                out += f'{field_name}:"{value}",\n'
             else:
-                out += '''%(f)s:%(v)s,\n''' % {'f': f, 'v': str(input_type_object[i])}
+                value = input_type_object[index]
+                out += f'{field_name}:{value},\n'
         return out + '},\n'
