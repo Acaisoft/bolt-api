@@ -5,6 +5,7 @@ from flask import current_app
 from gql import gql
 
 from app import const
+from app.appgraph.util import get_request_role_userid
 from app.deployer import clients
 from app.deployer.utils import start_job, get_test_run_status
 from app.validators.configuration import validate_test_configuration_by_id
@@ -28,17 +29,28 @@ class TestrunStart(graphene.Mutation):
     Output = TestrunStartInterface
 
     def mutate(self, info, conf_id, **kwargs):
-        validate_test_configuration_by_id(conf_id)
+        role, user_id = get_request_role_userid(info)
+
+        assert role in (
+        const.ROLE_ADMIN, const.ROLE_MANAGER), f'only managers and admins may start a test run (you are {role})'
+
+        validate_test_configuration_by_id(str(conf_id))
 
         gclient = devclient(current_app.config)
-        test_config_response = gclient.execute(gql('''query ($conf_id:uuid!) {
-            configuration (where:{id:{_eq:$conf_id}}) {
+        test_config_response = gclient.execute(gql('''query ($confId:uuid!, $userId:uuid!) {
+            configuration (where:{
+            id:{_eq:$confId},
+            project:{userProjects:{user_id:{_eq:$userId}}}
+            }) {
                 project_id
                 repository {
                     url
                 }
             }
-        }'''), {'conf_id': str(conf_id)})
+        }'''), {
+            'confId': str(conf_id),
+            'userId': user_id,
+        })
         assert test_config_response['configuration'], f'configuration not found ({str(test_config_response)})'
         test_config = test_config_response['configuration'][0]
 

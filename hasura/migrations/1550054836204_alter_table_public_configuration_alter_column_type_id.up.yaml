@@ -1,7 +1,4 @@
 - args:
-    sql: INSERT INTO "public"."configuration_type" (name, description) VALUES ('Daily Tests', 'Ensure nothing broke overnight');
-  type: run_sql
-- args:
     sql: INSERT INTO "public"."configuration_type" (name, description) VALUES ('Extreme Load', 'Lets kill that server');
   type: run_sql
 - args:

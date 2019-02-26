@@ -1,6 +1,7 @@
 from datetime import datetime
 
 import deployer_cli
+from deployer_cli.rest import ApiException
 from flask import current_app
 from gql import gql
 
@@ -62,6 +63,7 @@ def get_test_run_status(execution_id:str):
 
 
 def can_refresh_test_preparation_job_status():
+    # TODO
     return True
 
 
@@ -74,8 +76,8 @@ def get_test_preparation_job_status(execution_id:str, test_preparation_job_id:st
 
     if response.status == 'FAILURE':
         new_status = const.TESTRUN_PREPARING_FAILED
-        if response.state and response.state.error:
-            err = response.state.error
+        if response.state and response.state['error']:
+            err = response.state['error']
 
     if response.status == 'SUCCESS':
         new_status = const.TESTRUN_STARTED
@@ -104,4 +106,10 @@ def get_test_preparation_job_status(execution_id:str, test_preparation_job_id:st
 
 
 def get_test_job_status(test_job_id):
-    return clients.jobs(current_app.config).jobs_job_id_get(job_id=test_job_id)
+    try:
+        return clients.jobs(current_app.config).jobs_job_id_get(job_id=test_job_id)
+    except ApiException as e:
+        if e.status == 404:
+            raise Exception('job not found, is the id valid?')
+        else:
+            raise e

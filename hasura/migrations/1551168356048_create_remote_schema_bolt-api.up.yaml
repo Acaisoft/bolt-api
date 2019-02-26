@@ -1,0 +1,7 @@
+- args:
+    definition:
+      forward_client_headers: true
+      headers: []
+      url_from_env: BOLT_API_GRAPHQL
+    name: bolt-api
+  type: add_remote_schema

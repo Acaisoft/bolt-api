@@ -12,8 +12,8 @@ services:
     ports:
       - "6379:6379"
   hasura:
-#    image: hasura/graphql-engine:v1.0.0-alpha37
-    image: hasura/graphql-engine:v1.0.0-alpha38.cli-migrations
+    image: hasura/graphql-engine:v1.0.0-alpha38
+#    image: hasura/graphql-engine:v1.0.0-alpha38.cli-migrations
     ports:
       - "8080:8080"
     depends_on:
@@ -27,6 +27,7 @@ services:
       HASURA_GRAPHQL_JWT_SECRET: '{"type": "HS256", "key": "slkd1o8wnO*#LUFHNO4islkd1o8wnO*#"}'
       ## uncomment next line to set an access key
       HASURA_GRAPHQL_ACCESS_KEY: devaccess
+      BOLT_API_GRAPHQL: http://api:5000/graphql
     volumes:
       - ./hasura/migrations:/hasura-migrations
     network_mode: "host"

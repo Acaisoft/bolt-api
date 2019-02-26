@@ -39,6 +39,7 @@ Deployment requirements:
 ###### Hasura:
 
 * set `HASURA_GRAPHQL_ACCESS_KEY` equal to api's
+* set `BOLT_API_GRAPHQL` to bolt-api graphql address, eg. `http://api:5000/graphql`
 * execute `tools/encode_jwt_secret.py` and store result in `HASURA_GRAPHQL_JWT_SECRET`, eg.:
 ```
 HASURA_GRAPHQL_JWT_SECRET: '{"type": "HS256", "key": "jwtsigningksecretkey"}'

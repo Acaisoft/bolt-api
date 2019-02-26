@@ -7,7 +7,13 @@ from bolt_api.upstream.devclient import devclient
 
 def validate_test_configuration_by_id(test_conf_id):
     conf = devclient(current_app.config).execute(gql('''query ($conf_id:uuid!) {
-        configuration (where:{id:{_eq:$conf_id}}) {
+        parameter {
+            id
+            default_value
+            param_name
+            name
+        }
+        configuration_by_pk (id:$conf_id) {
             id
             name
             repository {
@@ -15,21 +21,16 @@ def validate_test_configuration_by_id(test_conf_id):
             }
             configurationParameters {
                 value
-                parameter {
-                    name
-                    default_value
-                    param_name
-                    param_type
-                }
+                parameter_id
             }
         }
-    }'''), {'conf_id': str(test_conf_id)})
-    assert conf['configuration'], f'configuration not found ({str(conf)})'
+    }'''), {'conf_id': test_conf_id})
+    assert conf['configuration_by_pk'], f'configuration not found ({str(conf)})'
 
-    validate_test_configuration(conf['configuration'][0])
+    validate_test_configuration(conf['configuration_by_pk'], defaultParams=conf['parameter'])
 
 
-def validate_test_configuration(conf: dict):
+def validate_test_configuration(conf: dict, defaultParams:list):
     """
     check parameter sanity
     >>> validate_test_configuration({
@@ -38,43 +39,10 @@ def validate_test_configuration(conf: dict):
     ...      "url": "http://url.url/url"
     ...    },
     ...    "configurationParameters": [
-    ...      {
-    ...        "value": "30m",
-    ...        "parameter": {
-    ...          "name": "time",
-    ...          "default_value": "10m",
-    ...          "param_name": "-t",
-    ...          "param_type": "str"
-    ...        }
-    ...      },
-    ...      {
-    ...        "value": "5000",
-    ...        "parameter": {
-    ...          "name": "users",
-    ...          "default_value": "1000",
-    ...          "param_name": "-c",
-    ...          "param_type": "int"
-    ...        }
-    ...      },
-    ...      {
-    ...        "value": "500",
-    ...        "parameter": {
-    ...          "name": "users/second",
-    ...          "default_value": "",
-    ...          "param_name": "-r",
-    ...          "param_type": "int"
-    ...        }
-    ...      },
-    ...      {
-    ...        "value": "http://wp.pl",
-    ...        "parameter": {
-    ...          "name": "host",
-    ...          "default_value": "",
-    ...          "param_name": "-H",
-    ...          "param_type": "str"
-    ...        }
-    ...      }
-    ... ]})
+    ...      { "value": "30m", "parameter_id": "param1", },
+    ... ]}, [
+    ...      {"id": "param1", "name": "time", "default_value": "360", "param_name": "-t"},
+    ... ])
     Traceback (most recent call last):
     ...
     AssertionError: expected numeric value of seconds for duration, got 30m
@@ -83,11 +51,36 @@ def validate_test_configuration(conf: dict):
 
     assert len(conf['name']), 'configuration name is required'
 
-    params = conf['configurationParameters']
-    for param in params:
-        param_value = param['value']
-        param_name = param['parameter']['param_name']
-        VALIDATORS[param_name](param_value)
+    validate_test_params(conf['configurationParameters'], defaults=defaultParams)
+
+
+def validate_test_params(params: list, defaults: list) -> dict:
+    """
+    Validates params and returns input patched with default values from defaults.
+    >>> validate_test_params([
+    ...      { "value": "30", "parameter_id": "param1", },
+    ...      { "value": "5000", "parameter_id": "param2", },
+    ...      { "value": "500", "parameter_id": "param3", },
+    ...      { "value": "http://wp.pl", "parameter_id": "param4", },
+    ...    ], [
+    ...      {"id": "param1", "name": "time", "default_value": "360", "param_name": "-t"},
+    ...      {"id": "param2", "name": "users", "default_value": "1000", "param_name": "-c", "param_type": "int"},
+    ...      {"id": "param3", "name": "users/second", "default_value": "100", "param_name": "-r", "param_type": "int"},
+    ...      {"id": "param4", "name": "host", "default_value": "", "param_name": "-H", "param_type": "str"},
+    ... ])
+    {'param1': '30', 'param2': '5000', 'param3': '500', 'param4': 'http://wp.pl'}
+    """
+    params_by_id = dict(((str(x['parameter_id']), x['value']) for x in params))
+    for p in defaults:
+        if p['id'] not in params_by_id or not params_by_id[p['id']]:
+            params_by_id[p['id']] = p['default_value']
+
+    param_names_by_id = dict(((x['id'], x['param_name']) for x in defaults))
+    for parameter_id, value in params_by_id.items():
+        param_name = param_names_by_id[parameter_id]
+        VALIDATORS[param_name](value)
+
+    return params_by_id
 
 
 if __name__ == '__main__':

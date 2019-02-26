@@ -33,5 +33,5 @@ def create_app(test_config=None):
     get_cache(app.config)
     devclient(app.config)
 
-    logging.info('app started')
+    logging.info('application ready')
     return app

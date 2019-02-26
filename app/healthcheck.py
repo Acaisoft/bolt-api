@@ -17,13 +17,21 @@ def register_app(app):
 
     def hasura_up():
         client = devclient(app.config)
-        response = client.execute(gql('query { configuration { id } }'))
-        assert response.get('configuration'), 'missing configuration'
+        try:
+            response = client.execute(gql('query { user { id } }'))
+        except Exception as e:
+            return False, str(e)
+        if not response.get('user', None):
+            return False, 'missing root tables'
         return True, 'ok'
 
     def deployer_up():
-        response = deployer.clients.healthcheck(app.config).health_check_get()
-        assert response.status == 'healthy'
+        try:
+            response = deployer.clients.healthcheck(app.config).health_check_get()
+        except Exception as e:
+            return False, str(e)
+        if response.status != 'healthy':
+            return False, f'deployer is not healthy, it is {response.status}'
         return True, 'ok'
 
     hc.add_check(redis_up)

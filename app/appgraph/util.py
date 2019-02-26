@@ -21,6 +21,11 @@ def get_selected_fields(info):
     return ' '.join([n for n in get_selections(info)])
 
 
+def get_request_role_userid(info) -> (str, str):
+    headers = info.context.headers.environ
+    return headers.get('HTTP_X_HASURA_ROLE', None), headers.get('HTTP_X_HASURA_USER_ID', None)
+
+
 class ClientsType(typing.NamedTuple):
     user: typing.Any
     repo: typing.Any
