@@ -35,7 +35,7 @@ def register_app(app):
         return True, 'ok'
 
     hc.add_check(redis_up)
-    hc.add_check(hasura_up)
+    # hc.add_check(hasura_up)
     hc.add_check(deployer_up)
 
     return hc
