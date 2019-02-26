@@ -59,7 +59,7 @@ def get_test_run_status(execution_id:str):
     elif execution['status'] in (const.TESTRUN_PREPARING_FAILED, const.TESTRUN_FINISHED):
         return execution['status']
     else:
-        return get_test_job_status(execution_id)
+        return get_test_job_status(execution['test_job_id'])
 
 
 def can_refresh_test_preparation_job_status():

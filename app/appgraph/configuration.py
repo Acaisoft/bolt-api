@@ -1,3 +1,5 @@
+import json
+
 import graphene
 from flask import current_app
 from gql import gql
@@ -68,37 +70,28 @@ class CreateConfiguration(graphene.Mutation):
 
         patched_params = validators.validate_test_params(configuration_parameters, defaults=repo['parameter'])
 
-        params_subquery = ''
-        mutation_params = ''
-        ind = 0
-
         query_params = {
             'name': name,
-            'repoId': str(repository_id),
-            'projId': str(project_id),
+            'repository_id': str(repository_id),
+            'project_id': str(project_id),
+            'configurationParameters': {'data': []},
+            'created_by_id': user_id,
         }
 
         for param_id, param_value in patched_params.items():
-            ind += 1
-            key_pid = f'param_id_{ind}'
-            key_val = f'value_{ind}'
-            params_subquery += f'{{ parameter_id:${key_pid}, value:${key_val} }},'
-            query_params[key_pid] = param_id
-            query_params[key_val] = param_value
-            mutation_params += f', ${key_pid}:uuid!, ${key_val}:String!'
+            query_params['configurationParameters']['data'].append({
+                'parameter_id': param_id,
+                'value': param_value,
+            })
 
-        conf_response = gclient.execute(gql('mutation ($name:String!, $repoId:uuid!, $projId:uuid!' + mutation_params + ''') {
+        query = gql('''mutation ($data:[configuration_insert_input!]!) {
             insert_configuration(
-                objects:[{
-                    name: $name,
-                    repository_id: $repoId,
-                    project_id: $projId,
-                    configurationParameters: {data:[ ''' + params_subquery + ''']}
-                }]
+                objects: $data
             ) {
                 returning { id } 
             }
-        }'''), query_params)
+        }''')
+        conf_response = gclient.execute(query, variable_values={'data': query_params})
         assert conf_response['insert_configuration'], f'cannot save configuration ({str(conf_response)})'
 
         return Configuration(id=conf_response['insert_configuration']['returning'][0]['id'])
