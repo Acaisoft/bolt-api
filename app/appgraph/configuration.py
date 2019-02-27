@@ -5,7 +5,7 @@ from flask import current_app
 from gql import gql
 
 from app.appgraph.util import get_selected_fields, clients, get_request_role_userid
-from app import validators
+from app import validators, const
 from bolt_api.upstream.devclient import devclient
 
 
@@ -60,7 +60,8 @@ class CreateConfiguration(graphene.Mutation):
         })
         assert repo.get('repository_by_pk', None), f'repository does not exist'
 
-        assert repo.get('user_project', None), f'user does not have access to project {str(project_id)}'
+        if role != const.ROLE_ADMIN:
+            assert repo.get('user_project', None), f'non-admin ({role}) user {user_id} does not have access to project {str(project_id)}'
 
         validators.validate_repository(user_id=user_id, repo_config=repo['repository_by_pk'])
 

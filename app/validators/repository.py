@@ -36,7 +36,8 @@ def validate_repository(user_id, repo_config):
     """
     assert len(repo_config['url']) > 5, f'invalid repository url ({repo_config["url"]})'
 
-    assert is_user_project_valid(user_id, repo_config['project'])
+    if user_id:
+        assert is_user_project_valid(user_id, repo_config['project'])
 
 
 def is_user_project_valid(user_id, project_config):
