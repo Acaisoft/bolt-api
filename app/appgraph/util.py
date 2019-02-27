@@ -23,7 +23,8 @@ def get_selected_fields(info):
 
 def get_request_role_userid(info) -> (str, str):
     headers = info.context.headers.environ
-    return headers.get('HTTP_X_HASURA_ROLE', None), headers.get('HTTP_X_HASURA_USER_ID', None)
+    role = headers.get('HTTP_X_HASURA_ROLE', '')
+    return role.split(',')[0], headers.get('HTTP_X_HASURA_USER_ID', None)
 
 
 class ClientsType(typing.NamedTuple):
