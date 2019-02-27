@@ -38,20 +38,30 @@ class TestrunStart(graphene.Mutation):
         validate_test_configuration_by_id(str(conf_id))
 
         gclient = devclient(current_app.config)
-        test_config_response = gclient.execute(gql('''query ($confId:uuid!, $userId:uuid!) {
-            configuration (where:{
-            id:{_eq:$confId},
-            project:{userProjects:{user_id:{_eq:$userId}}}
-            }) {
-                project_id
-                repository {
-                    url
+        if role == const.ROLE_ADMIN:
+            test_config_response = gclient.execute(gql('''query ($confId:uuid!, $userId:uuid!) {
+                configuration (where:{id:{_eq:$confId}}) {
+                    project_id
+                    repository {
+                        url
+                    }
                 }
-            }
-        }'''), {
-            'confId': str(conf_id),
-            'userId': user_id,
-        })
+            }'''), {'confId': str(conf_id)})
+        else:
+            test_config_response = gclient.execute(gql('''query ($confId:uuid!, $userId:uuid!) {
+                configuration (where:{
+                id:{_eq:$confId},
+                project:{userProjects:{user_id:{_eq:$userId}}}
+                }) {
+                    project_id
+                    repository {
+                        url
+                    }
+                }
+            }'''), {
+                'confId': str(conf_id),
+                'userId': user_id,
+            })
         assert test_config_response['configuration'], f'configuration not found ({str(test_config_response)})'
         test_config = test_config_response['configuration'][0]
 
