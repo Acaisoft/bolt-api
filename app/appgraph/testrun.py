@@ -39,7 +39,7 @@ class TestrunStart(graphene.Mutation):
 
         gclient = devclient(current_app.config)
         if role == const.ROLE_ADMIN:
-            test_config_response = gclient.execute(gql('''query ($confId:uuid!, $userId:uuid!) {
+            test_config_response = gclient.execute(gql('''query ($confId:uuid!) {
                 configuration (where:{id:{_eq:$confId}}) {
                     project_id
                     repository {
