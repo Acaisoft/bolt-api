@@ -1,5 +1,5 @@
 *.pyc
 .DS_store
-
+hasura-prod/
 charts/bolt-api/files/secrets.py
 instance/localhost-secrets.py
