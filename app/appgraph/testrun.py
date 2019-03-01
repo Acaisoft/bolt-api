@@ -15,7 +15,8 @@ from bolt_api.upstream import execution
 
 
 class TestrunStartInterface(graphene.Interface):
-    execution_id = graphene.UUID()
+    """Holds testrun_start response."""
+    execution_id = graphene.UUID(description='id of started execution')
 
 
 class TestrunStartObject(graphene.ObjectType):
@@ -24,8 +25,11 @@ class TestrunStartObject(graphene.ObjectType):
 
 
 class TestrunStart(graphene.Mutation):
+    """Starts tests for given configuration. Returns id of "execution" entry to track tests progress.
+    Call testrun_status to check on job progress.
+    """
     class Arguments:
-        conf_id = graphene.UUID(required=True)
+        conf_id = graphene.UUID(required=True, description='configuration to start tests for')
 
     Output = TestrunStartInterface
 
@@ -105,13 +109,22 @@ class StatusResponseInterface(graphene.Interface):
 
 class StatusResponse(graphene.ObjectType):
     class Meta:
+        description = ''
         interfaces = (StatusResponseInterface,)
 
 
 class TestrunQueries(graphene.ObjectType):
-    testrun_status = graphene.Field(StatusResponseInterface, name='testrun_status', execution_id=graphene.UUID())
+    testrun_status = graphene.Field(
+        StatusResponseInterface,
+        name='testrun_status',
+        description='Check tests status, requires connection to bolt-deployer. Writes error details to execution table.',
+        execution_id=graphene.UUID(description='Execution to check status of.')
+    )
 
-    testrun_repository_key = graphene.String(name='testrun_repository_key')
+    testrun_repository_key = graphene.String(
+        name='testrun_repository_key',
+        description='Returns id rsa public key. Use it to give Bolt access to repository containing tests.'
+    )
 
     def resolve_testrun_status(self, info, execution_id):
         status = get_test_run_status(str(execution_id))

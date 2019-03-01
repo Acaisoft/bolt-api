@@ -4,18 +4,24 @@ from app.appgraph import configuration, testrun
 from app.appgraph import oauth
 
 
-class RootQuery(oauth.QueryOauth, testrun.TestrunQueries):
+class TestrunQuery(oauth.QueryOauth, testrun.TestrunQueries):
     pass
 
 
-class RootMutations(graphene.ObjectType):
-    testrun_configuration_create = configuration.CreateConfiguration.Field(name='testrun_configuration_create')
-    testrun_start = testrun.TestrunStart.Field(name="testrun_start")
+class TestrunMutations(graphene.ObjectType):
+    testrun_configuration_create = configuration.CreateConfiguration.Field(
+        name='testrun_configuration_create',
+        description=configuration.CreateConfiguration.__doc__
+    )
+    testrun_start = testrun.TestrunStart.Field(
+        name="testrun_start",
+        description=testrun.TestrunStart.__doc__
+    )
 
 
 AppSchema = graphene.Schema(
-    query=RootQuery,
-    mutation=RootMutations,
+    query=TestrunQuery,
+    mutation=TestrunMutations,
     types=[
         configuration.Configuration,
         oauth.Oauth,

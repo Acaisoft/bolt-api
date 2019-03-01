@@ -1,0 +1,23 @@
+- args:
+    permission:
+      allow_aggregations: false
+      columns:
+      - id
+      - email
+      - active
+      - created
+      - is_admin
+      - is_reader
+      - is_manager
+      filter:
+        _or:
+        - id:
+            _eq: X-HASURA-USER-ID
+        - userProjects:
+            user_id:
+              _eq: X-HASURA-USER-ID
+    role: manager
+    table:
+      name: user
+      schema: public
+  type: create_select_permission

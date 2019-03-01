@@ -15,4 +15,5 @@ def timing_middleware(next, root, info, **args):
     ))
     return return_value
 
+
 middleware_list = [timing_middleware]

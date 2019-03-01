@@ -23,10 +23,15 @@ class OauthAuthtoken(graphene.ObjectType):
 
 
 class QueryOauth(graphene.ObjectType):
-    oauth_conf = graphene.List(OauthInterface, name='oauth_conf')
+    oauth_conf = graphene.List(
+        OauthInterface,
+        name='oauth_conf',
+        description='Returns known oauth endpoint ids.'
+    )
     oauth_authtoken = graphene.Field(
         OauthAuthtokenInterface,
         name="oauth_authtoken",
+        description='Exchanges an oauth providers token to a hasura compatible jwt token.',
         required=False,
         provider=graphene.String(),
         state=graphene.String(),

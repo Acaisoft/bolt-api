@@ -1,1 +1,0 @@
-update parameter set type_id = (select id from configuration_type limit 1) where type_id is null;

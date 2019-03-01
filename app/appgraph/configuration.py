@@ -24,11 +24,12 @@ class Configuration(graphene.ObjectType):
 
 
 class CreateConfiguration(graphene.Mutation):
+    """Validates and saves configuration for a testrun. Ensures repository is accessible and test parameters are sane."""
     class Arguments:
-        name = graphene.String(required=True)
-        repository_id = graphene.String(required=True, name='repository_id')
-        project_id = graphene.UUID(required=True, name='project_id')
-        configuration_parameters = graphene.List(ConfigurationParameterInterface)
+        name = graphene.String(required=True, description='Name, not unique.')
+        repository_id = graphene.String(required=True, name='repository_id', description='Repository to fetch test definition from.')
+        project_id = graphene.UUID(required=True, name='project_id', description='Project to create test in, user must have access to it.')
+        configuration_parameters = graphene.List(ConfigurationParameterInterface, description='Default parameter types overrides.')
 
     Output = ConfigurationInterface
 

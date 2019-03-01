@@ -56,8 +56,14 @@ def get_test_run_status(execution_id:str):
             return get_test_preparation_job_status(execution_id, str(execution['test_preparation_job_id']))
         else:
             return execution['test_preparation_job_status']
-    else:
-        return execution['status']
+    elif execution['status'] == const.TESTRUN_RUNNING and execution['test_job_id']:
+        # state was updated by test wrapper to TESTRUN_RUNNING but double-check with deployer jobs api
+        # in case wrapper crashed
+        job_status = get_test_job_status(execution['test_job_id'])
+        if not job_status['succeeded']:
+            return str(job_status.get('conditions'))
+
+    return execution['status']
 
 
 def can_refresh_test_preparation_job_status():
