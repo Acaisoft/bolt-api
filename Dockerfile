@@ -16,9 +16,6 @@ RUN apk del .build-deps gcc musl-dev libffi-dev
 FROM base
 COPY --from=builder /install /usr/local
 
-RUN apk add --no-cache ca-certificates
-RUN update-ca-certificates
-
 RUN mkdir /app
 COPY app /app/app
 COPY instance /app/instance

@@ -2,11 +2,12 @@ import logging
 import os
 
 from flask import Flask
-from raven.contrib.flask import Sentry
+import sentry_sdk
+from sentry_sdk.integrations.flask import \
+    FlaskIntegration
 
 
 def configure(app: Flask):
-
     conf_file_path = os.environ.get('CONFIG_FILE_PATH', 'localhost-config.py')
     app.config.from_pyfile(conf_file_path)
 
@@ -16,10 +17,7 @@ def configure(app: Flask):
     sentry_dsn = app.config.get('SENTRY_DSN', None)
     if sentry_dsn:
         logging.info(f'sentry logging to {sentry_dsn.split("@")[-1]}')
-        if not app.config.get('SENTRY_CONFIG'):
-            app.config['SENTRY_CONFIG'] = {}
-        app.config['SENTRY_CONFIG']['release'] = 'v0.1'
-        Sentry(app, dsn=sentry_dsn, level=logging.WARNING)
+        sentry_sdk.init(sentry_dsn, integrations=[FlaskIntegration()], release='v0.1.2')
 
     config_ver = app.config.get('CONFIG_VERSION', None)
     secrets_ver = app.config.get('SECRETS_VERSION', None)
