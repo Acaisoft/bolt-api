@@ -1,31 +1,11 @@
 import logging
 import os
-import time
-from logging.config import dictConfig
 
 from flask import Flask
-from flask.logging import default_handler
 from raven.contrib.flask import Sentry
 
 
 def configure(app: Flask):
-    app.logger.removeHandler(default_handler)
-
-    dictConfig({
-        'version': 1,
-        'formatters': {'default': {
-            'format': '[%(asctime)s] [%(levelname)s in %(module)s] %(message)s',
-        }},
-        'handlers': {'wsgi': {
-            'class': 'logging.StreamHandler',
-            'stream': 'ext://flask.logging.wsgi_errors_stream',
-            'formatter': 'default'
-        }},
-        'root': {
-            'level': 'INFO',
-            'handlers': ['wsgi']
-        }
-    })
 
     conf_file_path = os.environ.get('CONFIG_FILE_PATH', 'localhost-config.py')
     app.config.from_pyfile(conf_file_path)
@@ -34,7 +14,7 @@ def configure(app: Flask):
     app.config.from_pyfile(secrets_file_path)
 
     sentry_dsn = app.config.get('SENTRY_DSN', None)
-    if sentry_dsn and not app.debug:
+    if sentry_dsn:
         logging.info(f'sentry logging to {sentry_dsn.split("@")[-1]}')
         if not app.config.get('SENTRY_CONFIG'):
             app.config['SENTRY_CONFIG'] = {}

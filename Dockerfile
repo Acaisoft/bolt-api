@@ -1,16 +1,23 @@
-FROM python:3.6-alpine as base
+FROM python:3.6.8-alpine3.9 as base
+RUN apk --update upgrade
 
 FROM base as builder
 
 RUN mkdir /install
 WORKDIR /install
-RUN apk add --no-cache --virtual .build-deps gcc musl-dev openssl-dev libffi-dev
+
+RUN apk add --no-cache openssl-dev
+RUN apk add --no-cache --virtual .build-deps gcc musl-dev libffi-dev
 COPY requirements/core.txt /requirements.txt
+RUN pip install --no-cache-dir -U pip
 RUN pip install --install-option="--prefix=/install" -r /requirements.txt
-RUN apk del .build-deps gcc musl-dev
+RUN apk del .build-deps gcc musl-dev libffi-dev
 
 FROM base
 COPY --from=builder /install /usr/local
+
+RUN apk add --no-cache ca-certificates
+RUN update-ca-certificates
 
 RUN mkdir /app
 COPY app /app/app
