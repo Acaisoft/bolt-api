@@ -17,20 +17,25 @@ def validate_rampup(value: str):
     assert int(value) <= 1000, 'maximum users ramp up is 1000'
 
 
-def validate_host(value: str):
-    assert value, 'hostname is required'
-    assert len(value) > 10, 'hostname too short'
-    assert value.startswith('http://') or value.startswith('https://'), f'missing protocol in {value}'
+def validate_url(value: str, required=True, key='hostname'):
+    if required:
+        assert value, f'{key} is required'
+    if value:
+        assert len(value) > 10, f'{key} too short'
+        assert value.startswith('http://') or value.startswith('https://'), f'missing protocol in {key} ({value})'
 
 
-def validate_name(value: str):
-    assert value, 'name is required'
-    assert len(value) > 2, 'name is too short'
+def validate_text(value: str, required=True, key='name'):
+    if required:
+        assert value, f'{key} is required'
+    if value:
+        assert len(value) > 2, f'{key} is too short'
+        assert len(value) <= 512, f'{key} is too long'
 
 
 VALIDATORS = {
     '-t': validate_time,
     '-c': validate_users,
     '-r': validate_rampup,
-    '-H': validate_host,
+    '-H': validate_url,
 }

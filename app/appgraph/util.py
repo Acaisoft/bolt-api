@@ -1,7 +1,18 @@
 import typing
+
+import graphene
 from graphql.language.ast import FragmentSpread
 from bolt_api import upstream
 from bolt_api.upstream.devclient import devclient
+
+
+class ValidationInterface(graphene.Interface):
+    ok = graphene.Boolean()
+
+
+class ValidationResponse(graphene.ObjectType):
+    class Meta:
+        interfaces = (ValidationInterface,)
 
 
 def get_selections(info):

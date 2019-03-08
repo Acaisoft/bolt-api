@@ -12,8 +12,8 @@ services:
     ports:
       - "6379:6379"
   hasura:
-    image: hasura/graphql-engine:v1.0.0-alpha38
-#    image: hasura/graphql-engine:v1.0.0-alpha38.cli-migrations
+#    image: hasura/graphql-engine:v1.0.0-alpha38
+    image: hasura/graphql-engine:v1.0.0-alpha38.cli-migrations
     ports:
       - "8080:8080"
     depends_on:
