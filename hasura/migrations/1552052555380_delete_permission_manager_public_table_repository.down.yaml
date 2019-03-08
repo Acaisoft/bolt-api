@@ -1,0 +1,22 @@
+- args:
+    permission:
+      check: {}
+      columns:
+      - name
+      - project_id
+      - type_id
+      - url
+      - user_id
+      isSetConfigChecked: true
+      localSet:
+      - key: created_by_id
+        value: x-hasura-USER-ID
+      - key: ""
+        value: ""
+      set:
+        created_by_id: x-hasura-USER-ID
+    role: manager
+    table:
+      name: repository
+      schema: public
+  type: create_insert_permission
