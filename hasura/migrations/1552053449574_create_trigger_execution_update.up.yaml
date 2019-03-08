@@ -1,0 +1,15 @@
+- args:
+    headers: []
+    name: execution_update
+    retry_conf:
+      interval_sec: 5
+      num_retries: 1
+      timeout_sec: 10
+    table:
+      name: execution
+      schema: public
+    update:
+      columns:
+      - status
+    webhook_from_env: BOLT_API_EXECUTION_STATE_CHANGE
+  type: create_event_trigger

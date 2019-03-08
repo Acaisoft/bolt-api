@@ -2,7 +2,7 @@ import logging
 
 from flask import Flask
 
-from app import healthcheck, graphql, deployer, cmd
+from app import healthcheck, graphql, deployer, cmd, webhooks
 from app.auth import auth
 from app.cache import get_cache
 from app.configure import configure
@@ -28,6 +28,9 @@ def create_app(test_config=None):
 
     ## healthchecks
     healthcheck.register_app(app)
+
+    ## webhooks
+    webhooks.register_app(app)
 
     ## initialize cache and hasura clients
     get_cache(app.config)
