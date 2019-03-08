@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 
 import deployer_cli
@@ -53,17 +54,15 @@ def get_test_run_status(execution_id:str):
 
     if execution['status'] == const.TESTRUN_PREPARING:
         if can_refresh_test_preparation_job_status():
-            return get_test_preparation_job_status(execution_id, str(execution['test_preparation_job_id']))
+            return get_test_preparation_job_status(execution_id, str(execution['test_preparation_job_id'])), execution
         else:
-            return execution['test_preparation_job_status']
-    elif execution['status'] == const.TESTRUN_RUNNING and execution['test_job_id']:
+            return execution['test_preparation_job_status'], None
+    elif execution['status'] in (const.TESTRUN_RUNNING, const.TESTRUN_STARTED) and execution['test_job_id']:
         # state was updated by test wrapper to TESTRUN_RUNNING but double-check with deployer jobs api
         # in case wrapper crashed
-        job_status = get_test_job_status(execution['test_job_id'])
-        if not job_status['succeeded']:
-            return str(job_status.get('conditions'))
+        return get_test_job_status(execution_id, execution['test_job_id'])
 
-    return execution['status']
+    return execution['status'], None
 
 
 def can_refresh_test_preparation_job_status():
@@ -109,11 +108,35 @@ def get_test_preparation_job_status(execution_id:str, test_preparation_job_id:st
     return response.status
 
 
-def get_test_job_status(test_job_id):
+def get_test_job_status(execution_id:str, test_job_id:str):
     try:
-        return clients.jobs(current_app.config).jobs_job_id_get(job_id=test_job_id)
+        response_data = clients.jobs(current_app.config).jobs_job_id_get(job_id=test_job_id)
     except ApiException as e:
         if e.status == 404:
             raise Exception('job not found, is the id valid?')
         else:
             raise e
+
+    err = None
+    if not response_data.status.get('succeeded'):
+        status = const.TESTRUN_CRASHED
+        err = response_data.status
+    else:
+        status = const.TESTRUN_FINISHED
+
+    update_data = {
+        'exec_id': execution_id,
+        'data': {
+            'status': status,
+            'test_job_error': json.dumps(err),
+            'test_preparation_job_statuscheck_timestamp': str(datetime.now()),
+
+        },
+    }
+
+    update_response = devclient(current_app.config).execute(gql('''mutation ($exec_id:uuid!, $data:execution_insert_input!) {
+        update_execution(_set:$data, where:{id:{_eq:$exec_id}}) { returning { id } }
+    }'''), update_data)
+    assert not update_response.get('error'), f'error updating execution: {str(update_response)}'
+
+    return status, response_data

@@ -105,6 +105,7 @@ class TestrunStart(graphene.Mutation):
 
 class StatusResponseInterface(graphene.Interface):
     status = graphene.String()
+    debug = graphene.String()
 
 
 class StatusResponse(graphene.ObjectType):
@@ -127,8 +128,8 @@ class TestrunQueries(graphene.ObjectType):
     )
 
     def resolve_testrun_status(self, info, execution_id):
-        status = get_test_run_status(str(execution_id))
-        return StatusResponse(status=status)
+        status, debug = get_test_run_status(str(execution_id))
+        return StatusResponse(status=status, debug=debug)
 
     def resolve_testrun_repository_key(self, info, **kwargs):
         response = clients.management(current_app.config).management_id_rsa_pub_get()
