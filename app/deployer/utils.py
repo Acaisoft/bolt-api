@@ -57,12 +57,12 @@ def get_test_run_status(execution_id:str):
             return get_test_preparation_job_status(execution_id, str(execution['test_preparation_job_id'])), execution
         else:
             return execution['test_preparation_job_status'], None
-    elif execution['status'] in (const.TESTRUN_RUNNING, const.TESTRUN_STARTED) and execution['test_job_id']:
+    elif execution['status'] in (const.TESTRUN_RUNNING, const.TESTRUN_STARTED, const.TESTRUN_CRASHED) and execution['test_job_id']:
         # state was updated by test wrapper to TESTRUN_RUNNING but double-check with deployer jobs api
         # in case wrapper crashed
         return get_test_job_status(execution_id, execution['test_job_id'])
 
-    return execution['status'], None
+    return execution['status'], execution
 
 
 def can_refresh_test_preparation_job_status():
@@ -118,11 +118,14 @@ def get_test_job_status(execution_id:str, test_job_id:str):
             raise e
 
     err = None
-    if not response_data.status.get('succeeded'):
-        status = const.TESTRUN_CRASHED
-        err = response_data.status
+    if not response_data.status.get('active'):
+        if not response_data.status.get('succeeded'):
+            status = const.TESTRUN_CRASHED
+            err = response_data.status
+        else:
+            status = const.TESTRUN_FINISHED
     else:
-        status = const.TESTRUN_FINISHED
+        status = const.TESTRUN_RUNNING
 
     update_data = {
         'exec_id': execution_id,
