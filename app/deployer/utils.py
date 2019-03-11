@@ -12,13 +12,15 @@ from app.deployer import clients
 from bolt_api.upstream.devclient import devclient
 
 
-def start_job(app_config, project_id, repo_url, execution_id) -> deployer_cli.ImageBuildTaskSchema:
+def start_job(app_config, project_id, repo_url, execution_id, no_cache_redis=False, no_cache_kaniko=False) -> deployer_cli.ImageBuildTaskSchema:
     data = deployer_cli.ImageBuildRequestSchema(
         repo_url=repo_url,
         tenant_id=TENANT_ID,
         project_id=project_id,
         start_proper_job=True,
         test_run_execution_id=execution_id,
+        no_cache=no_cache_redis,
+        no_cache_kaniko=no_cache_kaniko,
     )
     return clients.images(app_config).image_builds_post(image_build_request_schema=data)
 

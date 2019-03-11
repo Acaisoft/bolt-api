@@ -30,10 +30,13 @@ class TestrunStart(graphene.Mutation):
     """
     class Arguments:
         conf_id = graphene.UUID(required=True, description='configuration to start tests for')
+        no_cache = graphene.Boolean(required=False, description='ignore both caches')
+        no_cache_redis = graphene.Boolean(required=False, description='ignore redis cache')
+        no_cache_kaniko = graphene.Boolean(required=False, description='ignore redis kaniko')
 
     Output = TestrunStartInterface
 
-    def mutate(self, info, conf_id, **kwargs):
+    def mutate(self, info, conf_id, no_cache=False, no_cache_redis=False, no_cache_kaniko=False, **kwargs):
         role, user_id = get_request_role_userid(info)
 
         assert role in (
@@ -86,6 +89,8 @@ class TestrunStart(graphene.Mutation):
             project_id=test_config['project_id'],
             repo_url=test_config['repository']['url'],
             execution_id=execution_id,
+            no_cache_redis=no_cache or no_cache_redis,
+            no_cache_kaniko=no_cache or no_cache_kaniko,
         )
 
         query_vars = {
