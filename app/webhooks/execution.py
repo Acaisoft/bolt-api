@@ -3,7 +3,7 @@ from gql import gql
 
 from app import const
 from app.deployer.utils import get_test_run_status
-from upstream.devclient import devclient
+from bolt_api.upstream.devclient import devclient
 
 bp = Blueprint('webhooks', __name__)
 
