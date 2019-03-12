@@ -1,6 +1,6 @@
 import graphene
 
-from app.appgraph import configuration, testrun, util, project
+from app.appgraph import configuration, testrun, util, project, repository
 from app.appgraph import oauth
 
 
@@ -17,6 +17,8 @@ class TestrunMutations(graphene.ObjectType):
     testrun_configuration_validate = to_field(configuration.Validate)
     testrun_project_create = to_field(project.Create)
     testrun_project_validate = to_field(project.Validate)
+    testrun_repository_create = to_field(repository.Create)
+    testrun_repository_validate = to_field(repository.Validate)
     testrun_start = to_field(testrun.TestrunStart)
 
 
@@ -26,6 +28,7 @@ AppSchema = graphene.Schema(
     types=[
         configuration.ConfigurationType,
         project.ProjectType,
+        repository.RepositoryType,
         oauth.Oauth,
         oauth.OauthAuthtoken,
         testrun.TestrunStartObject,

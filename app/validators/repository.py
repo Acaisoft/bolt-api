@@ -1,3 +1,4 @@
+import deployer_cli
 import requests
 
 from app.deployer import clients
@@ -54,9 +55,9 @@ def validate_accessibility(repository_url, app_config):
     """
     Validate repo is accessible using the key provided by upstream bolt-deployer
     """
-    # TODO: add endpoint in bolt-deployer which would call the repo using paramiko or even 'git ls-remote'
-    # response = clients.management(app_config).management_validate_repo_access(repository_url)
-    # assert response.status == 'OK'
+    req = deployer_cli.ValidateRepositorySchema(repository_url=repository_url)
+    response = clients.management(app_config).management_validate_repository_post(validate_repository_schema=req)
+    assert response.is_valid, f'it appears repository is not accessible ({str(response)})'
     return
 
 
