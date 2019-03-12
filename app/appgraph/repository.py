@@ -123,4 +123,4 @@ class Create(Validate):
         query_response = gclient.execute(query, variable_values={'data': query_params})
         assert query_response['insert_repository'], f'cannot save repository ({str(query_response)})'
 
-        return RepositoryType(id=query_response['insert_project']['returning'][0]['id'])
+        return RepositoryType(id=query_response['insert_repository']['returning'][0]['id'])
