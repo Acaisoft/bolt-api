@@ -1,0 +1,7 @@
+- args:
+    sql: ALTER TABLE "public"."configuration" ALTER COLUMN "repository_id" SET NOT
+      NULL;
+  type: run_sql
+- args:
+    sql: COMMENT ON COLUMN "public"."configuration"."repository_id" IS 'undefined'
+  type: run_sql

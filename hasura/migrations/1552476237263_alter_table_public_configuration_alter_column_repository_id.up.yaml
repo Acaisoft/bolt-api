@@ -1,0 +1,7 @@
+- args:
+    sql: ALTER TABLE "public"."configuration" ALTER COLUMN "repository_id" DROP NOT
+      NULL;
+  type: run_sql
+- args:
+    sql: COMMENT ON COLUMN "public"."configuration"."repository_id" IS ''
+  type: run_sql
