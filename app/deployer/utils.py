@@ -12,7 +12,8 @@ from app.deployer import clients
 from bolt_api.upstream.devclient import devclient
 
 
-def start_job(app_config, project_id, repo_url, execution_id, no_cache_redis=False, no_cache_kaniko=False) -> deployer_cli.ImageBuildTaskSchema:
+def start_job(app_config, project_id, repo_url, execution_id, no_cache_redis=False,
+              no_cache_kaniko=False) -> deployer_cli.ImageBuildTaskSchema:
     data = deployer_cli.ImageBuildRequestSchema(
         repo_url=repo_url,
         tenant_id=TENANT_ID,
@@ -25,7 +26,7 @@ def start_job(app_config, project_id, repo_url, execution_id, no_cache_redis=Fal
     return clients.images(app_config).image_builds_post(image_build_request_schema=data)
 
 
-def get_test_run_status(execution_id:str):
+def get_test_run_status(execution_id: str):
     """
     Execution model stores the id and last known state of an image-build-job and testrun-job.
     To check current state of job:
@@ -59,7 +60,8 @@ def get_test_run_status(execution_id:str):
             return get_test_preparation_job_status(execution_id, str(execution['test_preparation_job_id'])), execution
         else:
             return execution['test_preparation_job_status'], None
-    elif execution['status'] in (const.TESTRUN_RUNNING, const.TESTRUN_STARTED, const.TESTRUN_CRASHED) and execution['test_job_id']:
+    elif execution['status'] in (const.TESTRUN_RUNNING, const.TESTRUN_STARTED, const.TESTRUN_CRASHED) and execution[
+        'test_job_id']:
         # state was updated by test wrapper to TESTRUN_RUNNING but double-check with deployer jobs api
         # in case wrapper crashed
         return get_test_job_status(execution_id, execution['test_job_id'])
@@ -72,11 +74,12 @@ def can_refresh_test_preparation_job_status():
     return True
 
 
-def get_test_preparation_job_status(execution_id:str, test_preparation_job_id:str):
+def get_test_preparation_job_status(execution_id: str, test_preparation_job_id: str):
     response = clients.images(current_app.config).image_builds_task_id_get(task_id=test_preparation_job_id)
 
     err = None
     test_job_id = None
+    commit_sha = None
     new_status = const.TESTRUN_PREPARING
 
     if response.status == 'FAILURE':
@@ -87,30 +90,30 @@ def get_test_preparation_job_status(execution_id:str, test_preparation_job_id:st
     if response.status == 'SUCCESS':
         new_status = const.TESTRUN_STARTED
         test_job_id = response.state['result']['job_name']
+        commit_sha = response.state.get('result', {}).get('commit_sha')
 
     update_data = {
         'exec_id': execution_id,
-        'test_job_id': test_job_id,
-        'status': new_status,
-        'jobError': err,
-        'jobStatus': response.status,
-        'checkTime': str(datetime.now()),
+        'data': {
+            'test_job_id': test_job_id,
+            'status': new_status,
+            'test_preparation_job_error': err,
+            'test_preparation_job_status': response.status,
+            'test_preparation_job_statuscheck_timestamp': str(datetime.now()),
+        }
     }
+    if commit_sha:
+        update_data['data']['commit_hash'] = commit_sha
 
-    update_response = devclient(current_app.config).execute(gql('''mutation ($exec_id:uuid!, $test_job_id:String, $status:String!, $jobError:String, $jobStatus:String, $checkTime:timestamptz!) {
-        update_execution(_set:{
-            status: $status,
-            test_job_id: $test_job_id,
-            test_preparation_job_error: $jobError,
-            test_preparation_job_status: $jobStatus,
-            test_preparation_job_statuscheck_timestamp: $checkTime,
-        }, where:{id:{_eq:$exec_id}}) { returning { id } }
+    update_response = devclient(current_app.config).execute(gql('''mutation ($exec_id:uuid!, $data:execution_insert_input!) {
+        update_execution(_set: $data, where:{id:{_eq:$exec_id}}) { returning { id } }
     }'''), update_data)
+    assert not update_response.get('error'), f'error updating execution: {str(update_response)}'
 
     return response.status
 
 
-def get_test_job_status(execution_id:str, test_job_id:str):
+def get_test_job_status(execution_id: str, test_job_id: str):
     try:
         response_data = clients.jobs(current_app.config).jobs_job_id_get(job_id=test_job_id)
     except ApiException as e:
@@ -135,7 +138,6 @@ def get_test_job_status(execution_id:str, test_job_id:str):
             'status': status,
             'test_job_error': json.dumps(err),
             'test_preparation_job_statuscheck_timestamp': str(datetime.now()),
-
         },
     }
 
