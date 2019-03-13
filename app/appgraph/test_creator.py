@@ -2,6 +2,7 @@ import graphene
 from flask import current_app
 from gql import gql
 
+from app import validators
 from app.appgraph.util import get_request_role_userid, ValidationInterface, ValidationResponse
 from bolt_api.upstream.devclient import devclient
 
@@ -57,7 +58,8 @@ class Validate(graphene.Mutation):
         })
         assert len(creators.get('configuration', None)) == 0, f'configuration does not exist'
 
-        # TODO: validate data, min_/max_wait
+        # validate configuration body
+        validators.validate_test_creator(data, min_wait=min_wait, max_wait=max_wait)
 
         return {
             'data': data,

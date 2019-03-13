@@ -16,6 +16,7 @@ def validate_test_configuration_by_id(test_conf_id):
         configuration_by_pk (id:$conf_id) {
             id
             name
+            code_source
             repository {
                 url
             }

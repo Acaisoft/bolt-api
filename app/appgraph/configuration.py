@@ -30,6 +30,9 @@ class Validate(graphene.Mutation):
         name = graphene.String(
             required=True,
             description='Name, not unique.')
+        code_source = graphene.String(
+            required=True,
+            description=f'Test code source: "{const.CONF_SOURCE_JSON}" or "{const.CONF_SOURCE_REPO}"')
         repository_id = graphene.String(
             required=True,
             name='repository_id',
@@ -45,9 +48,14 @@ class Validate(graphene.Mutation):
     Output = ValidationInterface
 
     @staticmethod
-    def validate(info, name, repository_id, project_id, configuration_parameters):
+    def validate(info, name, code_source, repository_id, project_id, configuration_parameters):
+        assert code_source in const.CONF_SOURCE_CHOICE, f'invalid choice of code_source ({code_source})'
+
         role, user_id = get_request_role_userid(info)
+        assert user_id, f'unauthenticated request'
+
         gclient = devclient(current_app.config)
+
         repo = gclient.execute(gql('''query ($repoId:uuid!, $projId:uuid!, $userId:uuid!) {
             repository_by_pk(id:$repoId) {
                 url
@@ -57,12 +65,14 @@ class Validate(graphene.Mutation):
                     userProjects { user_id }
                 }
             }
+            
             parameter {
                 id
                 default_value
                 param_name
                 name
             }
+            
             user_project (where:{ user_id:{_eq:$userId}, project_id:{_eq:$projId} }) {
                 id
             }
@@ -71,15 +81,15 @@ class Validate(graphene.Mutation):
             'projId': str(project_id),
             'userId': user_id,
         })
-        assert repo.get('repository_by_pk', None), f'repository does not exist'
 
         if role != const.ROLE_ADMIN:
             assert repo.get('user_project', None), \
                 f'non-admin ({role}) user {user_id} does not have access to project {str(project_id)}'
 
-        validators.validate_repository(user_id=user_id, repo_config=repo['repository_by_pk'])
-
-        validators.validate_accessibility(repo['repository_by_pk']['url'], current_app.config)
+        if code_source == const.CONF_SOURCE_REPO:
+            assert repo.get('repository_by_pk', None), f'repository does not exist'
+            validators.validate_repository(user_id=user_id, repo_config=repo['repository_by_pk'])
+            validators.validate_accessibility(repo['repository_by_pk']['url'], current_app.config)
 
         validators.validate_text(name)
 
