@@ -1,4 +1,3 @@
-import json
 from datetime import datetime
 
 import graphene
@@ -10,8 +9,7 @@ from app.appgraph.util import get_request_role_userid
 from app.deployer import clients
 from app.deployer.utils import start_job, get_test_run_status
 from app.validators.configuration import validate_test_configuration_by_id
-from bolt_api.upstream.devclient import devclient
-from bolt_api.upstream import execution
+from app.hasura_client import hasura_client
 
 
 class TestrunStartInterface(graphene.Interface):
@@ -44,25 +42,51 @@ class TestrunStart(graphene.Mutation):
 
         validate_test_configuration_by_id(str(conf_id))
 
-        gclient = devclient(current_app.config)
+        gclient = hasura_client(current_app.config)
         if role == const.ROLE_ADMIN:
             test_config_response = gclient.execute(gql('''query ($confId:uuid!) {
                 configuration (where:{id:{_eq:$confId}}) {
                     project_id
+                    code_source
+                    
                     repository {
                         url
+                    }
+                    
+                    test_creator_configuration_m2m (order_by:{
+                        created_at:desc_nulls_last
+                    }, limit:1) {
+                        testCreator {
+                            created_at
+                            data
+                            max_wait
+                            min_wait
+                        }
                     }
                 }
             }'''), {'confId': str(conf_id)})
         else:
             test_config_response = gclient.execute(gql('''query ($confId:uuid!, $userId:uuid!) {
                 configuration (where:{
-                id:{_eq:$confId},
-                project:{userProjects:{user_id:{_eq:$userId}}}
+                    id:{_eq:$confId},
+                    project:{userProjects:{user_id:{_eq:$userId}}}
                 }) {
+                    code_source
                     project_id
+                    
                     repository {
                         url
+                    }
+                    
+                    test_creator_configuration_m2m (order_by:{
+                        created_at:desc_nulls_last
+                    }, limit:1) {
+                        testCreator {
+                            created_at
+                            data
+                            max_wait
+                            min_wait
+                        }
                     }
                 }
             }'''), {

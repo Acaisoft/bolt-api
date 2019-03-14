@@ -5,12 +5,12 @@ from flask import make_response
 from gql import gql
 
 from app import const
-from bolt_api.upstream.devclient import devclient
+from app.hasura_client import hasura_client
 
 
 def hasura_token_for_user(config, user_email):
     email = user_email.lower()
-    gql_client = devclient(config)
+    gql_client = hasura_client(config)
     allowed_roles = ['anonymous']
     role = ''
 

@@ -1,12 +1,10 @@
-import json
-
 import graphene
 from flask import current_app
 from gql import gql
 
 from app.appgraph.util import get_request_role_userid, ValidationInterface, ValidationResponse
 from app import validators, const
-from bolt_api.upstream.devclient import devclient
+from app.hasura_client import hasura_client
 
 
 class ConfigurationParameterInterface(graphene.InputObjectType):
@@ -49,14 +47,17 @@ class Validate(graphene.Mutation):
 
     @staticmethod
     def validate(info, name, code_source, repository_id, project_id, configuration_parameters):
+        repository_id = str(repository_id)
+        project_id = str(project_id)
+
         assert code_source in const.CONF_SOURCE_CHOICE, f'invalid choice of code_source ({code_source})'
 
         role, user_id = get_request_role_userid(info)
         assert user_id, f'unauthenticated request'
 
-        gclient = devclient(current_app.config)
+        gclient = hasura_client(current_app.config)
 
-        repo = gclient.execute(gql('''query ($repoId:uuid!, $projId:uuid!, $userId:uuid!) {
+        repo = gclient.execute(gql('''query ($confName:String!, $repoId:uuid!, $projId:uuid!, $userId:uuid!) {
             repository_by_pk(id:$repoId) {
                 url
                 configurationType { slug_name }
@@ -76,26 +77,39 @@ class Validate(graphene.Mutation):
             user_project (where:{ user_id:{_eq:$userId}, project_id:{_eq:$projId} }) {
                 id
             }
+            
+            project_by_pk(id:$projId) {
+                id
+            }
+            configuration (where:{name:{_eq:$confName}, project:{userProjects:{user_id:{_eq:$userId}}}}) {
+                id
+            }
+            
         }'''), {
-            'repoId': str(repository_id),
-            'projId': str(project_id),
+            'confName': name,
+            'repoId': repository_id,
+            'projId': project_id,
             'userId': user_id,
         })
 
         if role != const.ROLE_ADMIN:
             assert repo.get('user_project', None), \
-                f'non-admin ({role}) user {user_id} does not have access to project {str(project_id)}'
-
-        if code_source == const.CONF_SOURCE_REPO:
-            assert repo.get('repository_by_pk', None), f'repository does not exist'
-            validators.validate_repository(user_id=user_id, repo_config=repo['repository_by_pk'])
-            validators.validate_accessibility(repo['repository_by_pk']['url'], current_app.config)
+                f'non-admin ({role}) user {user_id} does not have access to project {project_id}'
 
         validators.validate_text(name)
 
+        assert repo.get('project_by_pk', None), f'project "{project_id}" does not exist'
+
+        assert len(repo.get('configuration', [])) == 0, f'configuration named "{name}" already exists'
+
+        if repository_id and code_source == const.CONF_SOURCE_REPO:
+            assert repo.get('repository_by_pk', None), f'repository does not exist'
+            validators.validate_repository(user_id=user_id, repo_config=repo['repository_by_pk'])
+            validators.validate_accessibility(current_app.config, repo['repository_by_pk']['url'])
+
         return validators.validate_test_params(configuration_parameters, defaults=repo['parameter'])
 
-    def mutate(self, info, name, repository_id, project_id, configuration_parameters):
+    def mutate(self, info, name, code_source, repository_id, project_id, configuration_parameters):
         Validate.validate(info, name, repository_id, project_id, configuration_parameters)
         return ValidationResponse(ok=True)
 
@@ -105,11 +119,11 @@ class Create(Validate):
 
     Output = ConfigurationInterface
 
-    def mutate(self, info, name, repository_id, project_id, configuration_parameters):
+    def mutate(self, info, name, code_source, repository_id, project_id, configuration_parameters):
         role, user_id = get_request_role_userid(info)
-        gclient = devclient(current_app.config)
+        gclient = hasura_client(current_app.config)
 
-        patched_params = Validate.validate(info, name, repository_id, project_id, configuration_parameters)
+        patched_params = Validate.validate(info, name, code_source, repository_id, project_id, configuration_parameters)
 
         query_params = {
             'name': name,

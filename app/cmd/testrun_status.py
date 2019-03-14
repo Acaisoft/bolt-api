@@ -5,13 +5,13 @@ from gql import gql
 
 from app import const
 from app.deployer.utils import get_test_run_status
-from bolt_api.upstream.devclient import devclient
+from app.hasura_client import hasura_client
 
 
 @click.command(name='testrun_status')
 @with_appcontext
 def testrun_status():
-    executions = devclient(current_app.config).execute(gql('''query ($finalStates:[String!]!) {
+    executions = hasura_client(current_app.config).execute(gql('''query ($finalStates:[String!]!) {
         execution(where:{status:{_nin:$finalStates}}) { id, status }
     }'''), {'finalStates': [
         const.TESTRUN_FINISHED,

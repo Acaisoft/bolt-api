@@ -1,9 +1,5 @@
-import typing
-
 import graphene
 from graphql.language.ast import FragmentSpread
-from bolt_api import upstream
-from bolt_api.upstream.devclient import devclient
 
 
 class ValidationInterface(graphene.Interface):
@@ -36,24 +32,3 @@ def get_request_role_userid(info) -> (str, str):
     headers = info.context.headers.environ
     role = headers.get('HTTP_X_HASURA_ROLE', '')
     return role.split(',')[0], headers.get('HTTP_X_HASURA_USER_ID', '').split(',')[0]
-
-
-class ClientsType(typing.NamedTuple):
-    user: typing.Any
-    repo: typing.Any
-    conf: typing.Any
-
-
-_clients: ClientsType = None
-
-
-def clients():
-    global _clients
-    if not _clients:
-        cl = devclient()
-        _clients = ClientsType(
-            user=upstream.user.Query(cl),
-            repo=upstream.repository.Query(cl),
-            conf=upstream.configuration.Query(cl),
-        )
-    return _clients

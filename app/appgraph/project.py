@@ -1,12 +1,10 @@
-import json
-
 import graphene
 from flask import current_app
 from gql import gql
 
 from app.appgraph.util import get_request_role_userid, ValidationInterface, ValidationResponse
-from app import validators, const
-from bolt_api.upstream.devclient import devclient
+from app import validators
+from app.hasura_client import hasura_client
 
 
 class ProjectParameterInterface(graphene.InputObjectType):
@@ -45,7 +43,7 @@ class Validate(graphene.Mutation):
     @staticmethod
     def validate(info, name, description, image_url, contact):
         role, user_id = get_request_role_userid(info)
-        gclient = devclient(current_app.config)
+        gclient = hasura_client(current_app.config)
 
         validators.validate_text(name)
 
@@ -86,7 +84,7 @@ class Create(Validate):
     Output = ProjectInterface
 
     def mutate(self, info, name, description, image_url, contact):
-        gclient = devclient(current_app.config)
+        gclient = hasura_client(current_app.config)
 
         query_params = Validate.validate(info, name, description, image_url, contact)
 

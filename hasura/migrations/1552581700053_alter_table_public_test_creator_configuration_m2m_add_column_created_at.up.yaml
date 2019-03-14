@@ -1,0 +1,4 @@
+- args:
+    sql: ALTER TABLE "public"."test_creator_configuration_m2m" ADD COLUMN "created_at"
+      timestamptz NULL DEFAULT now()
+  type: run_sql

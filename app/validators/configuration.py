@@ -1,28 +1,44 @@
 from flask import current_app
 from gql import gql
 
+from app import const
+from app.validators import repository, validate_test_creator
 from app.validators.validators import VALIDATORS
-from bolt_api.upstream.devclient import devclient
+from app.hasura_client import hasura_client
 
 
 def validate_test_configuration_by_id(test_conf_id):
-    conf = devclient(current_app.config).execute(gql('''query ($conf_id:uuid!) {
+    conf = hasura_client(current_app.config).execute(gql('''query ($conf_id:uuid!) {
         parameter {
             id
             default_value
             param_name
             name
         }
+        
         configuration_by_pk (id:$conf_id) {
             id
             name
             code_source
+            
             repository {
                 url
             }
+            
             configurationParameters {
                 value
                 parameter_id
+            }
+                    
+            test_creator_configuration_m2m (order_by:{
+                created_at:desc_nulls_last
+            }, limit:1) {
+                testCreator {
+                    created_at
+                    data
+                    max_wait
+                    min_wait
+                }
             }
         }
     }'''), {'conf_id': test_conf_id})
@@ -39,6 +55,16 @@ def validate_test_configuration(conf: dict, defaultParams:list):
     ...    "repository": {
     ...      "url": "http://url.url/url"
     ...    },
+    ...    "test_creator_configuration_m2m": [
+    ...        {
+    ...          "testCreator": {
+    ...            "created_at": "2019-03-14T17:23:17.267973+00:00",
+    ...            "data": "{}",
+    ...            "max_wait": 200,
+    ...            "min_wait": 60
+    ...          }
+    ...        }
+    ...    ],
     ...    "configurationParameters": [
     ...      { "value": "30m", "parameter_id": "param1", },
     ... ]}, [
@@ -48,11 +74,23 @@ def validate_test_configuration(conf: dict, defaultParams:list):
     ...
     AssertionError: expected numeric value of seconds for duration, got 30m
     """
-    assert len(conf['repository']['url']), 'invalid repository address'
 
     assert len(conf['name']), 'configuration name is required'
 
     validate_test_params(conf['configurationParameters'], defaults=defaultParams)
+
+    if conf['code_source'] == const.CONF_SOURCE_REPO:
+        assert len(conf['repository']['url']), 'invalid repository address'
+        repository.validate_accessibility(current_app.config, conf['repository']['url'])
+
+    if conf['code_source'] == const.CONF_SOURCE_JSON:
+        assert len(conf['test_creator_configuration_m2m']) == 1, f'missing test_creator configuration'
+        test_creator = conf['test_creator_configuration_m2m'][0]['testCreator']
+        validate_test_creator(
+            json_data=test_creator['data'],
+            min_wait=test_creator['min_wait'],
+            max_wait=test_creator['max_wait'],
+        )
 
 
 def validate_test_params(params: list, defaults: list) -> dict:
@@ -78,7 +116,8 @@ def validate_test_params(params: list, defaults: list) -> dict:
 
     param_names_by_id = dict(((x['id'], x['param_name']) for x in defaults))
     for parameter_id, value in params_by_id.items():
-        param_name = param_names_by_id[parameter_id]
+        param_name = param_names_by_id.get(parameter_id, None)
+        assert param_name, f'invalid parameter id "{parameter_id}"'
         VALIDATORS[param_name](value)
 
     return params_by_id

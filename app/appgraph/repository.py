@@ -1,12 +1,10 @@
-import json
-
 import graphene
 from flask import current_app
 from gql import gql
 
 from app.appgraph.util import get_request_role_userid, ValidationInterface, ValidationResponse
 from app import validators, const
-from bolt_api.upstream.devclient import devclient
+from app.hasura_client import hasura_client
 
 
 class RepositoryParameterInterface(graphene.InputObjectType):
@@ -47,7 +45,7 @@ class Validate(graphene.Mutation):
     @staticmethod
     def validate(info, name, repository_url, project_id, type_id):
         role, user_id = get_request_role_userid(info)
-        gclient = devclient(current_app.config)
+        gclient = hasura_client(current_app.config)
 
         project_id = str(project_id)
         type_id = str(type_id)
@@ -87,7 +85,7 @@ class Validate(graphene.Mutation):
 
         assert query.get('configuration_type_by_pk'), f'type_id does not exist'
 
-        validators.validate_accessibility(repository_url, current_app.config)
+        validators.validate_accessibility(current_app.config, repository_url)
 
         return {
             'name': name,
@@ -108,7 +106,7 @@ class Create(Validate):
     Output = RepositoryInterface
 
     def mutate(self, info, name, repository_url, project_id, type_id):
-        gclient = devclient(current_app.config)
+        gclient = hasura_client(current_app.config)
 
         query_params = Validate.validate(info, name, repository_url, project_id, type_id)
 

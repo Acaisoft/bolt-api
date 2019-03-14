@@ -1,0 +1,6 @@
+- args:
+    relationship: testCreators
+    table:
+      name: configuration
+      schema: public
+  type: drop_relationship

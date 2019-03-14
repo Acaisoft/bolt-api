@@ -3,7 +3,7 @@ from gql import gql
 
 from app import const
 from app.deployer.utils import get_test_run_status
-from bolt_api.upstream.devclient import devclient
+from app.hasura_client import hasura_client
 
 bp = Blueprint('webhooks', __name__)
 
@@ -22,7 +22,7 @@ def execution_update():
 
     if new.get('status') == const.TESTRUN_FINISHED:
         # mark as performed successfully
-        resp = devclient(current_app.config).execute(gql('''mutation ($confId:uuid!) {
+        resp = hasura_client(current_app.config).execute(gql('''mutation ($confId:uuid!) {
             update_configuration(_set:{performed:true}, where:{id:{_eq:$confId}}) { affected_rows }
         }'''), {'confId': new.get('configuration_id')})
         assert resp['update_configuration'].get('affected_rows') is not None, f'unexpected error: {str(resp)}'

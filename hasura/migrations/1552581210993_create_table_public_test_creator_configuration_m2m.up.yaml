@@ -1,0 +1,9 @@
+- args:
+    sql: CREATE TABLE "public"."test_creator_configuration_m2m"("configuration_id"
+      uuid NOT NULL, "test_creator_id" uuid NOT NULL, PRIMARY KEY ("configuration_id","test_creator_id")
+      );
+  type: run_sql
+- args:
+    name: test_creator_configuration_m2m
+    schema: public
+  type: add_existing_table_or_view

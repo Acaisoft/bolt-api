@@ -2,14 +2,14 @@ from unittest import TestCase
 
 from gql import gql
 
-from bolt_api.upstream.devclient import devclient
+from app.hasura_client import hasura_client
 
 
 class TestAuth(TestCase):
 
     def setUp(self) -> None:
         super().setUp()
-        self.client = devclient({'test': '123'})
+        self.client = hasura_client({'test': '123'})
 
     def test_query(self):
         query = '''query ($email: String!) {

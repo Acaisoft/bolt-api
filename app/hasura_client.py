@@ -42,7 +42,7 @@ class VerboseHTTPTransport(RequestsHTTPTransport):
         )
 
 
-def devclient(config=None):
+def hasura_client(config=None):
     global _client
     if not _client:
         # fallback to environment variables if app config is not specified

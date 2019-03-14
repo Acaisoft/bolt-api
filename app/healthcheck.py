@@ -3,7 +3,7 @@ from healthcheck import HealthCheck, EnvironmentDump
 
 from app import deployer
 from app.cache import get_cache
-from bolt_api.upstream.devclient import devclient
+from app.hasura_client import hasura_client
 
 
 def register_app(app):
@@ -16,7 +16,7 @@ def register_app(app):
         return True, 'ok'
 
     def hasura_up():
-        client = devclient(app.config)
+        client = hasura_client(app.config)
         try:
             response = client.execute(gql('query { user { id } }'))
         except Exception as e:

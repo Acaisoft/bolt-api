@@ -51,7 +51,7 @@ def is_user_project_valid(user_id, project_config):
     raise AssertionError('user has no access to project')
 
 
-def validate_accessibility(repository_url, app_config):
+def validate_accessibility(app_config, repository_url):
     """
     Validate repo is accessible using the key provided by upstream bolt-deployer
     """

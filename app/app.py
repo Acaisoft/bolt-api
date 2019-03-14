@@ -1,12 +1,10 @@
-import logging
-
 from flask import Flask
 
 from app import healthcheck, graphql, deployer, cmd, webhooks
 from app.auth import auth
 from app.cache import get_cache
 from app.configure import configure
-from bolt_api.upstream.devclient import devclient
+from app.hasura_client import hasura_client
 
 
 def create_app(test_config=None):
@@ -34,9 +32,9 @@ def create_app(test_config=None):
 
     ## initialize cache and hasura clients
     get_cache(app.config)
-    devclient(app.config)
+    hasura_client(app.config)
 
     cmd.register_commands(app)
 
-    logging.info('application ready')
+    app.logger.info('application ready')
     return app
