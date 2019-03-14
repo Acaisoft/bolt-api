@@ -3,8 +3,7 @@ import os
 
 from flask import Flask
 import sentry_sdk
-from sentry_sdk.integrations.flask import \
-    FlaskIntegration
+from sentry_sdk.integrations.flask import FlaskIntegration
 
 
 def configure(app: Flask):

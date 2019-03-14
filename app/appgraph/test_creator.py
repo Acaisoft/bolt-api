@@ -7,11 +7,6 @@ from app.appgraph.util import get_request_role_userid, ValidationInterface, Vali
 from bolt_api.upstream.devclient import devclient
 
 
-class TestCreatorParameterInterface(graphene.InputObjectType):
-    value = graphene.String()
-    parameter_id = graphene.UUID(name='parameter_id')
-
-
 class TestCreatorInterface(graphene.Interface):
     id = graphene.UUID()
 
@@ -46,17 +41,18 @@ class Validate(graphene.Mutation):
         assert user_id, f'unauthenticated request'
 
         gclient = devclient(current_app.config)
-
         # validate configuration exists and user has access to it
-        creators = gclient.execute(gql('''query ($userId:uuid!, $confId:uuid!) {
-            configuration (where:{id:{_eq:$confId}, {project:{userProject:{user_id:{_eq:$userId}}}) {
-                name
+        creators = gclient.execute(gql('''
+            query ($userId: uuid!, $confId: uuid!) {
+                configuration(where: {id: {_eq: $confId}, project: {userProjects: {user_id: {_eq: $userId}}}}) {
+                    name
+                }
             }
-        }'''), {
+        '''), {
             'userId': user_id,
-            'confId': configuration_id,
+            'confId': str(configuration_id)
         })
-        assert len(creators.get('configuration', None)) == 0, f'configuration does not exist'
+        assert len(creators['configuration']) == 1, f'configuration does not exist'
 
         # validate configuration body
         validators.validate_test_creator(data, min_wait=min_wait, max_wait=max_wait)
@@ -69,8 +65,8 @@ class Validate(graphene.Mutation):
             'created_by_id': user_id,
         }
 
-    def mutate(self, info, name, description, image_url, contact):
-        Validate.validate(info, name, description, image_url, contact)
+    def mutate(self, info, data, configuration_id, max_wait, min_wait):
+        Validate.validate(info, data, configuration_id, max_wait, min_wait)
         return ValidationResponse(ok=True)
 
 
@@ -79,10 +75,10 @@ class Create(Validate):
 
     Output = TestCreatorInterface
 
-    def mutate(self, info, name, description, image_url, contact):
+    def mutate(self, info, data, configuration_id, max_wait, min_wait):
         gclient = devclient(current_app.config)
 
-        query_params = Validate.validate(info, name, description, image_url, contact)
+        query_params = Validate.validate(info, data, str(configuration_id), max_wait, min_wait)
 
         query = gql('''mutation ($data:[test_creator_insert_input!]!) {
             insert_test_creator(
