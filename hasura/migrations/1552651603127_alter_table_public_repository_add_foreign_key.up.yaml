@@ -1,0 +1,4 @@
+- args:
+    sql: ALTER TABLE "public"."repository" ADD FOREIGN KEY ("type_slug") REFERENCES
+      "public"."configuration_type" ("slug_name")
+  type: run_sql

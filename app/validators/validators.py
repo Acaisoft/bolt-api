@@ -1,23 +1,27 @@
 
 def validate_time(value: str):
+    value = value.strip()
     assert value, 'test duration parameter is required'
     assert value.isdigit(), f'expected numeric value of seconds for duration, got {value}'
     assert int(value) <= 1800, 'maximum testrun duration is 30 minutes or 1800 seconds'
 
 
 def validate_users(value: str):
+    value = value.strip()
     assert value, 'number of users is required'
     assert value.isdigit(), f'expected numeric value for number of users, got {value}'
     assert int(value) <= 5000, 'maximum simultaneous users limit is 5000'
 
 
 def validate_rampup(value: str):
+    value = value.strip()
     assert value, 'user rampup rate is required'
     assert value.isdigit(), f'expected numeric value for user rampup, got {value}'
     assert int(value) <= 1000, 'maximum users ramp up is 1000'
 
 
 def validate_url(value: str, required=True, key='hostname'):
+    value = value.strip()
     if required:
         assert value, f'{key} is required'
     if value:
@@ -26,6 +30,7 @@ def validate_url(value: str, required=True, key='hostname'):
 
 
 def validate_text(value: str, required=True, key='name'):
+    value = value.strip()
     if required:
         assert value, f'{key} is required'
     if value:

@@ -1,3 +1,5 @@
+import re
+
 import deployer_cli
 import requests
 
@@ -8,7 +10,7 @@ def validate_repository(user_id, repo_config):
     """
     >>> validate_repository('u1', {
     ...  "url": "http://url.url/url",
-    ...  "configurationType": { "slug_name": "extreme_load" },
+    ...  "configuration_type": { "slug_name": "extreme_load" },
     ...  "project": {
     ...    "is_deleted": False,
     ...    "userProjects": [
@@ -21,7 +23,7 @@ def validate_repository(user_id, repo_config):
     AssertionError: user has no access to project
     >>> validate_repository('u1', {
     ...  "url": "http://url.url/url",
-    ...  "configurationType": { "slug_name": "extreme_load" },
+    ...  "configuration_type": { "slug_name": "extreme_load" },
     ...  "project": {
     ...    "is_deleted": False,
     ...    "userProjects": [
@@ -35,7 +37,8 @@ def validate_repository(user_id, repo_config):
     ...
     AssertionError: invalid repository url (abc)
     """
-    assert len(repo_config['url']) > 5, f'invalid repository url ({repo_config["url"]})'
+    regex = '((git|ssh|http(s)?)|(git@[\w\.]+))(:(//)?)([\w\.@\:/\-~]+)(\.git)(/)?'
+    assert re.match(regex, repo_config['url']), f'invalid repository url ({repo_config["url"]})'
 
     if user_id:
         assert is_user_project_valid(user_id, repo_config['project'])

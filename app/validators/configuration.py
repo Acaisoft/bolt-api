@@ -25,7 +25,7 @@ def validate_test_configuration_by_id(test_conf_id):
                 url
             }
             
-            configurationParameters {
+            configuration_parameters {
                 value
                 parameter_id
             }
@@ -65,7 +65,7 @@ def validate_test_configuration(conf: dict, defaultParams:list):
     ...          }
     ...        }
     ...    ],
-    ...    "configurationParameters": [
+    ...    "configuration_parameters": [
     ...      { "value": "30m", "parameter_id": "param1", },
     ... ]}, [
     ...      {"id": "param1", "name": "time", "default_value": "360", "param_name": "-t"},
@@ -77,7 +77,7 @@ def validate_test_configuration(conf: dict, defaultParams:list):
 
     assert len(conf['name']), 'configuration name is required'
 
-    validate_test_params(conf['configurationParameters'], defaults=defaultParams)
+    validate_test_params(conf['configuration_parameters'], defaults=defaultParams)
 
     if conf['code_source'] == const.CONF_SOURCE_REPO:
         assert len(conf['repository']['url']), 'invalid repository address'

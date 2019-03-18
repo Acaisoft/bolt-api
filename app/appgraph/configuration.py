@@ -1,3 +1,5 @@
+import json
+
 import graphene
 from flask import current_app
 from gql import gql
@@ -21,23 +23,24 @@ class ConfigurationType(graphene.ObjectType):
         interfaces = (ConfigurationInterface,)
 
 
-class Validate(graphene.Mutation):
+class CreateValidate(graphene.Mutation):
     """Validates configuration for a testrun. Ensures repository is accessible and test parameters are sane."""
 
     class Arguments:
         name = graphene.String(
             required=True,
             description='Name, not unique.')
+        type_slug = graphene.String(
+            required=True,
+            description=f'Configuration type: "{const.TESTTYPE_LOAD}"')
         code_source = graphene.String(
             required=True,
             description=f'Test code source: "{const.CONF_SOURCE_JSON}" or "{const.CONF_SOURCE_REPO}"')
         repository_id = graphene.String(
-            required=True,
-            name='repository_id',
+            required=False,
             description='Repository to fetch test definition from.')
         project_id = graphene.UUID(
             required=True,
-            name='project_id',
             description='Project to create test in, user must have access to it.')
         configuration_parameters = graphene.List(
             ConfigurationParameterInterface,
@@ -46,28 +49,40 @@ class Validate(graphene.Mutation):
     Output = ValidationInterface
 
     @staticmethod
-    def validate(info, name, code_source, repository_id, project_id, configuration_parameters):
-        repository_id = str(repository_id)
+    def validate(info, name, type_slug, code_source, repository_id, project_id, configuration_parameters):
         project_id = str(project_id)
 
-        assert code_source in const.CONF_SOURCE_CHOICE, f'invalid choice of code_source ({code_source})'
+        assert code_source in const.CONF_SOURCE_CHOICE, f'invalid choice of code_source (valid choices: {const.CONF_SOURCE_CHOICE})'
+
+        assert type_slug in const.TESTTYPE_CHOICE, f'invalid choice of type_slug (valid choices: {const.TESTTYPE_CHOICE})'
 
         role, user_id = get_request_role_userid(info)
         assert user_id, f'unauthenticated request'
 
         gclient = hasura_client(current_app.config)
 
-        repo = gclient.execute(gql('''query ($confName:String!, $repoId:uuid!, $projId:uuid!, $userId:uuid!) {
-            repository_by_pk(id:$repoId) {
+        repo_query = {
+            'type_slug': type_slug,
+            'confName': name,
+            'projId': project_id,
+            'userId': user_id,
+            'repoId': repository_id or "",
+            'fetchRepo': bool(repository_id),
+        }
+
+        print(json.dumps(repo_query))
+
+        repo = gclient.execute(gql('''query ($confName:String, $repoId:uuid!, $fetchRepo:Boolean!, $projId:uuid!, $userId:uuid!, $type_slug:String!) {
+            repository_by_pk (id:$repoId) @include(if:$fetchRepo) {
                 url
-                configurationType { slug_name }
+                configuration_type { slug_name }
                 project {
                     is_deleted
                     userProjects { user_id }
                 }
             }
             
-            parameter {
+            parameter (where:{configurationTypes:{slug_name:{_eq:$type_slug}}}) {
                 id
                 default_value
                 param_name
@@ -78,19 +93,14 @@ class Validate(graphene.Mutation):
                 id
             }
             
-            project_by_pk(id:$projId) {
-                id
-            }
-            configuration (where:{name:{_eq:$confName}, project:{userProjects:{user_id:{_eq:$userId}}}}) {
+            project_by_pk (id:$projId) {
                 id
             }
             
-        }'''), {
-            'confName': name,
-            'repoId': repository_id,
-            'projId': project_id,
-            'userId': user_id,
-        })
+            configuration (where:{name:{_eq:$confName}, project:{userProjects:{user_id:{_eq:$userId}}}}) {
+                id
+            }
+        }'''), repo_query)
 
         if role != const.ROLE_ADMIN:
             assert repo.get('user_project', None), \
@@ -107,39 +117,41 @@ class Validate(graphene.Mutation):
             validators.validate_repository(user_id=user_id, repo_config=repo['repository_by_pk'])
             validators.validate_accessibility(current_app.config, repo['repository_by_pk']['url'])
 
-        return validators.validate_test_params(configuration_parameters, defaults=repo['parameter'])
+        patched_params = validators.validate_test_params(configuration_parameters, defaults=repo['parameter'])
 
-    def mutate(self, info, name, code_source, repository_id, project_id, configuration_parameters):
-        Validate.validate(info, name, repository_id, project_id, configuration_parameters)
+        query_data = {
+            'name': name,
+            'repository_id': str(repository_id),
+            'project_id': project_id,
+            'configuration_parameters': {'data': []},
+        }
+
+        if user_id:
+            query_data['created_by_id'] = user_id
+
+        for param_id, param_value in patched_params.items():
+            query_data['configuration_parameters']['data'].append({
+                'parameter_id': param_id,
+                'value': param_value,
+            })
+
+        return query_data
+
+    def mutate(self, info, name, type_slug, code_source, repository_id, project_id, configuration_parameters):
+        CreateValidate.validate(info, name, type_slug, repository_id, project_id, configuration_parameters)
         return ValidationResponse(ok=True)
 
 
-class Create(Validate):
+class Create(CreateValidate):
     """Validates and saves configuration for a testrun."""
 
     Output = ConfigurationInterface
 
-    def mutate(self, info, name, code_source, repository_id, project_id, configuration_parameters):
-        role, user_id = get_request_role_userid(info)
+    def mutate(self, info, name, type_slug, code_source, repository_id, project_id, configuration_parameters):
         gclient = hasura_client(current_app.config)
 
-        patched_params = Validate.validate(info, name, code_source, repository_id, project_id, configuration_parameters)
-
-        query_params = {
-            'name': name,
-            'repository_id': str(repository_id),
-            'project_id': str(project_id),
-            'configurationParameters': {'data': []},
-        }
-
-        if user_id:
-            query_params['created_by_id'] = user_id
-
-        for param_id, param_value in patched_params.items():
-            query_params['configurationParameters']['data'].append({
-                'parameter_id': param_id,
-                'value': param_value,
-            })
+        query_params = CreateValidate.validate(info, name, type_slug, code_source, repository_id, project_id,
+                                               configuration_parameters)
 
         query = gql('''mutation ($data:[configuration_insert_input!]!) {
             insert_configuration(
@@ -153,3 +165,178 @@ class Create(Validate):
         assert conf_response['insert_configuration'], f'cannot save configuration ({str(conf_response)})'
 
         return ConfigurationType(id=conf_response['insert_configuration']['returning'][0]['id'])
+
+
+class UpdateValidate(graphene.Mutation):
+    """Updates configuration for a testrun.
+    All fields are optional.
+    Only name can be updated if configuration testrun has been performed.
+    """
+
+    class Arguments():
+        id = graphene.UUID(
+            description='Configuration object id')
+        name = graphene.String(
+            required=False,
+            description='Name, not unique.')
+        type_slug = graphene.String(
+            required=False,
+            description=f'Configuration type: "{const.TESTTYPE_LOAD}"')
+        code_source = graphene.String(
+            required=False,
+            description=f'Test code source (choices: {const.CONF_SOURCE_CHOICE})')
+        repository_id = graphene.String(
+            required=False,
+            description='Repository to fetch test definition from.')
+        configuration_parameters = graphene.List(
+            ConfigurationParameterInterface,
+            required=False,
+            description='Default parameter types overrides.')
+
+    Output = ValidationInterface
+
+    @staticmethod
+    def validate(info, id, name=None, type_slug=None, code_source=None, repository_id=None, configuration_parameters=None):
+
+        gclient = hasura_client(current_app.config)
+
+        original = gclient.execute(gql('''query ($confId:uuid!) {
+            configuration_by_pk (id:$confId) {
+                performed
+                name
+                code_source
+                type_slug
+                project_id
+                repository_id
+            }
+        }'''), {'confId': str(id)})
+        assert original['configuration_by_pk'], f'configuration does not exist'
+
+        is_performed = original['configuration_by_pk']['performed']
+        if is_performed:
+            assert not any((type_slug, code_source, repository_id, configuration_parameters)), \
+                f'configuration {str(id)} has already been performed, only name is editable'
+
+        role, user_id = get_request_role_userid(info)
+        assert user_id, f'unauthenticated request'
+
+        if name:
+            validators.validate_text(name)
+
+        if type_slug:
+            assert type_slug in const.TESTTYPE_CHOICE, \
+                f'invalid choice of type_slug (valid choices: {const.TESTTYPE_CHOICE})'
+        else:
+            type_slug = original['configuration_by_pk']['type_slug']
+
+        if code_source:
+            assert code_source in const.CONF_SOURCE_CHOICE, \
+                f'invalid choice of code_source (valid choices: {const.CONF_SOURCE_CHOICE})'
+
+        repo_query = {
+            'type_slug': type_slug,
+            'confId': str(id),
+            'confName': name or '',
+            'userId': user_id,
+            'repoId': repository_id or '',
+            'fetchRepo': bool(repository_id),
+        }
+
+        print(json.dumps(repo_query))
+
+        repo = gclient.execute(gql('''query ($confId:uuid!, $confName:String, $repoId:uuid!, $fetchRepo:Boolean!, $userId:uuid!, $type_slug:String!) {
+            repository_by_pk (id:$repoId) @include(if:$fetchRepo) {
+                url
+                configuration_type { slug_name }
+                project {
+                    is_deleted
+                    userProjects { user_id }
+                }
+            }
+            
+            parameter (where:{configurationTypes:{slug_name:{_eq:$type_slug}}}) {
+                id
+                default_value
+                param_name
+                name
+            }
+                        
+            isNameUnique: configuration (where:{name:{_eq:$confName}, project:{userProjects:{user_id:{_eq:$userId}}}}) {
+                id
+            }
+            
+            hasUserAccess: configuration (where:{id:{_eq:$confId}, project:{userProjects:{user_id:{_eq:$userId}}}}) {
+                id
+            }
+        }'''), repo_query)
+
+        if role != const.ROLE_ADMIN:
+            assert repo.get('hasUserAccess', None), \
+                f'non-admin ({role}) user {user_id} does not have access to configuration {str(id)}'
+
+        query_data = {}
+
+        if name:
+            validators.validate_text(name)
+            assert len(repo.get('isNameUnique', [])) == 0, f'configuration named "{name}" already exists'
+            query_data['name'] = name
+
+        if type_slug:
+            query_data['type_slug'] = type_slug
+
+        if code_source:
+            query_data['code_source'] = code_source
+        else:
+            code_source = original['configuration_by_pk']['code_source']
+
+        if repository_id and code_source != const.CONF_SOURCE_REPO:
+            assert False, f'cannot set repository_id on a "{code_source}" type configuration'
+
+        if repository_id and code_source == const.CONF_SOURCE_REPO:
+            assert repo.get('repository_by_pk', None), f'repository does not exist'
+            validators.validate_repository(user_id=user_id, repo_config=repo['repository_by_pk'])
+            validators.validate_accessibility(current_app.config, repo['repository_by_pk']['url'])
+            query_data['repository_id'] = repository_id
+
+        if configuration_parameters:
+            patched_params = validators.validate_test_params(configuration_parameters, defaults=repo['parameter'])
+            if patched_params:
+                query_data['configuration_parameters'] = {'data': []}
+                for param_id, param_value in patched_params.items():
+                    query_data['configuration_parameters']['data'].append({
+                        'parameter_id': param_id,
+                        'value': param_value,
+                    })
+
+        return query_data
+
+    def mutate(self, info, id, name=None, type_slug=None, code_source=None, repository_id=None, configuration_parameters=None):
+        UpdateValidate.validate(info, id, name, type_slug, code_source, repository_id, configuration_parameters)
+        return ValidationResponse(ok=True)
+
+
+class Update(UpdateValidate):
+    """Validates and saves configuration for a testrun."""
+
+    Output = ConfigurationInterface
+
+    def mutate(self, info, id, name=None, type_slug=None, code_source=None, repository_id=None, configuration_parameters=None):
+        gclient = hasura_client(current_app.config)
+
+        query_params = UpdateValidate.validate(info, id, name, type_slug, code_source, repository_id,
+                                               configuration_parameters)
+
+        query = gql('''mutation ($id:uuid!, $data:configuration_set_input!) {
+            update_configuration(
+                where:{id:{_eq:$id}},
+                _set: $data
+            ) {
+                returning { id } 
+            }
+        }''')
+
+        print(json.dumps(query_params))
+        conf_response = gclient.execute(query, variable_values={'id': str(id), 'data': query_params})
+        assert conf_response['update_configuration'], f'cannot update configuration ({str(conf_response)})'
+
+        return ConfigurationType(id=conf_response['update_configuration']['returning'][0]['id'])
