@@ -2,7 +2,7 @@ import graphene
 from flask import current_app
 from gql import gql
 
-from app.appgraph.util import get_request_role_userid, ValidationInterface, ValidationResponse, ReturnResponse
+from app.appgraph.util import get_request_role_userid, ValidationInterface, ValidationResponse, OutputTypeFactory
 from app import validators, const
 from app.hasura_client import hasura_client
 
@@ -22,6 +22,11 @@ class ProjectInterface(graphene.Interface):
 class ProjectType(graphene.ObjectType):
     class Meta:
         interfaces = (ProjectInterface,)
+
+
+class ProjectResponse(graphene.ObjectType):
+    affected_rows = graphene.Int()
+    returning = graphene.List(ProjectInterface)
 
 
 class CreateValidate(graphene.Mutation):
@@ -84,7 +89,7 @@ class CreateValidate(graphene.Mutation):
 class Create(CreateValidate):
     """Validates and saves configuration for a testrun."""
 
-    Output = ProjectInterface
+    Output = OutputTypeFactory(ProjectType, 'Create')
 
     def mutate(self, info, name, description="", image_url=""):
         _, user_id = get_request_role_userid(info)
@@ -113,12 +118,9 @@ class Create(CreateValidate):
             'project_id': proj_id,
         }})
 
-        return ReturnResponse(returning=ProjectType(
-                id=proj_id,
-                name=conf_response['insert_project']['returning'][0]['name'],
-                description=conf_response['insert_project']['returning'][0]['description'],
-                image_url=conf_response['insert_project']['returning'][0]['image_url'],
-            )
+        return Create.Output(
+            affected_rows=1,
+            returning=[ProjectType(**conf_response['insert_project']['returning'][0])]
         )
 
 
@@ -191,7 +193,7 @@ class UpdateValidate(graphene.Mutation):
 class Update(UpdateValidate):
     """Validates and updates a project."""
 
-    Output = ProjectInterface
+    Output = OutputTypeFactory(ProjectType, 'Update')
 
     def mutate(self, info, id, name, description, image_url):
         gclient = hasura_client(current_app.config)
@@ -210,9 +212,7 @@ class Update(UpdateValidate):
         conf_response = gclient.execute(query, variable_values={'id': str(id), 'data': query_params})
         assert conf_response['update_project'], f'cannot update project ({str(conf_response)})'
 
-        return ProjectType(
-            id=conf_response['insert_project']['returning'][0]['id'],
-            name=conf_response['insert_project']['returning'][0]['name'],
-            description=conf_response['insert_project']['returning'][0]['description'],
-            image_url=conf_response['insert_project']['returning'][0]['image_url'],
+        return Create.Output(
+            affected_rows=1,
+            returning=[ProjectType(**conf_response['update_project']['returning'][0])]
         )

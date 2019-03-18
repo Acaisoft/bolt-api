@@ -12,4 +12,4 @@ REDIS_PASS = None
 
 SECRETS_VERSION = '01beta'
 
-SENTRY_DSN = 'https://4c646c92944b44fe8f062e2a8cd0bce2:19dff88f1e5e4d84acc94eb0278f8ac5@sentry.tools.acaisoft.io/4'
+# SENTRY_DSN = 'https://4c646c92944b44fe8f062e2a8cd0bce2:19dff88f1e5e4d84acc94eb0278f8ac5@sentry.tools.acaisoft.io/4'

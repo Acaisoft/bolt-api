@@ -43,7 +43,6 @@ AppSchema = graphene.Schema(
         testrun.TestrunStartObject,
         testrun.StatusResponse,
         util.ValidationResponse,
-        util.ReturnResponse,
     ],
     auto_camelcase=False,
 )

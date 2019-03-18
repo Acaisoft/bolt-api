@@ -1,9 +1,24 @@
 Changelog
 =========
 
-
 (unreleased)
 ------------
+
+Changes
+~~~~~~~
+- Rename configurationParams relation to configuration_params. [Piotr
+  Mońko]
+
+Other
+~~~~~
+- Add testrun_project_create and testrun_project_create_validate. [Piotr
+  Mońko]
+- Change: rename configurationParams relation on configuration to
+  configuration_params. [Piotr Mońko]
+
+
+0.1.0 (2019-03-18)
+-------------------
 - Update readme. [Piotr Mońko]
 - Merge branch 'master' of bitbucket.org:acaisoft/bolt-api. [Piotr
   Mońko]

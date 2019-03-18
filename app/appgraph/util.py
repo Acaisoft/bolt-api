@@ -1,5 +1,14 @@
+from typing import Type
+
 import graphene
 from graphql.language.ast import FragmentSpread
+
+
+def OutputTypeFactory(cls:Type[graphene.ObjectType], postfix=""):
+    return type(cls.__name__ + postfix + 'ReturnType', (cls,), {
+        'affected_rows': graphene.Int(),
+        'returning': graphene.List(cls),
+    })
 
 
 class ValidationInterface(graphene.Interface):
@@ -9,16 +18,6 @@ class ValidationInterface(graphene.Interface):
 class ValidationResponse(graphene.ObjectType):
     class Meta:
         interfaces = (ValidationInterface,)
-
-
-class ReturnInterface(graphene.Interface):
-    affected_rows = graphene.Int()
-    returning = graphene.ObjectType()
-
-
-class ReturnResponse(graphene.ObjectType):
-    class Meta:
-        interfaces = (ReturnInterface,)
 
 
 def get_selections(info):
