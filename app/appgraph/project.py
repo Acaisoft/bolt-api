@@ -2,7 +2,7 @@ import graphene
 from flask import current_app
 from gql import gql
 
-from app.appgraph.util import get_request_role_userid, ValidationInterface, ValidationResponse
+from app.appgraph.util import get_request_role_userid, ValidationInterface, ValidationResponse, ReturnResponse
 from app import validators, const
 from app.hasura_client import hasura_client
 
@@ -14,6 +14,9 @@ class ProjectParameterInterface(graphene.InputObjectType):
 
 class ProjectInterface(graphene.Interface):
     id = graphene.UUID()
+    name = graphene.String()
+    description = graphene.String()
+    image_url = graphene.String()
 
 
 class ProjectType(graphene.ObjectType):
@@ -63,7 +66,8 @@ class CreateValidate(graphene.Mutation):
         if image_url:
             validators.validate_url(image_url, key='image_url', required=False)
             file_extension = image_url.split('.')[-1]
-            assert file_extension.lower() in ('jpg', 'jpeg', 'png', 'gif'), f'unsupported image_url file type {file_extension}'
+            assert file_extension.lower() in (
+                'jpg', 'jpeg', 'png', 'gif'), f'unsupported image_url file type {file_extension}'
 
         return {
             'name': name,
@@ -93,10 +97,10 @@ class Create(CreateValidate):
             insert_project(
                 objects: $data
             ) {
-                returning { id } 
+                returning { id name description image_url } 
             }
         }''')
-        
+
         conf_response = gclient.execute(query, variable_values={'data': query_params})
         assert conf_response['insert_project'], f'cannot save project ({str(conf_response)})'
 
@@ -109,7 +113,13 @@ class Create(CreateValidate):
             'project_id': proj_id,
         }})
 
-        return ProjectType(id=proj_id)
+        return ReturnResponse(returning=ProjectType(
+                id=proj_id,
+                name=conf_response['insert_project']['returning'][0]['name'],
+                description=conf_response['insert_project']['returning'][0]['description'],
+                image_url=conf_response['insert_project']['returning'][0]['image_url'],
+            )
+        )
 
 
 class UpdateValidate(graphene.Mutation):
@@ -167,7 +177,8 @@ class UpdateValidate(graphene.Mutation):
         if image_url:
             validators.validate_url(image_url, key='image_url', required=False)
             file_extension = image_url.split('.')[-1]
-            assert file_extension.lower() in ('jpg', 'jpeg', 'png', 'gif'), f'unsupported image_url file type {file_extension}'
+            assert file_extension.lower() in (
+                'jpg', 'jpeg', 'png', 'gif'), f'unsupported image_url file type {file_extension}'
             query_params['image_url'] = image_url.strip()
 
         return query_params
@@ -192,11 +203,16 @@ class Update(UpdateValidate):
                 where:{id:{_eq:$id}},
                 _set: $data
             ) {
-                returning { id } 
+                returning { id name description image_url } 
             }
         }''')
 
         conf_response = gclient.execute(query, variable_values={'id': str(id), 'data': query_params})
         assert conf_response['update_project'], f'cannot update project ({str(conf_response)})'
 
-        return ProjectType(id=conf_response['update_project']['returning'][0]['id'])
+        return ProjectType(
+            id=conf_response['insert_project']['returning'][0]['id'],
+            name=conf_response['insert_project']['returning'][0]['name'],
+            description=conf_response['insert_project']['returning'][0]['description'],
+            image_url=conf_response['insert_project']['returning'][0]['image_url'],
+        )

@@ -11,6 +11,16 @@ class ValidationResponse(graphene.ObjectType):
         interfaces = (ValidationInterface,)
 
 
+class ReturnInterface(graphene.Interface):
+    affected_rows = graphene.Int()
+    returning = graphene.ObjectType()
+
+
+class ReturnResponse(graphene.ObjectType):
+    class Meta:
+        interfaces = (ReturnInterface,)
+
+
 def get_selections(info):
     fragments = info.fragments
 
