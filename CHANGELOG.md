@@ -1,20 +1,19 @@
 Changelog
 =========
 
-(unreleased)
-------------
+## (unreleased)
 
-Changes
-~~~~~~~
-- Rename configurationParams relation to configuration_params. [Piotr
-  Mońko]
+### Changes
 
-Other
-~~~~~
-- Add testrun_project_create and testrun_project_create_validate. [Piotr
-  Mońko]
-- Change: rename configurationParams relation on configuration to
-  configuration_params. [Piotr Mońko]
+* Wrap project_create and configuration_create in ReturnTypes with .returning members. [Piotr Mońko]
+
+* Rename configurationParams relation to configuration_params. [Piotr Mońko]
+
+### Other
+
+* Add testrun_project_create and testrun_project_create_validate. [Piotr Mońko]
+
+* Change: rename configurationParams relation on configuration to configuration_params. [Piotr Mońko]
 
 
 0.1.0 (2019-03-18)
