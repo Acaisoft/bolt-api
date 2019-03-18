@@ -43,7 +43,6 @@ AppSchema = graphene.Schema(
     mutation=TestrunMutations,
     types=[
         configuration.ConfigurationType,
-        project.ProjectType,
         repository.RepositoryType,
         test_creator.TestCreatorType,
         oauth.Oauth,

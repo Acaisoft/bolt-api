@@ -1,9 +1,11 @@
+import json
+
 import graphene
 from flask import current_app
 from gql import gql
 
 from app.appgraph.util import get_request_role_userid, ValidationInterface, ValidationResponse, OutputTypeFactory, \
-    OutputValueFactory
+    OutputValueFromFactory, OutputInterfaceFactory
 from app import validators, const
 from app.hasura_client import hasura_client
 
@@ -18,11 +20,6 @@ class ProjectInterface(graphene.Interface):
     name = graphene.String()
     description = graphene.String()
     image_url = graphene.String()
-
-
-class ProjectType(graphene.ObjectType):
-    class Meta:
-        interfaces = (ProjectInterface,)
 
 
 class ProjectResponse(graphene.ObjectType):
@@ -90,7 +87,7 @@ class CreateValidate(graphene.Mutation):
 class Create(CreateValidate):
     """Validates and saves configuration for a testrun."""
 
-    Output = OutputTypeFactory(ProjectType, 'Create')
+    Output = OutputInterfaceFactory(ProjectInterface, 'Create')
 
     def mutate(self, info, name, description="", image_url=""):
         _, user_id = get_request_role_userid(info)
@@ -119,7 +116,7 @@ class Create(CreateValidate):
             'project_id': proj_id,
         }})
 
-        return OutputValueFactory(Create, conf_response['insert_project'])
+        return OutputValueFromFactory(Create, conf_response['insert_project'])
 
 
 class UpdateValidate(graphene.Mutation):
@@ -141,7 +138,7 @@ class UpdateValidate(graphene.Mutation):
     Output = ValidationInterface
 
     @staticmethod
-    def validate(info, id, name=None, description=None, image_url=None, contact=None):
+    def validate(info, id, name=None, description=None, image_url=None):
         role, user_id = get_request_role_userid(info)
         assert user_id, f'unauthenticated request'
         assert role in (const.ROLE_ADMIN, const.ROLE_MANAGER), f'user with role {role} cannot update projects'
@@ -151,7 +148,7 @@ class UpdateValidate(graphene.Mutation):
         validators.validate_text(name)
 
         projects = gclient.execute(gql('''query ($projId:uuid!, $userId:uuid!, $name:String!) {
-            original: project_by_pk(id:$projId)
+            original: project_by_pk(id:$projId) { id }
             
             uniqueName: project (where:{name:{_eq:$name}, userProjects:{user_id:{_eq:$userId}}}) {
                 name
@@ -191,14 +188,14 @@ class UpdateValidate(graphene.Mutation):
 class Update(UpdateValidate):
     """Validates and updates a project."""
 
-    Output = OutputTypeFactory(ProjectType, 'Update')
+    Output = OutputInterfaceFactory(ProjectInterface, 'Update')
 
-    def mutate(self, info, id, name, description, image_url):
+    def mutate(self, info, id, name=None, description=None, image_url=None):
         gclient = hasura_client(current_app.config)
 
         query_params = UpdateValidate.validate(info, id, name, description, image_url)
 
-        query = gql('''mutation ($id:uuid!, $data:[project_set_input!]!) {
+        query = gql('''mutation ($id:uuid!, $data:project_set_input!) {
             update_project(
                 where:{id:{_eq:$id}},
                 _set: $data
@@ -210,7 +207,7 @@ class Update(UpdateValidate):
         conf_response = gclient.execute(query, variable_values={'id': str(id), 'data': query_params})
         assert conf_response['update_project'], f'cannot update project ({str(conf_response)})'
 
-        return OutputValueFactory(Update, conf_response['update_project'])
+        return OutputValueFromFactory(Update, conf_response['update_project'])
 
 
 class UploadUrlReturnType(graphene.ObjectType):
@@ -257,7 +254,7 @@ class ImageUploadUrl(graphene.Mutation):
 
         # TODO: get the urls
 
-        return OutputValueFactory(ImageUploadUrl, {'returning': [{
+        return OutputValueFromFactory(ImageUploadUrl, {'returning': [{
             'id': id,
             'upload_url': 'https://duckduckgo.com/i/16664acd.png',
             'download_url': 'https://duckduckgo.com/i/bdff2324.png',

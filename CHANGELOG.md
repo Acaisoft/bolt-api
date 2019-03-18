@@ -13,6 +13,12 @@ Changelog
 
 ### Other
 
+* Merge branch 'master' of bitbucket.org:acaisoft/bolt-api. [Piotr Mońko]
+
+* Add testrun_project_image_upload stub method placeholder. [Piotr Mońko]
+
+* Update changelog. [Piotr Mońko]
+
 * Add testrun_project_create and testrun_project_create_validate. [Piotr Mońko]
 
 * Change: rename configurationParams relation on configuration to configuration_params. [Piotr Mońko]

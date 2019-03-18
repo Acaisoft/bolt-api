@@ -5,13 +5,24 @@ from graphql.language.ast import FragmentSpread
 
 
 def OutputTypeFactory(cls:Type[graphene.ObjectType], postfix=""):
-    return type(cls.__name__ + postfix + 'ReturnType', (cls,), {
+    return type(cls.__name__ + postfix + 'ReturnType', (graphene.ObjectType,), {
         'affected_rows': graphene.Int(),
         'returning': graphene.List(cls),
     })
 
 
-def OutputValueFactory(cls, returning_response):
+def OutputInterfaceFactory(cls:Type[graphene.Interface], postfix=""):
+    metaclass = type(cls.__name__ + postfix + 'Metaclass', (object,), {'interfaces': (cls, )})
+    return_type = type(cls.__name__ + postfix + 'WrappedReturnType', (graphene.ObjectType,), {
+        'Meta': metaclass,
+    })
+    return type(cls.__name__ + postfix + 'WrappingReturnType', (graphene.ObjectType,), {
+        'affected_rows': graphene.Int(),
+        'returning': graphene.List(return_type),
+    })
+
+
+def OutputValueFromFactory(cls, returning_response):
     output = [cls.Output.returning._of_type(**item) for item in returning_response['returning']]
     return cls.Output(
         affected_rows=len(output),

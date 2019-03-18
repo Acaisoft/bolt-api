@@ -5,7 +5,7 @@ from flask import current_app
 from gql import gql
 
 from app.appgraph.util import get_request_role_userid, ValidationInterface, ValidationResponse, OutputTypeFactory, \
-    OutputValueFactory
+    OutputValueFromFactory
 from app import validators, const
 from app.hasura_client import hasura_client
 
@@ -191,7 +191,7 @@ class Create(CreateValidate):
         conf_response = gclient.execute(query, variable_values={'data': query_params})
         assert conf_response['insert_configuration'], f'cannot save configuration ({str(conf_response)})'
 
-        return OutputValueFactory(Create, conf_response['insert_configuration'])
+        return OutputValueFromFactory(Create, conf_response['insert_configuration'])
 
 
 class UpdateValidate(graphene.Mutation):
@@ -364,4 +364,4 @@ class Update(UpdateValidate):
         conf_response = gclient.execute(query, variable_values={'id': str(id), 'data': query_params})
         assert conf_response['update_configuration'], f'cannot update configuration ({str(conf_response)})'
 
-        return OutputValueFactory(Update, conf_response['update_configuration'])
+        return OutputValueFromFactory(Update, conf_response['update_configuration'])
