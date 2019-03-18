@@ -5,6 +5,8 @@ Changelog
 
 ### Changes
 
+* Add testrun_project_image_upload stub method placeholder. [Piotr Mońko]
+
 * Wrap project_create and configuration_create in ReturnTypes with .returning members. [Piotr Mońko]
 
 * Rename configurationParams relation to configuration_params. [Piotr Mońko]
@@ -16,7 +18,7 @@ Changelog
 * Change: rename configurationParams relation on configuration to configuration_params. [Piotr Mońko]
 
 
-0.1.0 (2019-03-18)
+0.1.0 (2019-03-15)
 -------------------
 - Update readme. [Piotr Mońko]
 - Merge branch 'master' of bitbucket.org:acaisoft/bolt-api. [Piotr
