@@ -1,0 +1,29 @@
+- args:
+    role: manager
+    table:
+      name: project
+      schema: public
+  type: drop_update_permission
+- args:
+    permission:
+      columns:
+      - contact
+      - description
+      - image_url
+      - name
+      filter:
+        _and:
+        - userProjects:
+            user_id:
+              _eq: X-Hasura-User-Id
+        - is_deleted:
+            _eq: false
+      localSet:
+      - key: ""
+        value: ""
+      set: {}
+    role: manager
+    table:
+      name: project
+      schema: public
+  type: create_update_permission
