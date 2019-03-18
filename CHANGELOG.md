@@ -1,6 +1,17 @@
 Changelog
 =========
 
+## (unreleased)
+
+### Changes
+
+* Refactor hasura connection names. [Piotr Mońko]
+
+### Other
+
+* Update changelog. [Piotr Mońko]
+
+
 ## 0.1.2 (2019-03-18)
 
 ### Changes

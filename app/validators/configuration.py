@@ -33,7 +33,7 @@ def validate_test_configuration_by_id(test_conf_id):
             test_creator_configuration_m2m (order_by:{
                 created_at:desc_nulls_last
             }, limit:1) {
-                testCreator {
+                test_creator {
                     created_at
                     data
                     max_wait
@@ -57,7 +57,7 @@ def validate_test_configuration(conf: dict, defaultParams:list):
     ...    },
     ...    "test_creator_configuration_m2m": [
     ...        {
-    ...          "testCreator": {
+    ...          "test_creator": {
     ...            "created_at": "2019-03-14T17:23:17.267973+00:00",
     ...            "data": "{}",
     ...            "max_wait": 200,
@@ -85,7 +85,7 @@ def validate_test_configuration(conf: dict, defaultParams:list):
 
     if conf['code_source'] == const.CONF_SOURCE_JSON:
         assert len(conf['test_creator_configuration_m2m']) == 1, f'missing test_creator configuration'
-        test_creator = conf['test_creator_configuration_m2m'][0]['testCreator']
+        test_creator = conf['test_creator_configuration_m2m'][0]['test_creator']
         validate_test_creator(
             json_data=test_creator['data'],
             min_wait=test_creator['min_wait'],

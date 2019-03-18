@@ -106,7 +106,7 @@ class CreateValidate(graphene.Mutation):
                 }
             }
             
-            parameter (where:{configurationTypes:{slug_name:{_eq:$type_slug}}}) {
+            parameter (where:{configuration_type:{slug_name:{_eq:$type_slug}}}) {
                 id
                 default_value
                 param_name
@@ -280,7 +280,7 @@ class UpdateValidate(graphene.Mutation):
                 }
             }
             
-            parameter (where:{configurationTypes:{slug_name:{_eq:$type_slug}}}) {
+            parameter (where:{configuration_type:{slug_name:{_eq:$type_slug}}}) {
                 id
                 default_value
                 param_name

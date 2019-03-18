@@ -56,7 +56,7 @@ class TestrunStart(graphene.Mutation):
                     test_creator_configuration_m2m (order_by:{
                         created_at:desc_nulls_last
                     }, limit:1) {
-                        testCreator {
+                        test_creator {
                             created_at
                             data
                             max_wait
@@ -81,7 +81,7 @@ class TestrunStart(graphene.Mutation):
                     test_creator_configuration_m2m (order_by:{
                         created_at:desc_nulls_last
                     }, limit:1) {
-                        testCreator {
+                        test_creator {
                             created_at
                             data
                             max_wait

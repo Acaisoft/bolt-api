@@ -1,0 +1,12 @@
+- args:
+    name: resultDistributions
+    table:
+      name: execution
+      schema: public
+    using:
+      foreign_key_constraint_on:
+        column: execution_id
+        table:
+          name: result_distribution
+          schema: public
+  type: create_array_relationship

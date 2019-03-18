@@ -22,11 +22,6 @@ class ProjectInterface(graphene.Interface):
     image_url = graphene.String()
 
 
-class ProjectResponse(graphene.ObjectType):
-    affected_rows = graphene.Int()
-    returning = graphene.List(ProjectInterface)
-
-
 class CreateValidate(graphene.Mutation):
     """Validates configuration for a testrun. Ensures repository is accessible and test parameters are sane."""
 
