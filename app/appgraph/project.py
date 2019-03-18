@@ -2,7 +2,8 @@ import graphene
 from flask import current_app
 from gql import gql
 
-from app.appgraph.util import get_request_role_userid, ValidationInterface, ValidationResponse, OutputTypeFactory
+from app.appgraph.util import get_request_role_userid, ValidationInterface, ValidationResponse, OutputTypeFactory, \
+    OutputValueFactory
 from app import validators, const
 from app.hasura_client import hasura_client
 
@@ -118,10 +119,7 @@ class Create(CreateValidate):
             'project_id': proj_id,
         }})
 
-        return Create.Output(
-            affected_rows=1,
-            returning=[ProjectType(**conf_response['insert_project']['returning'][0])]
-        )
+        return OutputValueFactory(Create, conf_response['insert_project'])
 
 
 class UpdateValidate(graphene.Mutation):
@@ -129,7 +127,7 @@ class UpdateValidate(graphene.Mutation):
 
     class Arguments:
         id = graphene.UUID(
-            description='Configuration object id')
+            description='Project id')
         name = graphene.String(
             required=False,
             description='Name, unique for user.')
@@ -146,7 +144,7 @@ class UpdateValidate(graphene.Mutation):
     def validate(info, id, name=None, description=None, image_url=None, contact=None):
         role, user_id = get_request_role_userid(info)
         assert user_id, f'unauthenticated request'
-        assert role == const.ROLE_ADMIN, f'user with role {role} cannot create projects'
+        assert role in (const.ROLE_ADMIN, const.ROLE_MANAGER), f'user with role {role} cannot update projects'
 
         gclient = hasura_client(current_app.config)
 
@@ -212,7 +210,55 @@ class Update(UpdateValidate):
         conf_response = gclient.execute(query, variable_values={'id': str(id), 'data': query_params})
         assert conf_response['update_project'], f'cannot update project ({str(conf_response)})'
 
-        return Create.Output(
-            affected_rows=1,
-            returning=[ProjectType(**conf_response['update_project']['returning'][0])]
-        )
+        return OutputValueFactory(Update, conf_response['update_project'])
+
+
+class UploadUrlReturnType(graphene.ObjectType):
+    id = graphene.UUID()
+    upload_url = graphene.String()
+    download_url = graphene.String()
+
+
+class ImageUploadUrl(graphene.Mutation):
+    """Generate project image upload url."""
+
+    class Arguments:
+        id = graphene.UUID(
+            description='Project id')
+        content_type = graphene.String(
+            description='File mime type')
+        content_md5 = graphene.String(
+            description='File content MD5 hash')
+
+    Output = OutputTypeFactory(UploadUrlReturnType)
+
+    @staticmethod
+    def validate(info, id, content_type, content_md5):
+        role, user_id = get_request_role_userid(info)
+        assert user_id, f'unauthenticated request'
+        assert role in (const.ROLE_ADMIN, const.ROLE_MANAGER), f'user with role {role} cannot update projects'
+
+        gclient = hasura_client(current_app.config)
+
+        projects = gclient.execute(gql('''query ($projId:uuid!, $userId:uuid!) {
+            project (where:{id:{_eq:$projId}, userProjects:{user_id:{_eq:$userId}}}) { id }
+        }'''), {
+            'projId': str(id),
+            'userId': user_id,
+        })
+        assert len(projects.get('project', [])), f'project {str(id)} does not exist or user is not authorized'
+
+        assert content_type in const.IMAGE_CONTENT_TYPES, f'illegal content_type "{content_type}", valid choices are: {const.IMAGE_CONTENT_TYPES}'
+
+        assert content_md5 and len(content_md5) > 10, f'invalid content_md5'
+
+    def mutate(self, info, id, content_type, content_md5):
+        ImageUploadUrl.validate(info, id, content_type, content_md5)
+
+        # TODO: get the urls
+
+        return OutputValueFactory(ImageUploadUrl, {'returning': [{
+            'id': id,
+            'upload_url': 'https://duckduckgo.com/i/16664acd.png',
+            'download_url': 'https://duckduckgo.com/i/bdff2324.png',
+        }]})

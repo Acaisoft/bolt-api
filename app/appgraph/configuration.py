@@ -4,7 +4,8 @@ import graphene
 from flask import current_app
 from gql import gql
 
-from app.appgraph.util import get_request_role_userid, ValidationInterface, ValidationResponse, OutputTypeFactory
+from app.appgraph.util import get_request_role_userid, ValidationInterface, ValidationResponse, OutputTypeFactory, \
+    OutputValueFactory
 from app import validators, const
 from app.hasura_client import hasura_client
 
@@ -94,8 +95,6 @@ class CreateValidate(graphene.Mutation):
             'repoId': repository_id or "",
             'fetchRepo': bool(repository_id),
         }
-
-        print(json.dumps(repo_query))
 
         repo = gclient.execute(gql('''query ($confName:String, $repoId:uuid!, $fetchRepo:Boolean!, $projId:uuid!, $userId:uuid!, $type_slug:String!) {
             repository_by_pk (id:$repoId) @include(if:$fetchRepo) {
@@ -189,14 +188,10 @@ class Create(CreateValidate):
             }
         }''')
 
-        print(json.dumps(query_params))
         conf_response = gclient.execute(query, variable_values={'data': query_params})
         assert conf_response['insert_configuration'], f'cannot save configuration ({str(conf_response)})'
 
-        return Create.Output(
-            affected_rows=1,
-            returning=[ConfigurationType(**conf_response['insert_configuration']['returning'][0])]
-        )
+        return OutputValueFactory(Create, conf_response['insert_configuration'])
 
 
 class UpdateValidate(graphene.Mutation):
@@ -274,7 +269,6 @@ class UpdateValidate(graphene.Mutation):
             'fetchRepo': bool(repository_id),
         }
 
-        print(json.dumps(repo_query))
 
         repo = gclient.execute(gql('''query ($confId:uuid!, $confName:String, $repoId:uuid!, $fetchRepo:Boolean!, $userId:uuid!, $type_slug:String!) {
             repository_by_pk (id:$repoId) @include(if:$fetchRepo) {
@@ -367,11 +361,7 @@ class Update(UpdateValidate):
             }
         }''')
 
-        print(json.dumps(query_params))
         conf_response = gclient.execute(query, variable_values={'id': str(id), 'data': query_params})
         assert conf_response['update_configuration'], f'cannot update configuration ({str(conf_response)})'
 
-        return Create.Output(
-            affected_rows=1,
-            returning=[ConfigurationType(**conf_response['update_configuration']['returning'][0])]
-        )
+        return OutputValueFactory(Update, conf_response['update_configuration'])
