@@ -1,9 +1,11 @@
 Changelog
 =========
 
-## (unreleased)
+## 0.1.2 (2019-03-18)
 
 ### Changes
+
+* Add common Interface for typed schema responses. [Piotr Mońko]
 
 * Add testrun_project_image_upload stub method placeholder. [Piotr Mońko]
 
