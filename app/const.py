@@ -20,3 +20,5 @@ TESTTYPE_CHOICE = (TESTTYPE_LOAD,)
 CONF_SOURCE_JSON = 'creator'
 CONF_SOURCE_REPO = 'repository'
 CONF_SOURCE_CHOICE = (CONF_SOURCE_JSON, CONF_SOURCE_REPO)
+
+IMAGE_CONTENT_TYPES = ('image/png', 'image/jpg', 'image/jpeg', 'image/gif')

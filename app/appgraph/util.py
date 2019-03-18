@@ -11,6 +11,14 @@ def OutputTypeFactory(cls:Type[graphene.ObjectType], postfix=""):
     })
 
 
+def OutputValueFactory(cls, returning_response):
+    output = [cls.Output.returning._of_type(**item) for item in returning_response['returning']]
+    return cls.Output(
+        affected_rows=len(output),
+        returning=output
+    )
+
+
 class ValidationInterface(graphene.Interface):
     ok = graphene.Boolean()
 
