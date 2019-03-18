@@ -1,10 +1,8 @@
 import unittest
 
-from unittest import mock
 from schematics import exceptions
 
 from app.models import Assert, Endpoint, TestConfiguration
-from app.exceptions import StatusCodeException, TimeException, BodyTextContainsException, BodyTextEqualException
 
 
 class TestAssertModel(unittest.TestCase):
@@ -30,62 +28,6 @@ class TestAssertModel(unittest.TestCase):
     def test_model_with_valid_data(self):
         assert_instance = Assert({'assert_type': 'response_code', 'value': '400', 'message': 'Error 400'})
         self.assertIsNone(assert_instance.validate())
-
-    def test_failure_with_response_code(self):
-        mocked_response = mock.MagicMock()
-        mocked_response.status_code = 200
-        assert_instance = Assert({'assert_type': 'response_code', 'value': '400', 'message': 'Wrong response code'})
-        validated_data = assert_instance.check_response_for_failure(mocked_response)
-        self.assertEqual(validated_data.__class__.__name__, StatusCodeException.__name__)
-        self.assertEqual(assert_instance.message, str(validated_data))
-
-    def test_pass_with_response_code(self):
-        mocked_response = mock.MagicMock()
-        mocked_response.status_code = 404
-        assert_instance = Assert({'assert_type': 'response_code', 'value': '404', 'message': 'Wrong response code'})
-        self.assertIsNone(assert_instance.check_response_for_failure(mocked_response))
-
-    def test_failure_with_response_time(self):
-        mocked_response = mock.MagicMock()
-        mocked_response.elapsed.total_seconds.return_value = 2.123456  # mcs
-        assert_instance = Assert({'assert_type': 'response_time', 'value': '2122', 'message': 'Wrong response time'})
-        validated_data = assert_instance.check_response_for_failure(mocked_response)
-        self.assertEqual(validated_data.__class__.__name__, TimeException.__name__)
-        self.assertEqual(assert_instance.message, str(validated_data))
-
-    def test_pass_with_response_time(self):
-        mocked_response = mock.MagicMock()
-        mocked_response.elapsed.total_seconds.return_value = 2.123456  # mcs
-        assert_instance = Assert({'assert_type': 'response_time', 'value': '2124', 'message': 'Wrong response code'})
-        self.assertIsNone(assert_instance.check_response_for_failure(mocked_response))
-
-    def test_failure_with_body_text_equal(self):
-        mocked_response = mock.MagicMock()
-        mocked_response.text = 'hi there'
-        assert_instance = Assert({'assert_type': 'body_text_equal', 'value': 'hello world', 'message': 'Wrong text'})
-        validated_data = assert_instance.check_response_for_failure(mocked_response)
-        self.assertEqual(validated_data.__class__.__name__, BodyTextEqualException.__name__)
-        self.assertEqual(assert_instance.message, str(validated_data))
-
-    def test_pass_with_body_text_equal(self):
-        mocked_response = mock.MagicMock()
-        mocked_response.text = 'hello world'
-        assert_instance = Assert({'assert_type': 'body_text_equal', 'value': 'hello world', 'message': 'Wrong text'})
-        self.assertIsNone(assert_instance.check_response_for_failure(mocked_response))
-
-    def test_failure_with_body_text_contains(self):
-        mocked_response = mock.MagicMock()
-        mocked_response.text = 'wow. hi man'
-        assert_instance = Assert({'assert_type': 'body_text_contains', 'value': 'hello', 'message': 'Wrong text'})
-        validated_data = assert_instance.check_response_for_failure(mocked_response)
-        self.assertEqual(validated_data.__class__.__name__, BodyTextContainsException.__name__)
-        self.assertEqual(assert_instance.message, str(validated_data))
-
-    def test_pass_with_body_text_contains(self):
-        mocked_response = mock.MagicMock()
-        mocked_response.text = 'Wow. Hi there. My name is locust.'
-        assert_instance = Assert({'assert_type': 'body_text_contains', 'value': 'Hi there', 'message': 'Wrong text'})
-        self.assertIsNone(assert_instance.check_response_for_failure(mocked_response))
 
 
 class TestEndpointModel(unittest.TestCase):
@@ -125,24 +67,6 @@ class TestEndpointModel(unittest.TestCase):
             context.exception.to_primitive(),
             {'method': ["Value must be one of ('get', 'post', 'put', 'patch', 'delete')."]}
         )
-
-    def test_model_kwargs(self):
-        endpoint = Endpoint({
-            'name': 'test', 'method': 'put', 'url': '/test',
-            'payload': {'username': 'user', 'password': '1234'},
-            'headers': {'auth': 'jwt'}
-        })
-        self.assertIsNone(endpoint.validate())
-        self.assertEqual(endpoint.kwargs, {
-            'name': 'test',
-            'data': {'username': 'user', 'password': '1234'},
-            'headers': {'auth': 'jwt'}
-        })
-
-    def test_model_empty_kwargs(self):
-        endpoint = Endpoint({'method': 'delete', 'url': '/test', 'task_value': 5})
-        self.assertIsNone(endpoint.validate())
-        self.assertEqual(endpoint.kwargs, {})
 
     def test_payload_field_with_valid_combined_data(self):
         endpoint = Endpoint({
@@ -504,108 +428,3 @@ class TestConfigurationModel(unittest.TestCase):
             }]
         })
 
-    def test_set_endpoint_headers_with_empty_global_headers(self):
-        test_configuration = TestConfiguration({'test_type': 'set'})
-        endpoints = [
-            {'name': '#1', 'url': '/url1', 'method': 'post', 'headers': {'key1': 'value1', 'key2': 'value2'}}
-        ]
-        test_configuration.set_endpoints(endpoints)
-        self.assertIsNone(test_configuration.validate())
-        self.assertEqual(test_configuration.to_primitive(), {
-            'test_type': 'set',
-            'global_headers': None,
-            'teardown_endpoints': None,
-            'setup_endpoints': None,
-            'endpoints': [{
-                'name': '#1',
-                'url': '/url1',
-                'method': 'post',
-                'task_value': 1,
-                'payload': None,
-                'headers': {
-                    'key1': 'value1',
-                    'key2': 'value2'
-                },
-                'asserts': None
-            }]
-        })
-
-    def test_set_empty_endpoint_headers_with_global_headers(self):
-        test_configuration = TestConfiguration({
-            'test_type': 'set',
-            'global_headers': {
-                'global_1': 'value_1',
-                'global_2': 'value_2'
-            }
-        })
-        endpoints = [{'name': '#1', 'url': '/url1', 'method': 'post'}]
-        test_configuration.set_endpoints(endpoints)
-        self.assertIsNone(test_configuration.validate())
-        self.assertEqual(test_configuration.to_primitive(), {
-            'test_type': 'set',
-            'global_headers': {
-                'global_1': 'value_1',
-                'global_2': 'value_2'
-            },
-            'teardown_endpoints': None,
-            'setup_endpoints': None,
-            'endpoints': [{
-                'name': '#1',
-                'url': '/url1',
-                'method': 'post',
-                'task_value': 1,
-                'payload': None,
-                'headers': {
-                    'global_1': 'value_1',
-                    'global_2': 'value_2'
-                },
-                'asserts': None
-            }]
-        })
-
-    def test_set_endpoint_headers_with_global_headers(self):
-        test_configuration = TestConfiguration({
-            'test_type': 'set',
-            'global_headers': {
-                'global_1': 'value_1',
-                'global_2': 'value_2',
-                'common': 'global value'
-            }
-        })
-        endpoints = [{
-            'name': '#1',
-            'url': '/url1',
-            'method': 'post',
-            'headers': {
-                'common': 'new value',
-                'endpoint_1': 'endpoint_1',
-                'endpoint_2': 'endpoint_2'
-            }
-        }]
-        test_configuration.set_endpoints(endpoints)
-        self.assertIsNone(test_configuration.validate())
-        self.assertEqual(test_configuration.to_primitive(), {
-            'test_type': 'set',
-            'teardown_endpoints': None,
-            'setup_endpoints': None,
-            'global_headers': {
-                'global_1': 'value_1',
-                'global_2': 'value_2',
-                'common': 'global value'
-            },
-            'endpoints': [{
-                'name': '#1',
-                'url': '/url1',
-                'method': 'post',
-                'task_value': 1,
-                'payload': None,
-                'headers': {
-                    'global_1': 'value_1',
-                    'global_2': 'value_2',
-                    'common': 'new value',
-                    'endpoint_1': 'endpoint_1',
-                    'endpoint_2': 'endpoint_2'
-                },
-                'asserts': None
-            }]
-        })

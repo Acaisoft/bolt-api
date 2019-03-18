@@ -19,7 +19,6 @@ COPY --from=builder /install /usr/local
 RUN mkdir /app
 COPY app /app/app
 COPY instance /app/instance
-COPY bolt_api /app/bolt_api
 COPY wsgi.py /app/wsgi.py
 COPY bolt-deployer/sdk /app/bolt-deployer/sdk
 RUN pip install /app/bolt-deployer/sdk

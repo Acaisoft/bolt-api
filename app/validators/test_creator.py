@@ -12,7 +12,7 @@ def validate_test_creator(json_data, min_wait, max_wait):
     try:
         data = json.loads(json_data)
     except json.decoder.JSONDecodeError:
-        assert None, f'Error during converting JSON data to python Dict'
+        assert None, 'Error during converting JSON data to python Dict'
     else:
         test_configuration = TestConfiguration({
             'test_type': data.get('test_type'), 'global_headers': data.get('global_headers')})

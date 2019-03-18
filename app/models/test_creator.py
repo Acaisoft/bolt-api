@@ -72,17 +72,6 @@ class Endpoint(models.Model):
     headers = types.DictType(types.StringType, required=False)
     asserts = types.ListType(types.PolyModelType(Assert), required=False)
 
-    @property
-    def kwargs(self):
-        kwargs = {}
-        if self.name:
-            kwargs.update({'name': self.name})
-        if self.payload:
-            kwargs.update({'data': self.payload})
-        if self.headers:
-            kwargs.update({'headers': self.headers})
-        return kwargs
-
 
 class TestConfiguration(models.Model):
     """
@@ -106,20 +95,10 @@ class TestConfiguration(models.Model):
     teardown_endpoints = types.ListType(types.PolyModelType(Endpoint), required=False)
     endpoints = types.ListType(types.PolyModelType(Endpoint), required=True)
 
-    def _get_combined_headers(self, endpoint_data):
-        """
-        Combined global_headers with headers for endpoint
-        """
-        global_headers = self.global_headers.copy() if self.global_headers is not None else {}
-        endpoint_headers = endpoint_data.pop('headers', {})
-        global_headers.update(endpoint_headers)
-        return global_headers or None
-
     def set_endpoints(self, endpoints):
         if isinstance(endpoints, list):
             list_of_endpoints = []
             for endpoint_data in endpoints:
-                endpoint_data['headers'] = self._get_combined_headers(endpoint_data)
                 list_of_endpoints.append(Endpoint(endpoint_data))
             self.endpoints = list_of_endpoints
 
