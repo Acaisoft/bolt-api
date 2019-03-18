@@ -17,8 +17,12 @@ class TestrunMutations(graphene.ObjectType):
     testrun_configuration_create_validate = to_field(configuration.CreateValidate)
     testrun_configuration_update = to_field(configuration.Update)
     testrun_configuration_update_validate = to_field(configuration.UpdateValidate)
+
     testrun_project_create = to_field(project.Create)
-    testrun_project_validate = to_field(project.Validate)
+    testrun_project_create_validate = to_field(project.CreateValidate)
+    testrun_project_update = to_field(project.Update)
+    testrun_project_update_validate = to_field(project.UpdateValidate)
+
     testrun_repository_create = to_field(repository.Create)
     testrun_repository_validate = to_field(repository.Validate)
     testrun_creator_create = to_field(test_creator.Create)

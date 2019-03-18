@@ -58,11 +58,15 @@ Where hasura methods are insufficient, bolt-api provides a superset of methods:
 ###### Mutations:
 
 * `testrun_project_create` - high-level interface to create and validate a project
-* `testrun_project_validate` - as above, validation only
+* `testrun_project_create_validate` - as above, validation only
 * `testrun_repository_create`
-* `testrun_repository_validate`
+* `testrun_repository_create_validate`
+* `testrun_repository_update`
+* `testrun_repository_update_validate`
 * `testrun_configuration_create`
-* `testrun_configuration_validate`
+* `testrun_configuration_create_validate`
+* `testrun_configuration_update`
+* `testrun_configuration_update_validate`
 * `testrun_start` - given a configuration id, start actual tests (pass result to `testrun_status`)
 
 ##### Authentication in development
