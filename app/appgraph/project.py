@@ -1,4 +1,5 @@
 import json
+from datetime import timedelta, datetime
 
 import graphene
 from flask import current_app
@@ -8,6 +9,9 @@ from app.appgraph.util import get_request_role_userid, ValidationInterface, Vali
     OutputValueFromFactory, OutputInterfaceFactory
 from app import validators, const
 from app.hasura_client import hasura_client
+
+from google.cloud import storage
+from google.cloud.storage._signing import generate_signed_url
 
 
 class ProjectParameterInterface(graphene.InputObjectType):
@@ -247,10 +251,19 @@ class ImageUploadUrl(graphene.Mutation):
     def mutate(self, info, id, content_type, content_md5):
         ImageUploadUrl.validate(info, id, content_type, content_md5)
 
-        # TODO: get the urls
+        project_logos_bucket = current_app.config.get('BUCKET_PROJECT_LOGOS', 'project_logos_bucket')
+
+        upload_url = generate_signed_url(
+            credentials=storage.Client()._credentials,
+            api_access_endpoint='https://storage.googleapis.com',  # change to domain configured to point to project_logos_bucket
+            resource=f'/{project_logos_bucket}/project_logos/{str(id)}',
+            expiration=datetime.now() + timedelta(minutes=15),
+            content_md5=content_md5,
+            content_type=content_type,
+        )
 
         return OutputValueFromFactory(ImageUploadUrl, {'returning': [{
             'id': id,
-            'upload_url': 'https://duckduckgo.com/i/16664acd.png',
-            'download_url': 'https://duckduckgo.com/i/bdff2324.png',
+            'upload_url': upload_url,
+            'download_url': upload_url.split('?')[0],
         }]})
