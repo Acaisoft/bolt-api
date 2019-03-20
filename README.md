@@ -108,6 +108,11 @@ Deployment requirements:
     * `HASURA_GQL` 
     full address of hasura, eg. http://localhost:8080/v1alpha1/graphql
     * `REDIS_HOST` and `REDIS_PORT` and `REDIS_DB`
+    * `BUCKET_PROJECT_LOGOS`
+    path to Google Cloud Storage bucket for uploads ment to be public
+    * `GOOGLE_APPLICATION_CREDENTIALS` 
+    path to google service account credentials json file, 
+    necessary for uploads 
 * app configuration in `instance/conf.py`:
     * `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` 
     from https://console.cloud.google.com/apis/credentials/oauthclient/

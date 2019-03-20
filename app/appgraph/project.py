@@ -251,7 +251,7 @@ class ImageUploadUrl(graphene.Mutation):
     def mutate(self, info, id, content_type, content_md5):
         ImageUploadUrl.validate(info, id, content_type, content_md5)
 
-        project_logos_bucket = current_app.config.get('BUCKET_PROJECT_LOGOS', 'project_logos_bucket')
+        project_logos_bucket = current_app.config.get('BUCKET_PUBLIC_UPLOADS', 'project_logos_bucket')
 
         upload_url = generate_signed_url(
             credentials=storage.Client()._credentials,

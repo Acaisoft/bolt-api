@@ -24,7 +24,7 @@ class RepositoryInterface(graphene.Interface):
         description='Repository address')
     project_id = graphene.UUID(
         description='Repository project')
-    type_slug = graphene.UUID(
+    type_slug = graphene.String(
         description=f'Configuration type: "{const.TESTTYPE_CHOICE}"')
 
 
@@ -41,7 +41,7 @@ class CreateValidate(graphene.Mutation):
         project_id = graphene.UUID(
             required=True,
             description='Repository project.')
-        type_slug = graphene.UUID(
+        type_slug = graphene.String(
             required=True,
             description=f'Configuration type: "{const.TESTTYPE_LOAD}"')
 
@@ -107,7 +107,7 @@ class CreateValidate(graphene.Mutation):
 class Create(CreateValidate):
     """Validates and creates a repository."""
 
-    Output = RepositoryInterface
+    Output = OutputInterfaceFactory(RepositoryInterface, 'Create')
 
     def mutate(self, info, name, repository_url, project_id, type_slug):
         gclient = hasura_client(current_app.config)
@@ -118,7 +118,7 @@ class Create(CreateValidate):
             insert_repository(
                 objects: $data
             ) {
-                returning { id } 
+                returning { id name repository_url:url project_id type_slug } 
             }
         }''')
 

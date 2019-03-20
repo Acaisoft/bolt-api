@@ -16,6 +16,6 @@ REDIS_HOST = 'redis'
 REDIS_PORT = 6379
 REDIS_DB = 0
 
-BUCKET_PROJECT_LOGOS = 'media.bolt.acaisoft.io'
+BUCKET_PUBLIC_UPLOADS = 'media.bolt.acaisoft.io'
 
 CONFIG_VERSION = '01betaConf'
