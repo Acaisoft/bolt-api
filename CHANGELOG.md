@@ -1,6 +1,21 @@
 Changelog
 =========
 
+## (unreleased)
+
+### Changes
+
+* Allow change to repository url if not yet performed. [Piotr Mońko]
+
+### Fix
+
+* Fix signed url upload method. [Piotr Mońko]
+
+### Other
+
+* Add create/_validate and update/_validate methods for repository. [Piotr Mońko]
+
+
 ## 0.1.3 (2019-03-20)
 
 ### Changes

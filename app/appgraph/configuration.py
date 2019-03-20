@@ -269,7 +269,6 @@ class UpdateValidate(graphene.Mutation):
             'fetchRepo': bool(repository_id),
         }
 
-
         repo = gclient.execute(gql('''query ($confId:uuid!, $confName:String, $repoId:uuid!, $fetchRepo:Boolean!, $userId:uuid!, $type_slug:String!) {
             repository_by_pk (id:$repoId) @include(if:$fetchRepo) {
                 url

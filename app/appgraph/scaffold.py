@@ -91,9 +91,6 @@ class CreateUpdateValidateScaffold:
             }
         }''' % {'TableName': self.TableName, 'returning': validated_keys}
 
-        print(query)
-        print(json.dumps({'data': validated_data}))
-
         conf_response = gclient.execute(gql(query), variable_values={'data': validated_data})
         assert conf_response[f'insert_{self.TableName}'], f'cannot save {self.TableName} ({str(conf_response)})'
 
@@ -121,9 +118,6 @@ class CreateUpdateValidateScaffold:
                 returning { %(returning)s } 
             }
         }''' % {'TableName': self.TableName, 'returning': validated_keys}
-
-        print(query)
-        print(json.dumps({'id': str(id), 'data': validated_data}))
 
         conf_response = gclient.execute(gql(query), variable_values={'id': str(id), 'data': validated_data})
         assert conf_response[f'update_{self.TableName}'], f'cannot update {self.TableName} ({str(conf_response)})'

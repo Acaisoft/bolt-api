@@ -87,9 +87,7 @@ class CreateValidate(graphene.Mutation):
         })
         assert len(query.get('repository')) == 0, f'repository with this name or url already exists'
 
-        if role != const.ROLE_ADMIN:
-            assert query.get('project'), \
-                f'non-admin ({role}) user {user_id} does not have access to project {project_id}'
+        assert query.get('project'), f'project does not exist'
 
         assert len(query.get('configuration_type', [])) == 1, f'configuration type does not exist'
 
@@ -156,12 +154,6 @@ class UpdateValidate(graphene.Mutation):
         if name:
             name = validators.validate_text(name)
 
-        print(json.dumps({
-            'userId': user_id,
-            'repoName': name or '',
-            'repoId': str(id),
-
-        }))
         query = gclient.execute(gql('''query ($repoName:String!, $repoId:uuid!, $userId:uuid!) {
             uniqueName: repository(where:{
                 name:{_eq:$repoName},

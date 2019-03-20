@@ -108,7 +108,7 @@ Deployment requirements:
     * `HASURA_GQL` 
     full address of hasura, eg. http://localhost:8080/v1alpha1/graphql
     * `REDIS_HOST` and `REDIS_PORT` and `REDIS_DB`
-    * `BUCKET_PROJECT_LOGOS`
+    * `BUCKET_PUBLIC_UPLOADS`
     path to Google Cloud Storage bucket for uploads ment to be public
     * `GOOGLE_APPLICATION_CREDENTIALS` 
     path to google service account credentials json file, 
