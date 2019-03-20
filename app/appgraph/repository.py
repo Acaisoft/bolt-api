@@ -140,11 +140,14 @@ class UpdateValidate(graphene.Mutation):
         repository_url = graphene.String(
             required=False,
             description='Repository address.')
+        type_slug = graphene.String(
+            required=False,
+            description=f'Configuration type: "{const.TESTTYPE_LOAD}"')
 
     Output = ValidationInterface
 
     @staticmethod
-    def validate(info, id, name=None, repository_url=None):
+    def validate(info, id, name=None, repository_url=None, type_slug=None):
         role, user_id = get_request_role_userid(info)
 
         assert role in (const.ROLE_ADMIN, const.ROLE_MANAGER), f'{role} user {user_id} cannot update repository'
@@ -154,11 +157,13 @@ class UpdateValidate(graphene.Mutation):
         if name:
             name = validators.validate_text(name)
 
-        query = gclient.execute(gql('''query ($repoName:String!, $repoId:uuid!, $userId:uuid!) {
+        query = gclient.execute(gql('''query ($repoName:String!, $repoId:uuid!, $userId:uuid!, $confType:String) {
             uniqueName: repository(where:{
                 name:{_eq:$repoName},
                 project: {userProjects: {user_id: {_eq:$userId}}}
             }) { id }
+            
+            configuration_type(where:{slug_name:{_eq:$confType}}, limit:1) { id }
             
             repository(
                 where:{
@@ -178,18 +183,25 @@ class UpdateValidate(graphene.Mutation):
             'userId': user_id,
             'repoName': name or '',
             'repoId': str(id),
+            'confType': type_slug or '',
 
         })
         assert len(query.get('repository')) == 1, f'repository {str(id)} does not exists'
 
         query_data = {}
+        num_performed = query['repository'][0]['configurations_aggregate']['aggregate']['count']
 
         if name:
             assert len(query.get('uniqueName')) == 0, f'repository with this name already exists'
             query_data['name'] = name
 
+        if type_slug:
+            assert len(query.get('configuration_type', [])) == 1, f'invalid type_slug "{type_slug}", valid choices are: {const.TESTTYPE_LOAD}'
+            assert num_performed == 0, \
+                f'cannot change type_slug, repository is in use by {num_performed} configuration{"s" if num_performed > 1 else ""}'
+            query_data['type_slug'] = type_slug
+
         if repository_url:
-            num_performed = query['repository'][0]['configurations_aggregate']['aggregate']['count']
             assert num_performed == 0, \
                 f'cannot update url, repository is in use by {num_performed} configuration{"s" if num_performed > 1 else ""}'
             repository_url = validators.validate_accessibility(current_app.config, repository_url)
@@ -197,8 +209,8 @@ class UpdateValidate(graphene.Mutation):
 
         return query_data
 
-    def mutate(self, info, id, name=None, repository_url=None):
-        UpdateValidate.validate(info, id, name)
+    def mutate(self, info, id, name=None, repository_url=None, type_slug=None):
+        UpdateValidate.validate(info, id, name, repository_url, type_slug)
         return ValidationResponse(ok=True)
 
 
@@ -207,10 +219,10 @@ class Update(UpdateValidate):
 
     Output = OutputInterfaceFactory(RepositoryInterface, 'Update')
 
-    def mutate(self, info, id, name=None, repository_url=None):
+    def mutate(self, info, id, name=None, repository_url=None, type_slug=None):
         gclient = hasura_client(current_app.config)
 
-        query_params = UpdateValidate.validate(info, id, name, repository_url)
+        query_params = UpdateValidate.validate(info, id, name, repository_url, type_slug)
 
         query = gql('''mutation ($id:uuid!, $data:repository_set_input!) {
             update_repository(
