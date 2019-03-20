@@ -28,7 +28,9 @@ class TestrunMutations(graphene.ObjectType):
 
     # repositories
     testrun_repository_create = to_field(repository.Create)
-    testrun_repository_validate = to_field(repository.Validate)
+    testrun_repository_create_validate = to_field(repository.CreateValidate)
+    testrun_repository_update = to_field(repository.Update)
+    testrun_repository_update_validate = to_field(repository.UpdateValidate)
 
     # test creator
     testrun_creator_create = to_field(test_creator.Create)
@@ -43,7 +45,6 @@ AppSchema = graphene.Schema(
     mutation=TestrunMutations,
     types=[
         configuration.ConfigurationType,
-        repository.RepositoryType,
         test_creator.TestCreatorType,
         oauth.Oauth,
         oauth.OauthAuthtoken,

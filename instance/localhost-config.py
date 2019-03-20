@@ -16,4 +16,6 @@ REDIS_HOST = 'localhost'
 REDIS_PORT = 6379
 REDIS_DB = 0
 
+BUCKET_PROJECT_LOGOS = 'media.bolt.acaisoft.io'
+
 CONFIG_VERSION = '01beta'

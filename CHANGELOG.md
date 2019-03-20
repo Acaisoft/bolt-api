@@ -1,13 +1,21 @@
 Changelog
 =========
 
-## (unreleased)
+## 0.1.3 (2019-03-20)
 
 ### Changes
 
+* Add testrun_project_image_upload implementation. [Piotr Mońko]
+
 * Refactor hasura connection names. [Piotr Mońko]
 
+### Fix
+
+* Fix some non-camelcase hasura relation names. [Piotr Mońko]
+
 ### Other
+
+* Add create/_validate and update/_validate methods for repository. [Piotr Mońko]
 
 * Update changelog. [Piotr Mońko]
 

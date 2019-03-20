@@ -54,16 +54,18 @@ def is_user_project_valid(user_id, project_config):
     raise AssertionError('user has no access to project')
 
 
-def validate_accessibility(app_config, repository_url):
+def validate_accessibility(app_config, repository_url:str):
     """
     Validate repo is accessible using the key provided by upstream bolt-deployer
     """
+    repository_url = repository_url.strip()
     regex = '((git|ssh|http(s)?)|(git@[\w\.]+))(:(//)?)([\w\.@\:/\-~]+)(\.git)(/)?'
     assert re.match(regex, repository_url), f'invalid repository url ({repository_url})'
 
     req = deployer_cli.ValidateRepositorySchema(repository_url=repository_url)
     response = clients.management(app_config).management_validate_repository_post(validate_repository_schema=req)
     assert response.is_valid, f'it appears repository is not accessible ({str(response)})'
+    return repository_url
 
 
 if __name__ == '__main__':
