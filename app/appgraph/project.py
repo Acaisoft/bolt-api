@@ -257,6 +257,7 @@ class ImageUploadUrl(graphene.Mutation):
             credentials=storage.Client()._credentials,
             api_access_endpoint='https://storage.googleapis.com',  # change to domain configured to point to project_logos_bucket
             resource=f'/{project_logos_bucket}/project_logos/{str(id)}',
+            method='PUT',
             expiration=datetime.now() + timedelta(minutes=15),
             content_md5=content_md5,
             content_type=content_type,
