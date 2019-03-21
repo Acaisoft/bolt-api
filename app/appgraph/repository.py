@@ -69,12 +69,14 @@ class CreateValidate(graphene.Mutation):
             
             configuration_type(where:{slug_name:{_eq:$confType}}, limit:1) { id }
             
-            repository(where:{
+            uniqueName: repository(where:{
                 project_id:{_eq:$projId},
-                _or:{
-                    name:{_eq:$repoName},
-                    url:{_eq:$repoUrl}
-                }
+                name:{_eq:$repoName}
+            }) { id }
+            
+            uniqueUrl: repository(where:{
+                project_id:{_eq:$projId},
+                url:{_eq:$repoUrl}
             }) { id }
             
             }'''), {
@@ -85,9 +87,11 @@ class CreateValidate(graphene.Mutation):
             'confType': type_slug,
 
         })
-        assert len(query.get('repository')) == 0, f'repository with this name or url already exists'
-
         assert query.get('project'), f'project does not exist'
+
+        assert len(query.get('uniqueName')) == 0, f'repository with this name already exists'
+
+        assert len(query.get('uniqueUrl')) == 0, f'repository with this url already exists'
 
         assert len(query.get('configuration_type', [])) == 1, f'configuration type does not exist'
 
@@ -157,9 +161,14 @@ class UpdateValidate(graphene.Mutation):
         if name:
             name = validators.validate_text(name)
 
-        query = gclient.execute(gql('''query ($repoName:String!, $repoId:uuid!, $userId:uuid!, $confType:String) {
+        query = gclient.execute(gql('''query ($repoName:String!, $repoUrl:String!, $repoId:uuid!, $userId:uuid!, $confType:String) {
             uniqueName: repository(where:{
                 name:{_eq:$repoName},
+                project: {userProjects: {user_id: {_eq:$userId}}}
+            }) { id }
+            
+            uniqueUrl: repository(where:{
+                url:{_eq:$repoUrl},
                 project: {userProjects: {user_id: {_eq:$userId}}}
             }) { id }
             
@@ -182,6 +191,7 @@ class UpdateValidate(graphene.Mutation):
             }'''), variable_values={
             'userId': user_id,
             'repoName': name or '',
+            'repoUrl': repository_url or '',
             'repoId': str(id),
             'confType': type_slug or '',
 
@@ -204,8 +214,8 @@ class UpdateValidate(graphene.Mutation):
         if repository_url:
             assert num_performed == 0, \
                 f'cannot update url, repository is in use by {num_performed} configuration{"s" if num_performed > 1 else ""}'
-            repository_url = validators.validate_accessibility(current_app.config, repository_url)
-            query_data['url'] = repository_url
+            assert len(query.get('uniqueUrl')) == 0, f'repository with this repository_url already exists'
+            query_data['url'] = validators.validate_accessibility(current_app.config, repository_url)
 
         return query_data
 

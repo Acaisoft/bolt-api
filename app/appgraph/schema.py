@@ -39,6 +39,10 @@ class TestrunMutations(graphene.ObjectType):
     # testrun management
     testrun_start = to_field(testrun.TestrunStart)
 
+    # debug only
+    testrun_project_purge = to_field(project.PurgeProject)
+    testrun_project_demo = to_field(project.DemoProject)
+
 
 AppSchema = graphene.Schema(
     query=TestrunQuery,

@@ -1,17 +1,27 @@
 Changelog
 =========
 
-## (unreleased)
+## 0.1.4 (2019-03-21)
 
 ### Changes
+
+* Add demo project setup and teardown mutations. [Piotr Mońko]
+
+* Switch parameters to slug_names, follow with relations. [Piotr Mońko]
 
 * Allow change to repository url if not yet performed. [Piotr Mońko]
 
 ### Fix
 
+* Fix repository name/url validation. [Piotr Mońko]
+
+* Fix project without access error message. [Piotr Mońko]
+
 * Fix signed url upload method. [Piotr Mońko]
 
 ### Other
+
+* Enable type_slug edition. [Piotr Mońko]
 
 * Add create/_validate and update/_validate methods for repository. [Piotr Mońko]
 
