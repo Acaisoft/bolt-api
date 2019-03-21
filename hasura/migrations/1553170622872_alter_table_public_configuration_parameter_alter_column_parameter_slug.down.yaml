@@ -1,0 +1,8 @@
+- args:
+    sql: ALTER TABLE "public"."configuration_parameter" ALTER COLUMN "parameter_slug"
+      DROP NOT NULL;
+  type: run_sql
+- args:
+    sql: COMMENT ON COLUMN "public"."configuration_parameter"."parameter_slug" IS
+      'undefined'
+  type: run_sql

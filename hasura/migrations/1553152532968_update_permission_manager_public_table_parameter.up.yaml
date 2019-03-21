@@ -1,0 +1,22 @@
+- args:
+    role: manager
+    table:
+      name: parameter
+      schema: public
+  type: drop_select_permission
+- args:
+    permission:
+      allow_aggregations: false
+      columns:
+      - default_value
+      - id
+      - name
+      - param_name
+      - param_type
+      - type_slug
+      filter: {}
+    role: manager
+    table:
+      name: parameter
+      schema: public
+  type: create_select_permission

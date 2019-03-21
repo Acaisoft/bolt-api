@@ -1,0 +1,13 @@
+- args:
+    name: execution
+    table:
+      name: result_distribution
+      schema: public
+    using:
+      manual_configuration:
+        column_mapping:
+          execution_id: id
+        remote_table:
+          name: execution
+          schema: public
+  type: create_object_relationship

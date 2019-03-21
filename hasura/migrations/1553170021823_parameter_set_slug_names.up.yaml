@@ -1,0 +1,8 @@
+- args:
+    cascade: false
+    sql: |-
+      update "public"."parameter" set slug_name = 'load_tests_duration' where name = 'time';
+      update "public"."parameter" set slug_name = 'load_tests_rampup' where name = 'users/second';
+      update "public"."parameter" set slug_name = 'load_tests_users' where name = 'users';
+      update "public"."parameter" set slug_name = 'host' where name = 'host';
+  type: run_sql

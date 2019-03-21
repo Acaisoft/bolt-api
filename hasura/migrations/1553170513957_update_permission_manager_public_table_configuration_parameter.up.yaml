@@ -1,0 +1,24 @@
+- args:
+    role: manager
+    table:
+      name: configuration_parameter
+      schema: public
+  type: drop_insert_permission
+- args:
+    permission:
+      check:
+        configuration:
+          project:
+            userProjects:
+              user_id:
+                _eq: X-HASURA-USER-ID
+      columns:
+      - configuration_id
+      - parameter_slug
+      - value
+      set: {}
+    role: manager
+    table:
+      name: configuration_parameter
+      schema: public
+  type: create_insert_permission
