@@ -167,7 +167,7 @@ Order is important.
 Hasura migrations (see DB) set up bolt-api as remote schema thus offloading access and authorization 
 to hasura. Bolt-api queries and mutations can be distinguished by the `testrun_` prefix.
 
-##### File Uploads:
+### File Uploads
 
 Files are uploaded directly to designated GCS buckets, through time-limited urls.
 To perform an upload:
@@ -194,7 +194,7 @@ $response = mutation{
   }
 }
 ```
-* actualy upload the file, eg. using CURL:
+* upload the file, eg.:
 ```
 curl \
     -X PUT \

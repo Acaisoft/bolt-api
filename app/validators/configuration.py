@@ -27,7 +27,7 @@ def validate_test_configuration_by_id(test_conf_id):
             
             configuration_parameters {
                 value
-                parameter_id
+                parameter_slug
             }
                     
             test_creator_configuration_m2m (order_by:{
@@ -66,9 +66,9 @@ def validate_test_configuration(conf: dict, defaultParams:list):
     ...        }
     ...    ],
     ...    "configuration_parameters": [
-    ...      { "value": "30m", "parameter_id": "param1", },
+    ...      { "value": "30m", "parameter_slug": "param1", },
     ... ]}, [
-    ...      {"id": "param1", "name": "time", "default_value": "360", "param_name": "-t"},
+    ...      {"parameter_slug": "param1", "name": "time", "default_value": "360", "param_name": "-t"},
     ... ])
     Traceback (most recent call last):
     ...
@@ -97,27 +97,27 @@ def validate_test_params(params: list, defaults: list) -> dict:
     """
     Validates params and returns input patched with default values from defaults.
     >>> validate_test_params([
-    ...      { "value": "30", "parameter_id": "param1", },
-    ...      { "value": "5000", "parameter_id": "param2", },
-    ...      { "value": "500", "parameter_id": "param3", },
-    ...      { "value": "http://wp.pl", "parameter_id": "param4", },
+    ...      { "value": "30", "parameter_slug": "param1", },
+    ...      { "value": "5000", "parameter_slug": "param2", },
+    ...      { "value": "500", "parameter_slug": "param3", },
+    ...      { "value": "http://wp.pl", "parameter_slug": "param4", },
     ...    ], [
-    ...      {"id": "param1", "name": "time", "default_value": "360", "param_name": "-t"},
-    ...      {"id": "param2", "name": "users", "default_value": "1000", "param_name": "-c", "param_type": "int"},
-    ...      {"id": "param3", "name": "users/second", "default_value": "100", "param_name": "-r", "param_type": "int"},
-    ...      {"id": "param4", "name": "host", "default_value": "", "param_name": "-H", "param_type": "str"},
+    ...      {"slug_name": "param1", "name": "time", "default_value": "360", "param_name": "-t"},
+    ...      {"slug_name": "param2", "name": "users", "default_value": "1000", "param_name": "-c", "param_type": "int"},
+    ...      {"slug_name": "param3", "name": "users/second", "default_value": "100", "param_name": "-r", "param_type": "int"},
+    ...      {"slug_name": "param4", "name": "host", "default_value": "", "param_name": "-H", "param_type": "str"},
     ... ])
     {'param1': '30', 'param2': '5000', 'param3': '500', 'param4': 'http://wp.pl'}
     """
-    params_by_id = dict(((str(x['parameter_id']), x['value']) for x in params))
+    params_by_id = dict(((str(x['parameter_slug']), x['value']) for x in params))
     for p in defaults:
-        if p['id'] not in params_by_id or not params_by_id[p['id']]:
-            params_by_id[p['id']] = p['default_value']
+        if p['slug_name'] not in params_by_id or not params_by_id[p['slug_name']]:
+            params_by_id[p['slug_name']] = p['default_value']
 
-    param_names_by_id = dict(((x['id'], x['param_name']) for x in defaults))
-    for parameter_id, value in params_by_id.items():
-        param_name = param_names_by_id.get(parameter_id, None)
-        assert param_name, f'invalid parameter id "{parameter_id}"'
+    param_names_by_id = dict(((x['slug_name'], x['param_name']) for x in defaults))
+    for parameter_slug, value in params_by_id.items():
+        param_name = param_names_by_id.get(parameter_slug, None)
+        assert param_name, f'invalid parameter slug "{parameter_slug}"'
         VALIDATORS[param_name](value)
 
     return params_by_id

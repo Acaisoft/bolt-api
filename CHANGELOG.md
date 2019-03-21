@@ -1,6 +1,17 @@
 Changelog
 =========
 
+## (unreleased)
+
+### Changes
+
+* Remove image_url filetype validation on project. [Piotr Mońko]
+
+### Fix
+
+* Fix typo in configuration_create. [Piotr Mońko]
+
+
 ## 0.1.5 (2019-03-21)
 
 ### Changes

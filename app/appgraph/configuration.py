@@ -12,7 +12,7 @@ from app.hasura_client import hasura_client
 
 class ConfigurationParameterAbstractType(graphene.AbstractType):
     value = graphene.String()
-    parameter_id = graphene.UUID(name='parameter_id')
+    parameter_slug = graphene.String()
 
 
 class ConfigurationParameterInterface(ConfigurationParameterAbstractType, graphene.Interface):
@@ -46,6 +46,9 @@ class ConfigurationInterface(graphene.Interface):
 class ConfigurationType(graphene.ObjectType):
     class Meta:
         interfaces = (ConfigurationInterface,)
+    configuration_parameters = graphene.List(
+        ConfigurationParameterType,
+        description='Default parameter types overrides.')
 
 
 class CreateValidate(graphene.Mutation):
@@ -107,7 +110,7 @@ class CreateValidate(graphene.Mutation):
             }
             
             parameter (where:{configuration_type:{slug_name:{_eq:$type_slug}}}) {
-                id
+                slug_name
                 default_value
                 param_name
                 name
@@ -157,9 +160,9 @@ class CreateValidate(graphene.Mutation):
             patched_params = validators.validate_test_params(configuration_parameters, defaults=repo['parameter'])
             if patched_params:
                 query_data['configuration_parameters'] = {'data': []}
-                for param_id, param_value in patched_params.items():
+                for parameter_slug, param_value in patched_params.items():
                     query_data['configuration_parameters']['data'].append({
-                        'parameter_id': param_id,
+                        'parameter_slug': parameter_slug,
                         'value': param_value,
                     })
 
@@ -184,7 +187,11 @@ class Create(CreateValidate):
             insert_configuration(
                 objects: $data
             ) {
-                returning { id name code_source type_slug repository_id project_id } 
+                returning { 
+                    id name code_source type_slug repository_id project_id configuration_parameters { 
+                        value parameter_slug 
+                    } 
+                } 
             }
         }''')
 
@@ -327,9 +334,9 @@ class UpdateValidate(graphene.Mutation):
             patched_params = validators.validate_test_params(configuration_parameters, defaults=repo['parameter'])
             if patched_params:
                 query_data['configuration_parameters'] = {'data': []}
-                for param_id, param_value in patched_params.items():
+                for parameter_slug, param_value in patched_params.items():
                     query_data['configuration_parameters']['data'].append({
-                        'parameter_id': param_id,
+                        'parameter_slug': parameter_slug,
                         'value': param_value,
                     })
 
