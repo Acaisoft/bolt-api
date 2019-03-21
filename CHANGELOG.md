@@ -1,6 +1,17 @@
 Changelog
 =========
 
+## 0.1.5 (2019-03-21)
+
+### Changes
+
+* Remove image_url filetype validation on project. [Piotr Mońko]
+
+### Other
+
+* Update changelog. [Piotr Mońko]
+
+
 ## 0.1.4 (2019-03-21)
 
 ### Changes

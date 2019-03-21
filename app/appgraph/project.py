@@ -145,7 +145,8 @@ class UpdateValidate(graphene.Mutation):
 
         gclient = hasura_client(current_app.config)
 
-        validators.validate_text(name)
+        if name:
+            validators.validate_text(name)
 
         projects = gclient.execute(gql('''query ($projId:uuid!, $userId:uuid!, $name:String!) {
             original: project_by_pk(id:$projId) { id }
@@ -156,7 +157,7 @@ class UpdateValidate(graphene.Mutation):
         }'''), {
             'projId': str(id),
             'userId': user_id,
-            'name': name,
+            'name': name or '',
         })
         assert projects.get('original'), f'project {str(id)} does not exist'
 
@@ -173,9 +174,6 @@ class UpdateValidate(graphene.Mutation):
 
         if image_url:
             validators.validate_url(image_url, key='image_url', required=False)
-            file_extension = image_url.split('.')[-1]
-            assert file_extension.lower() in (
-                'jpg', 'jpeg', 'png', 'gif'), f'unsupported image_url file type {file_extension}'
             query_params['image_url'] = image_url.strip()
 
         return query_params
@@ -324,7 +322,7 @@ class DemoProject(graphene.Mutation):
 
     class Arguments:
         name = graphene.String()
-        user_id = graphene.UUID(required=False)
+        req_user_id = graphene.UUID(required=False)
 
     project_id = graphene.UUID()
 

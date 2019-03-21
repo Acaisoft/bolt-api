@@ -167,3 +167,47 @@ Order is important.
 Hasura migrations (see DB) set up bolt-api as remote schema thus offloading access and authorization 
 to hasura. Bolt-api queries and mutations can be distinguished by the `testrun_` prefix.
 
+##### File Uploads:
+
+Files are uploaded directly to designated GCS buckets, through time-limited urls.
+To perform an upload:
+
+* generate `Content-MD5` standard header for file being uploaded:
+```
+$ cat file_to_upload.jpg | openssl dgst -md5 -binary  | openssl enc -base64
+
+xoK7oR4ezmKgX243mDbWuw==
+```
+* request an upload/download url from api, eg. for a project logo:
+```
+$response = mutation{
+  testrun_project_image_upload (
+    id:"d85d29e5-8204-46a7-8218-40bdcf68c978"
+    content_type:"image/jpeg"
+    content_md5:"xoK7oR4ezmKgX243mDbWuw=="
+  ) {
+    returning {
+      id
+      upload_url
+      download_url
+    }
+  }
+}
+```
+* actualy upload the file, eg. using CURL:
+```
+curl \
+    -X PUT \
+    -H "Content-Type: image/jpeg" \
+    -H "Content-MD5: xoK7oR4ezmKgX243mDbWuw==" \
+    -T - {$response.returning.upload_url} < file_to_upload.jpg
+```
+* after successful upload, update the image_url in database:
+```
+mutation {
+  testrun_project_update(
+    id:"d85d29e5-8204-46a7-8218-40bdcf68c978"
+    image_url:"{$response.returning.download_url}"
+  ) { affected_rows }
+}
+```
