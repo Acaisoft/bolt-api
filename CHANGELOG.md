@@ -21,6 +21,10 @@ Changelog
 
 ### Other
 
+* Merge branch 'master' of bitbucket.org:acaisoft/bolt-api. [Piotr Mońko]
+
+* Add GOOGLE_APPLICATION_CREDENTIALS env var to deployment. [jroslaniec-acaisoft]
+
 * Enable type_slug edition. [Piotr Mońko]
 
 * Add create/_validate and update/_validate methods for repository. [Piotr Mońko]
