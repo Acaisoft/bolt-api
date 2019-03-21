@@ -45,6 +45,8 @@ spec:
             value: /etc/config/config.py
           - name: SECRETS_FILE_PATH
             value: /etc/secrets/secrets.py
+          - name: GOOGLE_APPLICATION_CREDENTIALS
+            value: /etc/secrets/bolt-api-service.json
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:
