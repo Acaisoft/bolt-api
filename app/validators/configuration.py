@@ -14,6 +14,7 @@ def validate_test_configuration_by_id(test_conf_id):
             default_value
             param_name
             name
+            slug_name
         }
         
         configuration_by_pk (id:$conf_id) {
@@ -68,7 +69,7 @@ def validate_test_configuration(conf: dict, defaultParams:list):
     ...    "configuration_parameters": [
     ...      { "value": "30m", "parameter_slug": "param1", },
     ... ]}, [
-    ...      {"parameter_slug": "param1", "name": "time", "default_value": "360", "param_name": "-t"},
+    ...      {"slug_name": "param1", "name": "time", "default_value": "360", "param_name": "-t"},
     ... ])
     Traceback (most recent call last):
     ...

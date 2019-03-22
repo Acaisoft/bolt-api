@@ -347,7 +347,7 @@ class DemoProject(graphene.Mutation):
             insert_result_aggregate (objects:[{execution_id:$id, average_response_time:10, number_of_successes:100, number_of_errors:20, number_of_fails:30, average_response_size:1234}]) {affected_rows}
             insert_result_distribution (objects:[{execution_id:$id, request_result:"{}", distribution_result:"{}", start:$timestamp, end:$timestamp}]) {affected_rows}
             insert_result_error (objects:[{execution_id:$id, error_type:"AssertionError", name:$name, exception_data:"tralala", number_of_occurrences:120}]) {affected_rows}
-            insert_host: insert_configuration_parameter (objects:[{configuration_id:$id, parameter_slug:"host", value:"https://att-lwd-go-dev.acaisoft.net/api"}]) {affected_rows}
+            insert_host: insert_configuration_parameter (objects:[{configuration_id:$id, parameter_slug:"load_tests_host", value:"https://att-lwd-go-dev.acaisoft.net/api"}]) {affected_rows}
             insert_duration: insert_configuration_parameter (objects:[{configuration_id:$id, parameter_slug:"load_tests_duration", value:"15"}]) {affected_rows}
             
         }'''), variable_values={'id': UUID, 'name': name, 'userId': req_user_id, 'timestamp': datetime.now().astimezone().isoformat()})

@@ -1,13 +1,17 @@
 Changelog
 =========
 
-## (unreleased)
+## 0.1.6 (2019-03-22)
 
 ### Changes
 
 * Remove image_url filetype validation on project. [Piotr Mońko]
 
 ### Fix
+
+* Fix unresolvable slug_name in testrun configuration validation. [Piotr Mońko]
+
+* Fix load_tests_host slug. [Piotr Mońko]
 
 * Fix typo in configuration_create. [Piotr Mońko]
 
