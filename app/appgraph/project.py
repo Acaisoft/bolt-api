@@ -356,6 +356,10 @@ class DemoProject(graphene.Mutation):
             insert_test_creator(objects:[{ id:$id, max_wait:200, min_wait:100, data:{} }]) { affected_rows }
             insert_test_creator_configuration_m2m(objects:[{id:$id, configuration_id:$id2, name:$name, type_slug:"load_tests", project_id:$id }]) { affected_rows }
             
+            source_1: insert_test_source(objects:[{ project_id:$id, source_type:"creator", test_creator_id:$id }]) { affected_rows }
+            source_2: insert_test_source(objects:[{ project_id:$id, source_type:"repository", repository_id:$id }]) { affected_rows }
+            source_3: insert_test_source(objects:[{ project_id:$id, source_type:"repository", repository_id:$id2 }]) { affected_rows }
+            
         }'''), variable_values={'id': UUID, 'id2': str(uuid.uuid4()), 'name': name, 'userId': str(req_user_id), 'timestamp': datetime.now().astimezone().isoformat()})
 
         return DemoProject(project_id=UUID)
