@@ -1,0 +1,6 @@
+- args:
+    cascade: false
+    sql: |-
+      delete from "public"."configuration_parameter" where parameter_slug = 'host';
+      update "public"."parameter" set slug_name = 'load_tests_host' where name = 'host';
+  type: run_sql
