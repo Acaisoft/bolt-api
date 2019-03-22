@@ -1,0 +1,7 @@
+- args:
+    sql: ALTER TABLE "public"."test_creator_configuration_m2m" ADD CONSTRAINT "test_creator_configuration_m2m_id_key"
+      UNIQUE ("id")
+  type: run_sql
+- args:
+    sql: COMMENT ON COLUMN "public"."test_creator_configuration_m2m"."id" IS ''
+  type: run_sql

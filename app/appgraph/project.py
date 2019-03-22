@@ -301,8 +301,9 @@ class PurgeProject(graphene.Mutation):
             project_ids_list = [str(project_id)]
 
         output = gclient.execute(gql('''mutation ($projIds:[uuid!]!) {
-            delete_test_creator (where:{test_creator_configuration_m2m:{configuration:{project_id:{_in:$projIds}}}}) {affected_rows}
-            delete_test_creator_configuration_m2m (where:{configuration:{project_id:{_in:$projIds}}}) {affected_rows}
+            delete_test_source(where:{project_id:{_in:$projIds}}) { affected_rows }
+            delete_test_creator_configuration_m2m (where:{project_id:{_in:$projIds}}) {affected_rows}
+            delete_test_creator (where:{test_creator_configuration_m2m:{project_id:{_in:$projIds}}}) {affected_rows}
             delete_configuration_parameter (where:{configuration:{project_id:{_in:$projIds}}}) {affected_rows}
             delete_result_error (where:{execution:{configuration:{project_id:{_in:$projIds}}}}) {affected_rows}
             delete_result_distribution (where:{execution:{configuration:{project_id:{_in:$projIds}}}}) {affected_rows}
@@ -338,18 +339,23 @@ class DemoProject(graphene.Mutation):
 
         gclient = hasura_client(current_app.config)
 
-        gclient.execute(gql('''mutation ($id:uuid!, $userId:uuid!, $name:String!, $timestamp:timestamptz!) {
+        gclient.execute(gql('''mutation ($id:uuid!, $id2:uuid!, $userId:uuid!, $name:String!, $timestamp:timestamptz!) {
             insert_project (objects:[{id:$id, name:$name}]) {affected_rows}
             insert_user_project (objects:[{id:$id,, project_id:$id, user_id:$userId}]) {affected_rows}
-            insert_repository (objects:[{id:$id, name:$name, project_id:$id, url:"git@bitbucket.org:acaisoft/load-events.git", type_slug:"load_tests"}]) {affected_rows}
-            insert_configuration (objects:[{id:$id, name:$name, project_id:$id, repository_id:$id, code_source:"repository", type_slug:"load_tests"}]) {affected_rows}
+            insert_good_repository: insert_repository (objects:[{id:$id, name:$name, project_id:$id, url:"git@bitbucket.org:acaisoft/load-events.git", type_slug:"load_tests"}]) {affected_rows}
+            insert_bad_repository: insert_repository (objects:[{id:$id2, name:"some repo", project_id:$id, url:"git@bitbucket.org:acaisoft/invalid-url.git", type_slug:"load_tests"}]) {affected_rows}
+            insert_good_conf_repository: insert_configuration (objects:[{id:$id, name:$name, project_id:$id, repository_id:$id, code_source:"repository", type_slug:"load_tests"}]) {affected_rows}
+            insert_bad_conf_repository: insert_configuration (objects:[{name:"conf with some repo", project_id:$id, repository_id:$id2, code_source:"repository", type_slug:"load_tests"}]) {affected_rows}
             insert_execution (objects:[{id:$id, configuration_id:$id, status:"INIT"}]) {affected_rows}
             insert_result_aggregate (objects:[{execution_id:$id, average_response_time:10, number_of_successes:100, number_of_errors:20, number_of_fails:30, average_response_size:1234}]) {affected_rows}
             insert_result_distribution (objects:[{execution_id:$id, request_result:"{}", distribution_result:"{}", start:$timestamp, end:$timestamp}]) {affected_rows}
             insert_result_error (objects:[{execution_id:$id, error_type:"AssertionError", name:$name, exception_data:"tralala", number_of_occurrences:120}]) {affected_rows}
             insert_host: insert_configuration_parameter (objects:[{configuration_id:$id, parameter_slug:"load_tests_host", value:"https://att-lwd-go-dev.acaisoft.net/api"}]) {affected_rows}
             insert_duration: insert_configuration_parameter (objects:[{configuration_id:$id, parameter_slug:"load_tests_duration", value:"15"}]) {affected_rows}
+            insert_conf_creator: insert_configuration (objects:[{id:$id2, name:$name, project_id:$id, code_source:"creator", type_slug:"load_tests"}]) {affected_rows}
+            insert_test_creator(objects:[{ id:$id, max_wait:200, min_wait:100, data:{} }]) { affected_rows }
+            insert_test_creator_configuration_m2m(objects:[{id:$id, configuration_id:$id2, name:$name, type_slug:"load_tests", project_id:$id }]) { affected_rows }
             
-        }'''), variable_values={'id': UUID, 'name': name, 'userId': req_user_id, 'timestamp': datetime.now().astimezone().isoformat()})
+        }'''), variable_values={'id': UUID, 'id2': str(uuid.uuid4()), 'name': name, 'userId': str(req_user_id), 'timestamp': datetime.now().astimezone().isoformat()})
 
         return DemoProject(project_id=UUID)

@@ -1,0 +1,8 @@
+- args:
+    sql: ALTER TABLE "public"."test_creator_configuration_m2m" ALTER COLUMN "configuration_id"
+      DROP NOT NULL;
+  type: run_sql
+- args:
+    sql: COMMENT ON COLUMN "public"."test_creator_configuration_m2m"."configuration_id"
+      IS ''
+  type: run_sql
