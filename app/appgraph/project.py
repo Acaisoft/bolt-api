@@ -37,14 +37,11 @@ class CreateValidate(graphene.Mutation):
         description = graphene.String(
             required=False,
             description='Project description.')
-        image_url = graphene.String(
-            required=False,
-            description='Project logo.')
 
     Output = ValidationInterface
 
     @staticmethod
-    def validate(info, name, description, image_url):
+    def validate(info, name, description):
         role, user_id = get_request_role_userid(info)
         assert user_id, f'unauthenticated request'
         assert role == const.ROLE_ADMIN, f'user with role {role} cannot create projects'
@@ -66,21 +63,14 @@ class CreateValidate(graphene.Mutation):
         if description:
             validators.validate_text(description, key='description', required=False)
 
-        if image_url:
-            validators.validate_url(image_url, key='image_url', required=False)
-            file_extension = image_url.split('.')[-1]
-            assert file_extension.lower() in (
-                'jpg', 'jpeg', 'png', 'gif'), f'unsupported image_url file type {file_extension}'
-
         return {
             'name': name,
             'description': description,
-            'image_url': image_url,
             'created_by_id': user_id,
         }
 
-    def mutate(self, info, name, description="", image_url=""):
-        CreateValidate.validate(info, name, description, image_url)
+    def mutate(self, info, name, description=""):
+        CreateValidate.validate(info, name, description)
         return ValidationResponse(ok=True)
 
 
@@ -89,18 +79,18 @@ class Create(CreateValidate):
 
     Output = OutputInterfaceFactory(ProjectInterface, 'Create')
 
-    def mutate(self, info, name, description="", image_url=""):
+    def mutate(self, info, name, description=""):
         _, user_id = get_request_role_userid(info)
 
         gclient = hasura_client(current_app.config)
 
-        query_params = CreateValidate.validate(info, name, description, image_url)
+        query_params = CreateValidate.validate(info, name, description)
 
         query = gql('''mutation ($data:[project_insert_input!]!) {
             insert_project(
                 objects: $data
             ) {
-                returning { id name description image_url } 
+                returning { id name description } 
             }
         }''')
 

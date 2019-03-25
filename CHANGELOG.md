@@ -1,9 +1,15 @@
 Changelog
 =========
 
-## (unreleased)
+## 0.1.7 (2019-03-25)
 
 ### Changes
+
+* Remove image_url from project create method. [Piotr Mońko]
+
+* Add validation and authorization for testrunner process. [Piotr Mońko]
+
+* Update bolt-deployer. [Piotr Mońko]
 
 * Add permissions for testrunner role. [Piotr Mońko]
 
