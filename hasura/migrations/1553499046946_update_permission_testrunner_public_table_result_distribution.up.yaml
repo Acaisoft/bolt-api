@@ -1,0 +1,18 @@
+- args:
+    permission:
+      allow_upsert: true
+      check:
+        execution_id:
+          _eq: X-Hasura-User-Id
+      columns:
+      - distribution_result
+      - end
+      - execution_id
+      - request_result
+      - start
+      set: {}
+    role: testrunner
+    table:
+      name: result_distribution
+      schema: public
+  type: create_insert_permission

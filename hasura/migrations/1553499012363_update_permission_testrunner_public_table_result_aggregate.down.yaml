@@ -1,0 +1,6 @@
+- args:
+    role: testrunner
+    table:
+      name: result_aggregate
+      schema: public
+  type: drop_insert_permission

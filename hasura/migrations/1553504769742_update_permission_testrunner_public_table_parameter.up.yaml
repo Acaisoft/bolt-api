@@ -1,0 +1,23 @@
+- args:
+    permission:
+      allow_aggregations: false
+      columns:
+      - id
+      - name
+      - param_type
+      - default_value
+      - param_name
+      - type_slug
+      - slug_name
+      filter:
+        configuration_parameter:
+          configuration:
+            executions:
+              id:
+                _eq: X-Hasura-User-Id
+      limit: null
+    role: testrunner
+    table:
+      name: parameter
+      schema: public
+  type: create_select_permission
