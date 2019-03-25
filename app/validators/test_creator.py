@@ -19,6 +19,8 @@ def validate_test_creator(json_data, min_wait, max_wait):
         test_configuration.set_endpoints(data.get('endpoints'))
         test_configuration.set_setup_endpoints(data.get('setup'))
         test_configuration.set_teardown_endpoints(data.get('teardown'))
+        test_configuration.set_on_start_endpoints(data.get('on_start'))
+        test_configuration.set_on_stop_endpoints(data.get('on_stop'))
         test_configuration.validate()
         # validate min/max wait values
         if min_wait < 50:
