@@ -1,0 +1,34 @@
+- args:
+    role: testrunner
+    table:
+      name: result_error
+      schema: public
+  type: drop_insert_permission
+- args:
+    permission:
+      check:
+        _and:
+        - execution:
+            id:
+              _eq: X-Hasura-User-Id
+        - execution:
+            status:
+              _ne: FINISHED
+      columns:
+      - error_type
+      - exception_data
+      - name
+      - number_of_occurrences
+      isSetConfigChecked: true
+      localSet:
+      - key: execution_id
+        value: x-hasura-User-Id
+      - key: ""
+        value: ""
+      set:
+        execution_id: x-hasura-User-Id
+    role: testrunner
+    table:
+      name: result_error
+      schema: public
+  type: create_insert_permission
