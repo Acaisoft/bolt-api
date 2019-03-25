@@ -7,6 +7,7 @@ from flask import current_app
 from gql import gql
 
 from app import const
+from app.auth.hasura import hasura_token_for_testrunner
 from app.const import TENANT_ID
 from app.deployer import clients
 from app.hasura_client import hasura_client
@@ -14,12 +15,14 @@ from app.hasura_client import hasura_client
 
 def start_job(app_config, project_id, repo_url, execution_id, no_cache_redis=False,
               no_cache_kaniko=False) -> deployer_cli.ImageBuildTaskSchema:
+    job_token = hasura_token_for_testrunner(app_config, execution_id)
     data = deployer_cli.ImageBuildRequestSchema(
         repo_url=repo_url,
         tenant_id=TENANT_ID,
         project_id=project_id,
         start_proper_job=True,
         test_run_execution_id=execution_id,
+        job_auth_token=job_token,
         no_cache=no_cache_redis,
         no_cache_kaniko=no_cache_kaniko,
     )

@@ -58,3 +58,23 @@ def hasura_token_for_user(config, user_email):
     secret = config.get(const.SECRET_KEY)
     assert secret, 'SECRET_KEY not defined'
     return jwt.encode(payload, secret, algorithm=algo)
+
+
+def hasura_token_for_testrunner(config, execution_id:str):
+    """
+    Returns a token for use by a testrunner, granting access to a single execution.
+    :param config: flask app config
+    :param execution_id: resource ID to grant access to
+    :return: str: jwt token
+    """
+
+    payload = {"https://hasura.io/jwt/claims": {
+        "x-hasura-allowed-roles": [const.ROLE_TESTRUNNER],
+        "x-hasura-default-role": const.ROLE_TESTRUNNER,
+        "x-hasura-user-id": execution_id,
+    }}
+
+    algo = config.get(const.JWT_ALGORITHM, 'HS256')
+    secret = config.get(const.SECRET_KEY)
+    assert secret, 'SECRET_KEY not defined'
+    return jwt.encode(payload, secret, algorithm=algo)

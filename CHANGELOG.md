@@ -1,6 +1,25 @@
 Changelog
 =========
 
+## (unreleased)
+
+### Changes
+
+* Add permissions for testrunner role. [Piotr Mońko]
+
+* Added test_sources table, adjusted relations and code. [Piotr Mońko]
+
+### Fix
+
+* Fix test_source seed. [Piotr Mońko]
+
+* Fix unresolvable slug_name in testrun configuration validation. [Piotr Mońko]
+
+### Other
+
+* Fix configuration update param value. [Piotr Mońko]
+
+
 ## 0.1.6 (2019-03-22)
 
 ### Changes
