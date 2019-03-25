@@ -22,7 +22,7 @@ def start_job(app_config, project_id, repo_url, execution_id, no_cache_redis=Fal
         project_id=project_id,
         start_proper_job=True,
         test_run_execution_id=execution_id,
-        job_auth_token=job_token,
+        job_auth_token=str(job_token),
         no_cache=no_cache_redis,
         no_cache_kaniko=no_cache_kaniko,
     )
