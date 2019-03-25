@@ -291,6 +291,7 @@ class UpdateValidate(graphene.Mutation):
                 default_value
                 param_name
                 name
+                slug_name
             }
                         
             isNameUnique: configuration (where:{name:{_eq:$confName}, project:{userProjects:{user_id:{_eq:$userId}}}}) {
@@ -357,6 +358,21 @@ class Update(UpdateValidate):
 
         query_params = UpdateValidate.validate(info, id, name, type_slug, code_source, repository_id,
                                                configuration_parameters)
+
+        conf_params = query_params.pop('configuration_parameters')
+        for cp in conf_params['data']:
+            gclient.execute(gql('''mutation ($confId:uuid!, $slug:String!, $value:String!) {
+                update_configuration_parameter(
+                    where:{ configuration_id:{_eq:$confId}, parameter_slug:{_eq:$slug} },
+                    _set:{ value: $value }
+                ) {
+                    affected_rows
+                }
+            }'''), variable_values={
+                'confId': str(id),
+                'slug': cp['parameter_slug'],
+                'value': cp['value']
+            })
 
         query = gql('''mutation ($id:uuid!, $data:configuration_set_input!) {
             update_configuration(
