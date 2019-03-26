@@ -2,7 +2,52 @@ import unittest
 
 from schematics import exceptions
 
-from app.models import Assert, Endpoint, TestConfiguration
+from app.models import Action, Assert, Endpoint, TestConfiguration
+
+
+class TestActionModel(unittest.TestCase):
+    def test_model_without_data(self):
+        action = Action()
+        with self.assertRaises(exceptions.DataError) as context:
+            action.validate()
+        self.assertEqual(context.exception.to_primitive(), {
+            'action_type': ['This field is required.'],
+            'location': ['This field is required.'],
+            'variable_name': ['This field is required.'],
+            'variable_path': ['This field is required.']
+        })
+
+    def test_model_with_wrong_action_type_field(self):
+        action = Action({
+            'action_type': 'unknown',
+            'location': 'response',
+            'variable_name': 'token',
+            'variable_path': 'auth.token'
+        })
+        with self.assertRaises(exceptions.DataError) as context:
+            action.validate()
+        self.assertEqual(context.exception.to_primitive(), {'action_type': ["Value must be one of ('set_variable',)."]})
+
+    def test_model_with_wrong_location_field(self):
+        action = Action({
+            'action_type': 'set_variable',
+            'location': 'unknown',
+            'variable_name': 'token',
+            'variable_path': 'auth.token'
+        })
+        with self.assertRaises(exceptions.DataError) as context:
+            action.validate()
+        self.assertEqual(context.exception.to_primitive(), {
+            'location': ["Value must be one of ('response', 'headers', 'cookies')."]})
+
+    def test_model_with_valid_data(self):
+        action = Action({
+            'action_type': 'set_variable',
+            'location': 'headers',
+            'variable_name': 'token',
+            'variable_path': 'auth.token'
+        })
+        self.assertIsNone(action.validate())
 
 
 class TestAssertModel(unittest.TestCase):
@@ -56,7 +101,8 @@ class TestEndpointModel(unittest.TestCase):
             'task_value': 1,
             'headers': None,
             'payload': None,
-            'asserts': None
+            'asserts': None,
+            'actions': None
         })
 
     def test_model_with_wrong_method_field_data(self):
@@ -96,7 +142,8 @@ class TestEndpointModel(unittest.TestCase):
                 'combined_dict': {'test': [1, 2, '3'], 'task': 1}
             },
             'headers': None,
-            'asserts': None
+            'asserts': None,
+            'actions': None
         })
 
     def test_payload_field_with_empty_dict_data(self):
@@ -115,7 +162,8 @@ class TestEndpointModel(unittest.TestCase):
             'task_value': 2,
             'payload': {},
             'headers': None,
-            'asserts': None
+            'asserts': None,
+            'actions': None
         })
 
     def test_payload_field_with_invalid_types_data(self):
@@ -136,7 +184,7 @@ class TestEndpointModel(unittest.TestCase):
             Endpoint({'name': 'test', 'method': 'put', 'url': '/test', 'payload': True})
         self.assertEqual(context.exception.to_primitive(), {'payload': ["Only mappings may be used in a DictType"]})
 
-    def test_asserts_field_with_invalid_types_data(self):
+    def test_asserts_field_with_invalid_data(self):
         endpoint = Endpoint({
             'name': 'test',
             'method': 'put',
@@ -195,6 +243,79 @@ class TestEndpointModel(unittest.TestCase):
             ],
             'payload': None,
             'headers': None,
+            'actions': None
+        })
+
+    def test_action_field_with_invalid_data(self):
+        endpoint = Endpoint({
+            'name': 'test',
+            'method': 'put',
+            'url': '/test',
+            'task_value': 2,
+            'payload': {},
+            'asserts': [{
+                'assert_type': 'response_code',
+                'value': '100',
+                'message': 'Error'
+            }],
+            'actions': [{
+                'action_type': 'unknown',
+                'location': 'response',
+                'variable_name': 'token',
+                'variable_path': 'my_token.path'
+            }]
+        })
+        with self.assertRaises(exceptions.DataError) as context:
+            endpoint.validate()
+        self.assertEqual(context.exception.to_primitive(), {
+            'actions': {0: {'action_type': ["Value must be one of ('set_variable',)."]}}
+        })
+
+    def test_action_field_with_valid_data(self):
+        endpoint = Endpoint({
+            'name': 'test',
+            'method': 'put',
+            'url': '/test',
+            'task_value': 2,
+            'payload': {},
+            'actions': [
+                {
+                    'action_type': 'set_variable',
+                    'location': 'response',
+                    'variable_name': 'token',
+                    'variable_path': 'my_token.path'
+                },
+                {
+                    'action_type': 'set_variable',
+                    'location': 'cookies',
+                    'variable_name': 'token_type',
+                    'variable_path': 'token.auth.type'
+                }
+            ]
+        })
+        self.assertIsNone(endpoint.validate())
+        self.assertEqual(endpoint.to_primitive(), {
+            'name': 'test',
+            'method': 'put',
+            'url': '/test',
+            'task_value': 2,
+            'payload': {},
+            'asserts': None,
+            'headers': None,
+            'actions': [
+                {
+                    'action_type': 'set_variable',
+                    'location': 'response',
+                    'variable_name': 'token',
+                    'variable_path': 'my_token.path'
+                },
+                {
+                    'action_type': 'set_variable',
+                    'location': 'cookies',
+                    'variable_name': 'token_type',
+                    'variable_path': 'token.auth.type'
+                }
+            ]
         })
 
 
@@ -233,11 +354,14 @@ class TestConfigurationModel(unittest.TestCase):
                 'task_value': 1,
                 'payload': None,
                 'headers': None,
-                'asserts': None
+                'asserts': None,
+                'actions': None
             }],
             'global_headers': {'global': 'header'},
             'teardown_endpoints': None,
-            'setup_endpoints': None
+            'setup_endpoints': None,
+            'on_start_endpoints': None,
+            'on_stop_endpoints': None
         })
 
     def test_model_with_wrong_test_type_field_data(self):
@@ -294,6 +418,20 @@ class TestConfigurationModel(unittest.TestCase):
                         'value': '400',
                         'message': 'Error 400'
                     }
+                ],
+                'actions': [
+                    {
+                        'action_type': 'set_variable',
+                        'location': 'response',
+                        'variable_name': 'token',
+                        'variable_path': 'auth.token'
+                    },
+                    {
+                        'action_type': 'set_variable',
+                        'location': 'cookies',
+                        'variable_name': 'date',
+                        'variable_path': 'CurrentDate'
+                    }
                 ]
             }
         ]
@@ -305,6 +443,8 @@ class TestConfigurationModel(unittest.TestCase):
             'global_headers': None,
             'setup_endpoints': None,
             'teardown_endpoints': None,
+            'on_start_endpoints': None,
+            'on_stop_endpoints': None,
             'endpoints': [
                 {
                     'name': '#1',
@@ -313,7 +453,8 @@ class TestConfigurationModel(unittest.TestCase):
                     'task_value': 1,
                     'payload': None,
                     'headers': None,
-                    'asserts': None
+                    'asserts': None,
+                    'actions': None
                 },
                 {
                     'name': '#2',
@@ -329,7 +470,8 @@ class TestConfigurationModel(unittest.TestCase):
                         'assert_type': 'body_text_equal',
                         'value': 'hello world',
                         'message': 'Yes. error !!!'
-                    }]
+                    }],
+                    'actions': None
                 },
                 {
                     'name': '#3',
@@ -350,6 +492,20 @@ class TestConfigurationModel(unittest.TestCase):
                             'assert_type': 'response_code',
                             'value': '400',
                             'message': 'Error 400'
+                        }
+                    ],
+                    'actions': [
+                        {
+                            'action_type': 'set_variable',
+                            'location': 'response',
+                            'variable_name': 'token',
+                            'variable_path': 'auth.token'
+                        },
+                        {
+                            'action_type': 'set_variable',
+                            'location': 'cookies',
+                            'variable_name': 'date',
+                            'variable_path': 'CurrentDate'
                         }
                     ]
                 }
@@ -377,7 +533,8 @@ class TestConfigurationModel(unittest.TestCase):
                 'task_value': 1,
                 'payload': None,
                 'headers': None,
-                'asserts': None
+                'asserts': None,
+                'actions': None
             }],
             'teardown_endpoints': None,
             'endpoints': [{
@@ -387,8 +544,11 @@ class TestConfigurationModel(unittest.TestCase):
                 'task_value': 1,
                 'payload': None,
                 'headers': None,
-                'asserts': None
-            }]
+                'asserts': None,
+                'actions': None
+            }],
+            'on_start_endpoints': None,
+            'on_stop_endpoints': None
         })
 
     def test_set_teardown_endpoints(self):
@@ -397,7 +557,20 @@ class TestConfigurationModel(unittest.TestCase):
         test_configuration.set_endpoints(endpoints)
         teardown_endpoints = {
             'endpoints': [
-                {'name': '#2', 'url': '/url2', 'method': 'post', 'payload': {'hello': 'world'}},
+                {
+                    'name': '#2',
+                    'url': '/url2',
+                    'method': 'post',
+                    'payload': {
+                        'hello': 'world'
+                    },
+                    'actions': [{
+                        'action_type': 'set_variable',
+                        'location': 'headers',
+                        'variable_name': 'token',
+                        'variable_path': 'auth.token'
+                    }]
+                },
             ]
         }
         test_configuration.set_teardown_endpoints(teardown_endpoints)
@@ -414,7 +587,13 @@ class TestConfigurationModel(unittest.TestCase):
                     'hello': 'world'
                 },
                 'headers': None,
-                'asserts': None
+                'asserts': None,
+                'actions': [{
+                    'action_type': 'set_variable',
+                    'location': 'headers',
+                    'variable_name': 'token',
+                    'variable_path': 'auth.token'
+                }]
             }],
             'setup_endpoints': None,
             'endpoints': [{
@@ -424,7 +603,9 @@ class TestConfigurationModel(unittest.TestCase):
                 'task_value': 1,
                 'payload': None,
                 'headers': None,
-                'asserts': None
-            }]
+                'asserts': None,
+                'actions': None
+            }],
+            'on_start_endpoints': None,
+            'on_stop_endpoints': None
         })
-
