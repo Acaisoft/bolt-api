@@ -29,9 +29,7 @@ class VerboseHTTPTransport(RequestsHTTPTransport):
         }
         request = requests.post(self.url, **post_args)
 
-        if 400 <= request.status_code < 500:
-            pass
-        else:
+        if request.status_code >= 500:
             request.raise_for_status()
 
         result = request.json()
