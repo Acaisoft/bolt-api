@@ -2,14 +2,10 @@ import unittest
 
 from schematics import exceptions
 
-from models import Action, Assert, Endpoint, TestConfiguration
+from app.models import Action, Assert, Endpoint, TestConfiguration
 
 
 class TestActionModel(unittest.TestCase):
-    """
-    Running:
-    >>> python -m unittest models.tests.test_test_creator
-    """
     def test_model_without_data(self):
         action = Action()
         with self.assertRaises(exceptions.DataError) as context:
