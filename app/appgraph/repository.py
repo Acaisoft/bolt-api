@@ -59,7 +59,7 @@ class CreateValidate(graphene.Mutation):
         project_id = str(project_id)
 
         assert user_id, f'unauthenticated request'
-        validators.validate_text(name)
+        name = validators.validate_text(name)
 
         query = gclient.execute(gql('''query ($projId:uuid!, $repoName:String!, $repoUrl:String!, $userId:uuid!, $confType:uuid!) {
             project(where:{
@@ -180,6 +180,9 @@ class UpdateValidate(graphene.Mutation):
                     project:{userProjects:{user_id:{_eq:$userId}}}
                 }
             ) {
+                name
+                url
+                type_slug
                 performed
                 configurations_aggregate (where:{performed:{_eq:true}}) {
                     aggregate {
@@ -201,17 +204,17 @@ class UpdateValidate(graphene.Mutation):
         query_data = {}
         num_performed = query['repository'][0]['configurations_aggregate']['aggregate']['count']
 
-        if name:
+        if name and name != query['repository'][0]['name']:
             assert len(query.get('uniqueName')) == 0, f'repository with this name already exists'
             query_data['name'] = name
 
-        if type_slug:
+        if type_slug and repository_url != query['repository'][0]['type_slug']:
             assert len(query.get('configuration_type', [])) == 1, f'invalid type_slug "{type_slug}", valid choices are: {const.TESTTYPE_LOAD}'
             assert num_performed == 0, \
                 f'cannot change type_slug, repository is in use by {num_performed} configuration{"s" if num_performed > 1 else ""}'
             query_data['type_slug'] = type_slug
 
-        if repository_url:
+        if repository_url and repository_url != query['repository'][0]['url']:
             assert num_performed == 0, \
                 f'cannot update url, repository is in use by {num_performed} configuration{"s" if num_performed > 1 else ""}'
             assert len(query.get('uniqueUrl')) == 0, f'repository with this repository_url already exists'

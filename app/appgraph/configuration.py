@@ -313,8 +313,8 @@ class UpdateValidate(graphene.Mutation):
 
         query_data = {}
 
-        if name:
-            validators.validate_text(name)
+        if name and name != original['configuration_by_pk']['name']:
+            name = validators.validate_text(name)
             assert len(repo.get('isNameUnique', [])) == 0, f'configuration named "{name}" already exists'
             query_data['name'] = name
 
