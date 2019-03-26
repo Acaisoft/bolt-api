@@ -3,11 +3,13 @@ from flask import Flask
 from app import healthcheck, graphql, deployer, cmd, webhooks
 from app.auth import auth
 from app.cache import get_cache
-from app.configure import configure
+from app.configure import configure, setup_logging
 from app.hasura_client import hasura_client
 
 
 def create_app(test_config=None):
+    setup_logging()
+
     app = Flask(__name__, instance_relative_config=True)
 
     configure(app)

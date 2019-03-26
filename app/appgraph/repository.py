@@ -159,7 +159,7 @@ class UpdateValidate(graphene.Mutation):
         gclient = hasura_client(current_app.config)
 
         if name:
-            name = validators.validate_text(name)
+            name = validators.validate_text(name, required=False)
 
         query = gclient.execute(gql('''query ($repoName:String!, $repoUrl:String!, $repoId:uuid!, $userId:uuid!, $confType:String) {
             uniqueName: repository(where:{
