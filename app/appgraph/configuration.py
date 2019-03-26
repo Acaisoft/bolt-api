@@ -85,6 +85,8 @@ class CreateValidate(graphene.Mutation):
 
         assert type_slug in const.TESTTYPE_CHOICE, f'invalid choice of type_slug (valid choices: {const.TESTTYPE_CHOICE})'
 
+        name = validators.validate_text(name)
+
         role, user_id = get_request_role_userid(info)
         assert user_id, f'unauthenticated request'
 
@@ -124,7 +126,11 @@ class CreateValidate(graphene.Mutation):
                 id
             }
             
-            configuration (where:{name:{_eq:$confName}, project:{userProjects:{user_id:{_eq:$userId}}}}) {
+            configuration (where:{
+                name:{_eq:$confName}, 
+                project_id:{_eq:$projId}, 
+                project:{userProjects:{user_id:{_eq:$userId}}}
+            }) {
                 id
             }
         }'''), repo_query)
@@ -132,8 +138,6 @@ class CreateValidate(graphene.Mutation):
         if role != const.ROLE_ADMIN:
             assert repo.get('user_project', None), \
                 f'non-admin ({role}) user {user_id} does not have access to project {project_id}'
-
-        validators.validate_text(name)
 
         assert repo.get('project_by_pk', None), f'project "{project_id}" does not exist'
 
@@ -255,7 +259,7 @@ class UpdateValidate(graphene.Mutation):
         assert user_id, f'unauthenticated request'
 
         if name:
-            validators.validate_text(name)
+            name = validators.validate_text(name)
 
         if type_slug:
             assert type_slug in const.TESTTYPE_CHOICE, \

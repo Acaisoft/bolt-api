@@ -5,10 +5,10 @@ from app import const
 from app.deployer.utils import get_test_run_status
 from app.hasura_client import hasura_client
 
-bp = Blueprint('webhooks', __name__)
+bp = Blueprint('webhooks_execution', __name__)
 
 
-@bp.route('/execution/update', methods=['POST'])
+@bp.route('/update', methods=['POST'])
 def execution_update():
     event = request.get_json().get('event')
     assert event and event.get('op') == 'UPDATE', f'invalid event input: {str(event)}'

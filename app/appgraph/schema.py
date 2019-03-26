@@ -1,6 +1,6 @@
 import graphene
 
-from app.appgraph import configuration, testrun, util, project, repository, test_creator
+from app.appgraph import configuration, testrun, util, project, repository, test_creator, uploads, demo
 from app.appgraph import oauth
 
 
@@ -13,6 +13,9 @@ def to_field(gqlClass):
 
 
 class TestrunMutations(graphene.ObjectType):
+    # uploads
+    testrun_upload = to_field(uploads.UploadUrl)
+
     # configurations
     testrun_configuration_create = to_field(configuration.Create)
     testrun_configuration_create_validate = to_field(configuration.CreateValidate)
@@ -24,7 +27,6 @@ class TestrunMutations(graphene.ObjectType):
     testrun_project_create_validate = to_field(project.CreateValidate)
     testrun_project_update = to_field(project.Update)
     testrun_project_update_validate = to_field(project.UpdateValidate)
-    testrun_project_image_upload = to_field(project.ImageUploadUrl)
 
     # repositories
     testrun_repository_create = to_field(repository.Create)
@@ -40,8 +42,8 @@ class TestrunMutations(graphene.ObjectType):
     testrun_start = to_field(testrun.TestrunStart)
 
     # debug only
-    testrun_project_purge = to_field(project.PurgeProject)
-    testrun_project_demo = to_field(project.DemoProject)
+    testrun_project_purge = to_field(demo.PurgeProject)
+    testrun_project_demo = to_field(demo.DemoProject)
 
 
 AppSchema = graphene.Schema(

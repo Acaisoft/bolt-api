@@ -4,11 +4,11 @@ GITHUB_CLIENT_ID = '6f1b565171e2f15e2afd'
 
 PORT = 5000
 
-OAUTH_REDIRECT = 'http://localhost:5000'
+OAUTH_REDIRECT = 'http://api:5000'
 
 JWT_ALGORITHM = 'HS256'
 
-HASURA_GQL = "http://localhost:8080/v1alpha1/graphql"
+HASURA_GQL = "http://hasura:8080/v1alpha1/graphql"
 
 BOLT_DEPLOYER_ADDR = 'localhost:7777'
 
