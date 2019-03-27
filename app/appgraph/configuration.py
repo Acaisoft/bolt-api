@@ -5,7 +5,7 @@ from flask import current_app
 from gql import gql
 
 from app.appgraph.util import get_request_role_userid, ValidationInterface, ValidationResponse, OutputTypeFactory, \
-    OutputValueFromFactory
+    OutputValueFromFactory, OutputInterfaceFactory
 from app import validators, const
 from app.hasura_client import hasura_client
 
@@ -33,11 +33,10 @@ class ConfigurationInterface(graphene.Interface):
     name = graphene.String()
     type_slug = graphene.String(
         description=f'Configuration type: "{const.TESTTYPE_LOAD}"')
-    code_source = graphene.String(
-        description=f'Test code source: "{const.CONF_SOURCE_JSON}" or "{const.CONF_SOURCE_REPO}"')
-    repository_id = graphene.String(
-        description='Repository to fetch test definition from.')
     project_id = graphene.UUID()
+    test_source_id = graphene.String(
+        required=False,
+        description='Test source to fetch test definition from.')
     configuration_parameters = graphene.List(
         ConfigurationParameterInterface,
         description='Default parameter types overrides.')
@@ -61,15 +60,12 @@ class CreateValidate(graphene.Mutation):
         type_slug = graphene.String(
             required=True,
             description=f'Configuration type: "{const.TESTTYPE_LOAD}"')
-        code_source = graphene.String(
-            required=True,
-            description=f'Test code source: "{const.CONF_SOURCE_JSON}" or "{const.CONF_SOURCE_REPO}"')
         project_id = graphene.UUID(
             required=True,
             description='Project to create test in, user must have access to it.')
-        repository_id = graphene.String(
+        test_source_id = graphene.String(
             required=False,
-            description='Repository to fetch test definition from.')
+            description='Test source to fetch test definition from.')
         configuration_parameters = graphene.List(
             ConfigurationParameterInput,
             required=True,
@@ -78,10 +74,8 @@ class CreateValidate(graphene.Mutation):
     Output = ValidationInterface
 
     @staticmethod
-    def validate(info, name, type_slug, code_source, project_id, repository_id=None, configuration_parameters=None):
+    def validate(info, name, type_slug, project_id, test_source_id=None, configuration_parameters=None):
         project_id = str(project_id)
-
-        assert code_source in const.CONF_SOURCE_CHOICE, f'invalid choice of code_source (valid choices: {const.CONF_SOURCE_CHOICE})'
 
         assert type_slug in const.TESTTYPE_CHOICE, f'invalid choice of type_slug (valid choices: {const.TESTTYPE_CHOICE})'
 
@@ -97,17 +91,38 @@ class CreateValidate(graphene.Mutation):
             'confName': name,
             'projId': project_id,
             'userId': user_id,
-            'repoId': str(repository_id) or "",
-            'fetchRepo': bool(repository_id),
+            'sourceId': str(test_source_id) or "",
+            'fetchSource': bool(test_source_id),
         }
 
-        repo = gclient.execute(gql('''query ($confName:String, $repoId:uuid!, $fetchRepo:Boolean!, $projId:uuid!, $userId:uuid!, $type_slug:String!) {
-            repository_by_pk (id:$repoId) @include(if:$fetchRepo) {
-                url
-                configuration_type { slug_name }
+        repo = gclient.execute(gql('''query (
+                $confName:String, $sourceId:uuid!, $fetchSource:Boolean!, 
+                $projId:uuid!, $userId:uuid!, $type_slug:String!
+        ) {
+            test_source (where:{
+                    id:{_eq:$sourceId}, 
+                    project:{userProjects:{user_id:{_eq:$userId}}}
+            }) @include(if:$fetchSource) {
+                source_type
                 project {
-                    is_deleted
                     userProjects { user_id }
+                }
+                repository {
+                    name
+                    url
+                    configuration_type { slug_name }
+                    project {
+                        userProjects { user_id }
+                    }
+                }
+                test_creator {
+                    name
+                    data
+                    min_wait
+                    max_wait
+                    project {
+                        userProjects { user_id }
+                    }
                 }
             }
             
@@ -163,16 +178,31 @@ class CreateValidate(graphene.Mutation):
                     'value': param_value,
                 })
 
-        if repository_id and code_source == const.CONF_SOURCE_REPO:
-            assert repo.get('repository_by_pk', None), f'repository does not exist'
-            validators.validate_repository(user_id=user_id, repo_config=repo['repository_by_pk'])
-            validators.validate_accessibility(current_app.config, repo['repository_by_pk']['url'])
-            query_data['repository_id'] = str(repository_id)
+        if test_source_id:
+            test_source = repo.get('test_source')
+            assert len(test_source), f'test_source {str(test_source_id)} does not exist'
+            test_source = test_source[0]
+
+            if test_source['source_type'] == const.CONF_SOURCE_REPO:
+                assert test_source.get('repository', None), f'repository does not exist'
+                validators.validate_repository(user_id=user_id, repo_config=test_source['repository'])
+                validators.validate_accessibility(current_app.config, test_source['repository']['url'])
+                query_data['test_source_id'] = str(test_source_id)
+            elif test_source['source_type'] == const.CONF_SOURCE_JSON:
+                assert test_source.get('test_creator', None), f'test_creator does not exist'
+                validators.validate_test_creator(
+                    test_source['test_creator']['data'],
+                    min_wait=test_source['test_creator']['min_wait'],
+                    max_wait=test_source['test_creator']['max_wait']
+                )
+                query_data['test_source_id'] = str(test_source_id)
+            else:
+                raise AssertionError(f'test source {str(test_source_id)} is invalid: {test_source["source_type"]}')
 
         return query_data
 
-    def mutate(self, info, name, type_slug, code_source, project_id, repository_id=None, configuration_parameters=None):
-        CreateValidate.validate(info, name, type_slug, code_source, project_id, repository_id, configuration_parameters)
+    def mutate(self, info, name, type_slug, project_id, test_source_id=None, configuration_parameters=None):
+        CreateValidate.validate(info, name, type_slug, project_id, test_source_id, configuration_parameters)
         return ValidationResponse(ok=True)
 
 
@@ -181,19 +211,17 @@ class Create(CreateValidate):
 
     Output = OutputTypeFactory(ConfigurationType, 'Create')
 
-    def mutate(self, info, name, type_slug, code_source, project_id, repository_id=None, configuration_parameters=None):
+    def mutate(self, info, name, type_slug, project_id, test_source_id=None, configuration_parameters=None):
         gclient = hasura_client(current_app.config)
 
-        query_params = CreateValidate.validate(info, name, type_slug, code_source, project_id, repository_id, configuration_parameters)
+        query_params = CreateValidate.validate(info, name, type_slug, project_id, test_source_id, configuration_parameters)
 
         query = gql('''mutation ($data:[configuration_insert_input!]!) {
             insert_configuration(
                 objects: $data
             ) {
                 returning { 
-                    id name code_source type_slug repository_id project_id configuration_parameters { 
-                        value parameter_slug 
-                    } 
+                    id name type_slug project_id test_source_id 
                 } 
             }
         }''')
@@ -219,12 +247,9 @@ class UpdateValidate(graphene.Mutation):
         type_slug = graphene.String(
             required=False,
             description=f'Configuration type: "{const.TESTTYPE_LOAD}"')
-        code_source = graphene.String(
+        test_source_id = graphene.String(
             required=False,
-            description=f'Test code source (choices: {const.CONF_SOURCE_CHOICE})')
-        repository_id = graphene.String(
-            required=False,
-            description='Repository to fetch test definition from.')
+            description='Test source to fetch test definition from.')
         configuration_parameters = graphene.List(
             ConfigurationParameterInput,
             required=False,
@@ -233,29 +258,28 @@ class UpdateValidate(graphene.Mutation):
     Output = ValidationInterface
 
     @staticmethod
-    def validate(info, id, name=None, type_slug=None, code_source=None, repository_id=None, configuration_parameters=None):
-
-        gclient = hasura_client(current_app.config)
-
-        original = gclient.execute(gql('''query ($confId:uuid!) {
-            configuration_by_pk (id:$confId) {
-                performed
-                name
-                code_source
-                type_slug
-                project_id
-                repository_id
-            }
-        }'''), {'confId': str(id)})
-        assert original['configuration_by_pk'], f'configuration does not exist'
-
-        is_performed = original['configuration_by_pk']['performed']
-        if is_performed:
-            assert not any((type_slug, code_source, repository_id, configuration_parameters)), \
-                f'configuration {str(id)} has already been performed, only name is editable'
+    def validate(info, id, name=None, type_slug=None, test_source_id=None, configuration_parameters=None):
 
         role, user_id = get_request_role_userid(info)
         assert user_id, f'unauthenticated request'
+
+        gclient = hasura_client(current_app.config)
+
+        original = gclient.execute(gql('''query ($confId:uuid!, $userId:uuid!) {
+            configuration (where:{id:{_eq:$confId}, project:{userProjects:{user_id:{_eq:$userId}}}}) {
+                performed
+                name
+                type_slug
+                project_id
+                test_source_id
+            }
+        }'''), {'confId': str(id), 'userId': user_id})
+        assert len(original['configuration']), f'configuration does not exist'
+
+        is_performed = original['configuration'][0]['performed']
+        if is_performed:
+            assert not any((type_slug, test_source_id, configuration_parameters)), \
+                f'configuration {str(id)} has already been performed, only name is editable'
 
         if name:
             name = validators.validate_text(name)
@@ -264,28 +288,42 @@ class UpdateValidate(graphene.Mutation):
             assert type_slug in const.TESTTYPE_CHOICE, \
                 f'invalid choice of type_slug (valid choices: {const.TESTTYPE_CHOICE})'
         else:
-            type_slug = original['configuration_by_pk']['type_slug']
-
-        if code_source:
-            assert code_source in const.CONF_SOURCE_CHOICE, \
-                f'invalid choice of code_source (valid choices: {const.CONF_SOURCE_CHOICE})'
+            type_slug = original['configuration'][0]['type_slug']
 
         repo_query = {
             'type_slug': type_slug,
             'confId': str(id),
             'confName': name or '',
             'userId': user_id,
-            'repoId': repository_id or '',
-            'fetchRepo': bool(repository_id),
+            'sourceId': str(test_source_id) or "",
+            'fetchSource': bool(test_source_id),
         }
 
-        repo = gclient.execute(gql('''query ($confId:uuid!, $confName:String, $repoId:uuid!, $fetchRepo:Boolean!, $userId:uuid!, $type_slug:String!) {
-            repository_by_pk (id:$repoId) @include(if:$fetchRepo) {
-                url
-                configuration_type { slug_name }
+        repo = gclient.execute(gql('''query ($confId:uuid!, $confName:String, $sourceId:uuid!, $fetchSource:Boolean!, $userId:uuid!, $type_slug:String!) {
+            test_source (where:{
+                    id:{_eq:$sourceId}, 
+                    project:{userProjects:{user_id:{_eq:$userId}}}
+            }) @include(if:$fetchSource) {
+                source_type
                 project {
-                    is_deleted
                     userProjects { user_id }
+                }
+                repository {
+                    name
+                    url
+                    configuration_type { slug_name }
+                    project {
+                        userProjects { user_id }
+                    }
+                }
+                test_creator {
+                    name
+                    data
+                    min_wait
+                    max_wait
+                    project {
+                        userProjects { user_id }
+                    }
                 }
             }
             
@@ -312,7 +350,7 @@ class UpdateValidate(graphene.Mutation):
 
         query_data = {}
 
-        if name and name != original['configuration_by_pk']['name']:
+        if name and name != original['configuration'][0]['name']:
             name = validators.validate_text(name)
             assert len(repo.get('isNameUnique', [])) == 0, f'configuration named "{name}" already exists'
             query_data['name'] = name
@@ -320,19 +358,26 @@ class UpdateValidate(graphene.Mutation):
         if type_slug:
             query_data['type_slug'] = type_slug
 
-        if code_source:
-            query_data['code_source'] = code_source
-        else:
-            code_source = original['configuration_by_pk']['code_source']
+        if test_source_id:
+            test_source = repo.get('test_source')
+            assert len(test_source), f'test_source {str(test_source_id)} does not exist'
+            test_source = test_source[0]
 
-        if repository_id and code_source != const.CONF_SOURCE_REPO:
-            assert False, f'cannot set repository_id on a "{code_source}" type configuration'
-
-        if repository_id and code_source == const.CONF_SOURCE_REPO and repository_id != original['configuration_by_pk']['repository_id']:
-            assert repo.get('repository_by_pk', None), f'repository does not exist'
-            validators.validate_repository(user_id=user_id, repo_config=repo['repository_by_pk'])
-            validators.validate_accessibility(current_app.config, repo['repository_by_pk']['url'])
-            query_data['repository_id'] = repository_id
+            if test_source['source_type'] == const.CONF_SOURCE_REPO:
+                assert test_source.get('repository', None), f'repository does not exist'
+                validators.validate_repository(user_id=user_id, repo_config=test_source['repository'])
+                validators.validate_accessibility(current_app.config, test_source['repository']['url'])
+                query_data['test_source_id'] = str(test_source_id)
+            elif test_source['source_type'] == const.CONF_SOURCE_JSON:
+                assert test_source.get('test_creator', None), f'test_creator does not exist'
+                validators.validate_test_creator(
+                    test_source['test_creator']['data'],
+                    min_wait=test_source['test_creator']['min_wait'],
+                    max_wait=test_source['test_creator']['max_wait']
+                )
+                query_data['test_source_id'] = str(test_source_id)
+            else:
+                raise AssertionError(f'test source {str(test_source_id)} is invalid: {test_source["source_type"]}')
 
         if configuration_parameters:
             patched_params = validators.validate_test_params(configuration_parameters, defaults=repo['parameter'])
@@ -346,8 +391,8 @@ class UpdateValidate(graphene.Mutation):
 
         return query_data
 
-    def mutate(self, info, id, name=None, type_slug=None, code_source=None, repository_id=None, configuration_parameters=None):
-        UpdateValidate.validate(info, id, name, type_slug, code_source, repository_id, configuration_parameters)
+    def mutate(self, info, id, name=None, type_slug=None, test_source_id=None, configuration_parameters=None):
+        UpdateValidate.validate(info, id, name, type_slug, test_source_id, configuration_parameters)
         return ValidationResponse(ok=True)
 
 
@@ -356,11 +401,10 @@ class Update(UpdateValidate):
 
     Output = OutputTypeFactory(ConfigurationType, 'Update')
 
-    def mutate(self, info, id, name=None, type_slug=None, code_source=None, repository_id=None, configuration_parameters=None):
+    def mutate(self, info, id, name=None, type_slug=None, test_source_id=None, configuration_parameters=None):
         gclient = hasura_client(current_app.config)
 
-        query_params = UpdateValidate.validate(info, id, name, type_slug, code_source, repository_id,
-                                               configuration_parameters)
+        query_params = UpdateValidate.validate(info, id, name, type_slug, test_source_id, configuration_parameters)
 
         conf_params = query_params.pop('configuration_parameters', None)
         if conf_params:
@@ -383,7 +427,7 @@ class Update(UpdateValidate):
                 where:{id:{_eq:$id}},
                 _set: $data
             ) {
-                returning { id name code_source type_slug repository_id project_id } 
+                returning { id name type_slug project_id test_source_id } 
             }
         }''')
 

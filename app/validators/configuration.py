@@ -20,26 +20,37 @@ def validate_test_configuration_by_id(test_conf_id):
         configuration_by_pk (id:$conf_id) {
             id
             name
-            code_source
             
-            repository {
-                url
+            test_source {
+                source_type
+                
+                project {
+                    userProjects { user_id }
+                }
+                
+                repository {
+                    name
+                    url
+                    configuration_type { slug_name }
+                    project {
+                        userProjects { user_id }
+                    }
+                }
+                
+                test_creator {
+                    name
+                    data
+                    min_wait
+                    max_wait
+                    project {
+                        userProjects { user_id }
+                    }
+                }
             }
             
             configuration_parameters {
                 value
                 parameter_slug
-            }
-                    
-            test_creator_configuration_m2m (order_by:{
-                created_at:desc_nulls_last
-            }, limit:1) {
-                test_creator {
-                    created_at
-                    data
-                    max_wait
-                    min_wait
-                }
             }
         }
     }'''), {'conf_id': test_conf_id})
@@ -56,16 +67,6 @@ def validate_test_configuration(conf: dict, defaultParams:list):
     ...    "repository": {
     ...      "url": "http://url.url/url"
     ...    },
-    ...    "test_creator_configuration_m2m": [
-    ...        {
-    ...          "test_creator": {
-    ...            "created_at": "2019-03-14T17:23:17.267973+00:00",
-    ...            "data": "{}",
-    ...            "max_wait": 200,
-    ...            "min_wait": 60
-    ...          }
-    ...        }
-    ...    ],
     ...    "configuration_parameters": [
     ...      { "value": "30m", "parameter_slug": "param1", },
     ... ]}, [
@@ -80,17 +81,17 @@ def validate_test_configuration(conf: dict, defaultParams:list):
 
     validate_test_params(conf['configuration_parameters'], defaults=defaultParams)
 
-    if conf['code_source'] == const.CONF_SOURCE_REPO:
-        assert len(conf['repository']['url']), 'invalid repository address'
-        repository.validate_accessibility(current_app.config, conf['repository']['url'])
+    test_source = conf['test_source']
 
-    if conf['code_source'] == const.CONF_SOURCE_JSON:
-        assert len(conf['test_creator_configuration_m2m']) == 1, f'missing test_creator configuration'
-        test_creator = conf['test_creator_configuration_m2m'][0]['test_creator']
+    if test_source['source_type'] == const.CONF_SOURCE_REPO:
+        assert test_source.get('repository', None), f'repository does not exist'
+        repository.validate_accessibility(current_app.config, test_source['repository']['url'])
+    elif test_source['source_type'] == const.CONF_SOURCE_JSON:
+        assert test_source.get('test_creator', None), f'test_creator does not exist'
         validate_test_creator(
-            json_data=test_creator['data'],
-            min_wait=test_creator['min_wait'],
-            max_wait=test_creator['max_wait'],
+            test_source['test_creator']['data'],
+            min_wait=test_source['test_creator']['min_wait'],
+            max_wait=test_source['test_creator']['max_wait']
         )
 
 
