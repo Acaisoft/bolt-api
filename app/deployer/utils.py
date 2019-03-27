@@ -13,7 +13,7 @@ from app.deployer import clients
 from app.hasura_client import hasura_client
 
 
-DEPLOYER_TIMEOUT = 3
+DEPLOYER_TIMEOUT = 6
 
 
 def start_image(app_config, project_id):
