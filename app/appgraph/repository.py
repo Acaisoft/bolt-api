@@ -1,4 +1,5 @@
 import json
+import uuid
 
 import graphene
 from flask import current_app
@@ -119,16 +120,29 @@ class Create(CreateValidate):
         gclient = hasura_client(current_app.config)
 
         query_params = CreateValidate.validate(info, name, repository_url, project_id, type_slug)
+        query_params['id'] = str(uuid.uuid4())
+        test_source_params = {
+            'id': query_params['id'],
+            'project_id': query_params['project_id'],
+            'source_type': const.CONF_SOURCE_REPO,
+            'repository_id': query_params['id'],
+        }
 
-        query = gql('''mutation ($data:[repository_insert_input!]!) {
+        query = gql('''mutation ($data:[repository_insert_input!]!, $test_source_params:test_source_insert_input!) {
             insert_repository(
                 objects: $data
             ) {
                 returning { id name repository_url:url project_id type_slug } 
             }
+            insert_test_source (objects:[$test_source_params]) {
+                returning { id }
+            }
         }''')
 
-        query_response = gclient.execute(query, variable_values={'data': query_params})
+        query_response = gclient.execute(query, variable_values={
+            'data': query_params,
+            'test_source_params': test_source_params,
+        })
         assert query_response['insert_repository'], f'cannot save repository ({str(query_response)})'
 
         return OutputValueFromFactory(Create, query_response['insert_repository'])
@@ -209,7 +223,8 @@ class UpdateValidate(graphene.Mutation):
             query_data['name'] = name
 
         if type_slug and repository_url != query['repository'][0]['type_slug']:
-            assert len(query.get('configuration_type', [])) == 1, f'invalid type_slug "{type_slug}", valid choices are: {const.TESTTYPE_LOAD}'
+            assert len(query.get('configuration_type',
+                                 [])) == 1, f'invalid type_slug "{type_slug}", valid choices are: {const.TESTTYPE_LOAD}'
             assert num_performed == 0, \
                 f'cannot change type_slug, repository is in use by {num_performed} configuration{"s" if num_performed > 1 else ""}'
             query_data['type_slug'] = type_slug
