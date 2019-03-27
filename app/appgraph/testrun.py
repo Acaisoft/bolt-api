@@ -97,6 +97,12 @@ class TestrunStart(graphene.Mutation):
         test_config = test_config_response['configuration'][0]
         code_source = test_config['code_source']
 
+        initial_state = {
+            'configuration_id': str(conf_id),
+            'start': str(datetime.now()),
+            'status': const.TESTRUN_PREPARING,
+        }
+
         if code_source == const.CONF_SOURCE_REPO:
             deployer_response, execution_id = start_job(
                 app_config=current_app.config,
@@ -105,25 +111,24 @@ class TestrunStart(graphene.Mutation):
                 no_cache_redis=no_cache or no_cache_redis,
                 no_cache_kaniko=no_cache or no_cache_kaniko,
             )
+            initial_state['test_preparation_job_id'] = deployer_response.id
+            initial_state['test_preparation_job_status'] = deployer_response.status
         elif code_source == const.CONF_SOURCE_JSON:
             deployer_response, execution_id = start_image(
                 app_config=current_app.config,
                 project_id=test_config['project_id'],
             )
+            initial_state['test_preparation_job_id'] = deployer_response.name
+            initial_state['test_preparation_job_status'] = str(deployer_response.status)
         else:
             raise Exception(f'invalid code source value {code_source}')
+
+        initial_state['id'] = str(execution_id)
 
         exec_result = gclient.execute(gql('''mutation ($data:[execution_insert_input!]!) {
         insert_execution(objects:$data) 
             {returning {id}}
-        }'''), variable_values={'data': {
-            'id': str(execution_id),
-            'configuration_id': str(conf_id),
-            'start': str(datetime.now()),
-            'status': const.TESTRUN_PREPARING,
-            'test_preparation_job_id': deployer_response.id,
-            'test_preparation_job_status': deployer_response.status,
-        }})
+        }'''), variable_values={'data': initial_state})
         assert exec_result['insert_execution'], f'execution creation failed ({str(exec_result)}'
 
         return TestrunStartObject(execution_id=execution_id)
