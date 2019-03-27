@@ -1,6 +1,47 @@
 Changelog
 =========
 
+## 0.1.8 (2019-03-27)
+
+### Changes
+
+* Change testrunner authentication mechanism. [Piotr Mońko]
+
+* Add back image_url to project_create endpoint. [Piotr Mońko]
+
+* Move upload endpoints to a generic method. [Piotr Mońko]
+
+* Populate execution_id fields in execution results tables from testrunner role id. [Piotr Mońko]
+
+* Remove image_url from project create method. [Piotr Mońko]
+
+### Fix
+
+* Fix demo seed for result_distribution. [Piotr Mońko]
+
+* Fix nonserializable bytes error. [Piotr Mońko]
+
+### Other
+
+* Switch job token to keycloack. [Piotr Mońko]
+
+* Limit logging graphql exceptions, wip. [Piotr Mońko]
+
+* Merge branch 'master' of bitbucket.org:acaisoft/bolt-api. [Piotr Mońko]
+
+* Merged in add-on-start-and-on-stop (pull request #8) [Artiom Borysiewicz]
+
+  Add on start and on stop
+
+* Add tests for models. [art.barysevich]
+
+* Add tests for models. [art.barysevich]
+
+* Add tests for models. [art.barysevich]
+
+* Test commit. [art.barysevich]
+
+
 ## 0.1.7 (2019-03-25)
 
 ### Changes

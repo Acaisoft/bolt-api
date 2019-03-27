@@ -1,0 +1,27 @@
+- args:
+    role: testrunner
+    table:
+      name: test_creator_configuration_m2m
+      schema: public
+  type: drop_select_permission
+- args:
+    permission:
+      allow_aggregations: false
+      columns:
+      - configuration_id
+      - test_creator_id
+      - created_at
+      - project_id
+      - name
+      - id
+      - type_slug
+      filter:
+        configuration:
+          executions:
+            id:
+              _eq: X-Hasura-Testruner-Id
+    role: testrunner
+    table:
+      name: test_creator_configuration_m2m
+      schema: public
+  type: create_select_permission

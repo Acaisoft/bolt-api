@@ -1,0 +1,27 @@
+- args:
+    role: testrunner
+    table:
+      name: test_creator
+      schema: public
+  type: drop_select_permission
+- args:
+    permission:
+      allow_aggregations: false
+      columns:
+      - id
+      - data
+      - created_by_id
+      - created_at
+      - max_wait
+      - min_wait
+      filter:
+        test_creator_configuration_m2m:
+          configuration:
+            executions:
+              id:
+                _eq: X-Hasura-User-Id
+    role: testrunner
+    table:
+      name: test_creator
+      schema: public
+  type: create_select_permission

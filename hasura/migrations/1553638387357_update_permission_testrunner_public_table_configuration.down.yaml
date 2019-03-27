@@ -1,0 +1,27 @@
+- args:
+    role: testrunner
+    table:
+      name: configuration
+      schema: public
+  type: drop_select_permission
+- args:
+    permission:
+      allow_aggregations: false
+      columns:
+      - id
+      - name
+      - repository_id
+      - project_id
+      - performed
+      - created_by_id
+      - code_source
+      - type_slug
+      filter:
+        executions:
+          id:
+            _eq: X-Hasura-User-Id
+    role: testrunner
+    table:
+      name: configuration
+      schema: public
+  type: create_select_permission
