@@ -1,6 +1,30 @@
 Changelog
 =========
 
+## (unreleased)
+
+### Changes
+
+* Increase deployer service connection timeout setting. [Piotr Mońko]
+
+
+## 0.2.0 (2019-03-27)
+
+### Changes
+
+* Change how job status is reported for an image testrun. [Piotr Mońko]
+
+### Fix
+
+* Add back configuration creation parameters validation. [Piotr Mońko]
+
+### Other
+
+* Fix full token to auth token. [Piotr Mońko]
+
+* Set default BOLT_TEST_RUNNER_IMAGE. [Piotr Mońko]
+
+
 ## 0.1.9 (2019-03-27)
 
 ### Changes
