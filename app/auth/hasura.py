@@ -72,11 +72,16 @@ def hasura_token_for_testrunner(config):
     :return: tuple: jwt token, testrunner id
     """
 
+    server_url = config.get('KEYCLOAK_URL')
+    client_id = config.get('KEYCLOAK_CLIENT_ID')
+    realm_name = config.get('KEYCLOAK_REALM_NAME')
+    client_secret_key = config.get('KEYCLOAK_CLIENT_SECRET')
+
     k_client = KeycloakOpenID(
-        server_url=config.get('KEYCLOAK_URL'),
-        client_id=config.get('KEYCLOAK_CLIENT_ID'),
-        realm_name=config.get('KEYCLOAK_REALM_NAME'),
-        client_secret_key=config.get('KEYCLOAK_CLIENT_SECRET'),
+        server_url=server_url,
+        client_id=client_id,
+        realm_name=realm_name,
+        client_secret_key=client_secret_key,
         verify=True
     )
 

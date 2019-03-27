@@ -6,6 +6,8 @@ from flask import Flask
 import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
 
+from app import const
+
 
 def setup_logging():
     dictConfig({
@@ -40,4 +42,11 @@ def configure(app: Flask):
     config_ver = app.config.get('CONFIG_VERSION', None)
     secrets_ver = app.config.get('SECRETS_VERSION', None)
 
-    logging.info(f'app configured using {conf_file_path} v{config_ver} and {secrets_file_path} v{secrets_ver}')
+    app.logger.info(f'app configured using {conf_file_path} v{config_ver} and {secrets_file_path} v{secrets_ver}')
+
+    validate(app.config)
+
+
+def validate(config):
+    for var_name in const.REQUIRED_CONFIG_VARS:
+        assert config.get(var_name), f'undefined {var_name}'
