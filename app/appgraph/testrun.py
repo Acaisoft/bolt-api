@@ -7,7 +7,7 @@ from gql import gql
 from app import const
 from app.appgraph.util import get_request_role_userid
 from app.deployer import clients
-from app.deployer.utils import start_job, get_test_run_status
+from app.deployer.utils import start_job, get_test_run_status, start_image
 from app.validators.configuration import validate_test_configuration_by_id
 from app.hasura_client import hasura_client
 
@@ -95,39 +95,36 @@ class TestrunStart(graphene.Mutation):
             })
         assert test_config_response['configuration'], f'configuration not found ({str(test_config_response)})'
         test_config = test_config_response['configuration'][0]
+        code_source = test_config['code_source']
+
+        if code_source == const.CONF_SOURCE_REPO:
+            deployer_response, execution_id = start_job(
+                app_config=current_app.config,
+                project_id=test_config['project_id'],
+                repo_url=test_config['repository']['url'],
+                no_cache_redis=no_cache or no_cache_redis,
+                no_cache_kaniko=no_cache or no_cache_kaniko,
+            )
+        elif code_source == const.CONF_SOURCE_JSON:
+            deployer_response, execution_id = start_image(
+                app_config=current_app.config,
+                project_id=test_config['project_id'],
+            )
+        else:
+            raise Exception(f'invalid code source value {code_source}')
 
         exec_result = gclient.execute(gql('''mutation ($data:[execution_insert_input!]!) {
         insert_execution(objects:$data) 
             {returning {id}}
         }'''), variable_values={'data': {
+            'id': str(execution_id),
             'configuration_id': str(conf_id),
             'start': str(datetime.now()),
-            'status': 'INIT',
+            'status': const.TESTRUN_PREPARING,
+            'test_preparation_job_id': deployer_response.id,
+            'test_preparation_job_status': deployer_response.status,
         }})
         assert exec_result['insert_execution'], f'execution creation failed ({str(exec_result)}'
-
-        execution_id = exec_result['insert_execution']['returning'][0]['id']
-
-        deployer_response = start_job(
-            app_config=current_app.config,
-            project_id=test_config['project_id'],
-            repo_url=test_config['repository']['url'],
-            execution_id=execution_id,
-            no_cache_redis=no_cache or no_cache_redis,
-            no_cache_kaniko=no_cache or no_cache_kaniko,
-        )
-
-        query_vars = {
-            'execId': execution_id,
-            'data': {
-                'status': const.TESTRUN_PREPARING,
-                'test_preparation_job_id': deployer_response.id,
-                'test_preparation_job_status': deployer_response.status,
-            }}
-        resp = gclient.execute(gql('''mutation ($execId:UUID!, $data:execution_set_input!) {
-            update_execution(where:{id:{_eq: $execId}}, _set: $data) {returning {id} }
-        }'''), variable_values=query_vars)
-        assert resp['update_execution'], f'error updating execution state: {str(resp)}'
 
         return TestrunStartObject(execution_id=execution_id)
 

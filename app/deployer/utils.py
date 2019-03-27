@@ -13,9 +13,27 @@ from app.deployer import clients
 from app.hasura_client import hasura_client
 
 
-def start_job(app_config, project_id, repo_url, execution_id, no_cache_redis=False,
-              no_cache_kaniko=False) -> deployer_cli.ImageBuildTaskSchema:
-    job_token = hasura_token_for_testrunner(app_config, execution_id)
+def start_image(app_config, project_id):
+    # request a testrun is started with parameters in execution's configuration
+    assert app_config.get('BOLT_TEST_RUNNER_IMAGE'), 'BOLT_TEST_RUNNER_IMAGE is undefined'
+
+    job_token, execution_id = hasura_token_for_testrunner(app_config)
+
+    data = deployer_cli.JobCreateSchema(
+        docker_image=app_config.get('BOLT_TEST_RUNNER_IMAGE'),
+        tenant_id=TENANT_ID,
+        project_id=project_id,
+        test_run_execution_id=execution_id,
+        job_auth_token=str(job_token),
+    )
+    return clients.jobs(app_config).jobs_post(job_create_schema=data), execution_id
+
+
+def start_job(app_config, project_id, repo_url, no_cache_redis=False, no_cache_kaniko=False):
+    # request an image is built from repository sources and executed as testrun
+
+    job_token, execution_id = hasura_token_for_testrunner(app_config)
+
     data = deployer_cli.ImageBuildRequestSchema(
         repo_url=repo_url,
         tenant_id=TENANT_ID,
@@ -26,7 +44,7 @@ def start_job(app_config, project_id, repo_url, execution_id, no_cache_redis=Fal
         no_cache=no_cache_redis,
         no_cache_kaniko=no_cache_kaniko,
     )
-    return clients.images(app_config).image_builds_post(image_build_request_schema=data)
+    return clients.images(app_config).image_builds_post(image_build_request_schema=data), execution_id
 
 
 def get_test_run_status(execution_id: str):
