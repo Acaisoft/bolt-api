@@ -13,6 +13,9 @@ from app.deployer import clients
 from app.hasura_client import hasura_client
 
 
+DEPLOYER_TIMEOUT = 3
+
+
 def start_image(app_config, project_id):
     # request a testrun is started with parameters in execution's configuration
     image = app_config.get('BOLT_TEST_RUNNER_IMAGE', 'eu.gcr.io/acai-bolt/bolt-test-runner:0.1.0')
@@ -27,7 +30,10 @@ def start_image(app_config, project_id):
         test_run_execution_id=execution_id,
         job_auth_token=str(job_token),
     )
-    return clients.jobs(app_config).jobs_post(job_create_schema=data), execution_id
+    return clients.jobs(app_config).jobs_post(
+        job_create_schema=data,
+        _request_timeout=DEPLOYER_TIMEOUT
+    ), execution_id
 
 
 def start_job(app_config, project_id, repo_url, no_cache_redis=False, no_cache_kaniko=False):
@@ -45,7 +51,10 @@ def start_job(app_config, project_id, repo_url, no_cache_redis=False, no_cache_k
         no_cache=no_cache_redis,
         no_cache_kaniko=no_cache_kaniko,
     )
-    return clients.images(app_config).image_builds_post(image_build_request_schema=data), execution_id
+    return clients.images(app_config).image_builds_post(
+        image_build_request_schema=data,
+        _request_timeout=DEPLOYER_TIMEOUT
+    ), execution_id
 
 
 def get_test_run_status(execution_id: str):
