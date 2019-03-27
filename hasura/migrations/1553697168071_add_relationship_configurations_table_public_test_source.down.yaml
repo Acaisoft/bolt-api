@@ -1,0 +1,6 @@
+- args:
+    relationship: configurations
+    table:
+      name: test_source
+      schema: public
+  type: drop_relationship

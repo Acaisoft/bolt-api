@@ -1,0 +1,8 @@
+- args:
+    name: test_source
+    table:
+      name: configuration
+      schema: public
+    using:
+      foreign_key_constraint_on: test_source_id
+  type: create_object_relationship

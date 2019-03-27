@@ -1,0 +1,4 @@
+- args:
+    sql: ALTER TABLE "public"."test_creator" ADD COLUMN "previous_version_id" uuid
+      NULL
+  type: run_sql

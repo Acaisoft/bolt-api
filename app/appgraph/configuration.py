@@ -97,7 +97,7 @@ class CreateValidate(graphene.Mutation):
             'confName': name,
             'projId': project_id,
             'userId': user_id,
-            'repoId': repository_id or "",
+            'repoId': str(repository_id) or "",
             'fetchRepo': bool(repository_id),
         }
 
