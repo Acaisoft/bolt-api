@@ -48,5 +48,8 @@ def configure(app: Flask):
 
 
 def validate(config):
+    missing = []
     for var_name in const.REQUIRED_CONFIG_VARS:
-        assert config.get(var_name), f'undefined {var_name}'
+        if not config.get(var_name):
+            missing.append(var_name)
+    assert not missing, f'{len(missing)} undefined config variables: {", ".join(missing)}'

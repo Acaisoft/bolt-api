@@ -15,12 +15,13 @@ from app.hasura_client import hasura_client
 
 def start_image(app_config, project_id):
     # request a testrun is started with parameters in execution's configuration
-    assert app_config.get('BOLT_TEST_RUNNER_IMAGE'), 'BOLT_TEST_RUNNER_IMAGE is undefined'
+    image = app_config.get('BOLT_TEST_RUNNER_IMAGE', 'eu.gcr.io/acai-bolt/bolt-test-runner:0.1.0')
+    assert image, 'BOLT_TEST_RUNNER_IMAGE is undefined'
 
     job_token, execution_id = hasura_token_for_testrunner(app_config)
 
     data = deployer_cli.JobCreateSchema(
-        docker_image=app_config.get('BOLT_TEST_RUNNER_IMAGE'),
+        docker_image=image,
         tenant_id=TENANT_ID,
         project_id=project_id,
         test_run_execution_id=execution_id,
