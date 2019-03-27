@@ -1,6 +1,19 @@
 Changelog
 =========
 
+## 0.1.9 (2019-03-27)
+
+### Changes
+
+* Update demo project seed. [Piotr Mońko]
+
+* Change testrunner authentication mechanism. [Piotr Mońko]
+
+### Fix
+
+* Add back configuration creation parameters validation. [Piotr Mońko]
+
+
 ## 0.1.8 (2019-03-27)
 
 ### Changes

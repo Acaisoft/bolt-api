@@ -72,7 +72,7 @@ class CreateValidate(graphene.Mutation):
             description='Repository to fetch test definition from.')
         configuration_parameters = graphene.List(
             ConfigurationParameterInput,
-            required=False,
+            required=True,
             description='Default parameter types overrides.')
 
     Output = ValidationInterface
@@ -154,21 +154,20 @@ class CreateValidate(graphene.Mutation):
         if type_slug:
             query_data['type_slug'] = type_slug
 
+        patched_params = validators.validate_test_params(configuration_parameters, defaults=repo['parameter'])
+        if patched_params:
+            query_data['configuration_parameters'] = {'data': []}
+            for parameter_slug, param_value in patched_params.items():
+                query_data['configuration_parameters']['data'].append({
+                    'parameter_slug': parameter_slug,
+                    'value': param_value,
+                })
+
         if repository_id and code_source == const.CONF_SOURCE_REPO:
             assert repo.get('repository_by_pk', None), f'repository does not exist'
             validators.validate_repository(user_id=user_id, repo_config=repo['repository_by_pk'])
             validators.validate_accessibility(current_app.config, repo['repository_by_pk']['url'])
             query_data['repository_id'] = str(repository_id)
-
-        if configuration_parameters:
-            patched_params = validators.validate_test_params(configuration_parameters, defaults=repo['parameter'])
-            if patched_params:
-                query_data['configuration_parameters'] = {'data': []}
-                for parameter_slug, param_value in patched_params.items():
-                    query_data['configuration_parameters']['data'].append({
-                        'parameter_slug': parameter_slug,
-                        'value': param_value,
-                    })
 
         return query_data
 
@@ -329,7 +328,7 @@ class UpdateValidate(graphene.Mutation):
         if repository_id and code_source != const.CONF_SOURCE_REPO:
             assert False, f'cannot set repository_id on a "{code_source}" type configuration'
 
-        if repository_id and code_source == const.CONF_SOURCE_REPO:
+        if repository_id and code_source == const.CONF_SOURCE_REPO and repository_id != original['configuration_by_pk']['repository_id']:
             assert repo.get('repository_by_pk', None), f'repository does not exist'
             validators.validate_repository(user_id=user_id, repo_config=repo['repository_by_pk'])
             validators.validate_accessibility(current_app.config, repo['repository_by_pk']['url'])
@@ -363,20 +362,21 @@ class Update(UpdateValidate):
         query_params = UpdateValidate.validate(info, id, name, type_slug, code_source, repository_id,
                                                configuration_parameters)
 
-        conf_params = query_params.pop('configuration_parameters')
-        for cp in conf_params['data']:
-            gclient.execute(gql('''mutation ($confId:uuid!, $slug:String!, $value:String!) {
-                update_configuration_parameter(
-                    where:{ configuration_id:{_eq:$confId}, parameter_slug:{_eq:$slug} },
-                    _set:{ value: $value }
-                ) {
-                    affected_rows
-                }
-            }'''), variable_values={
-                'confId': str(id),
-                'slug': cp['parameter_slug'],
-                'value': cp['value']
-            })
+        conf_params = query_params.pop('configuration_parameters', None)
+        if conf_params:
+            for cp in conf_params['data']:
+                gclient.execute(gql('''mutation ($confId:uuid!, $slug:String!, $value:String!) {
+                    update_configuration_parameter(
+                        where:{ configuration_id:{_eq:$confId}, parameter_slug:{_eq:$slug} },
+                        _set:{ value: $value }
+                    ) {
+                        affected_rows
+                    }
+                }'''), variable_values={
+                    'confId': str(id),
+                    'slug': cp['parameter_slug'],
+                    'value': cp['value']
+                })
 
         query = gql('''mutation ($id:uuid!, $data:configuration_set_input!) {
             update_configuration(
