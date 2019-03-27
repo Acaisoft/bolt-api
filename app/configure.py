@@ -1,5 +1,4 @@
 import logging
-from logging.config import dictConfig
 import os
 
 from flask import Flask
@@ -7,24 +6,6 @@ import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
 
 from app import const
-
-
-def setup_logging():
-    dictConfig({
-        'version': 1,
-        'formatters': {'default': {
-            'format': '[%(asctime)s] %(levelname)s in %(module)s: %(message)s',
-        }},
-        'handlers': {'wsgi': {
-            'class': 'logging.StreamHandler',
-            'stream': 'ext://flask.logging.wsgi_errors_stream',
-            'formatter': 'default'
-        }},
-        'root': {
-            'level': 'INFO',
-            'handlers': ['wsgi']
-        }
-    })
 
 
 def configure(app: Flask):
@@ -44,6 +25,11 @@ def configure(app: Flask):
 
     app.logger.info(f'app configured using {conf_file_path} v{config_ver} and {secrets_file_path} v{secrets_ver}')
 
+    for handler in ('graphql.execution.executor', 'graphql.execution.utils'):
+        ll = logging.getLogger(handler)
+        if ll:
+            ll.addFilter(IgnoreGraphQLErrors(debug=app.debug))
+
     validate(app.config)
 
 
@@ -53,3 +39,23 @@ def validate(config):
         if not config.get(var_name):
             missing.append(var_name)
     assert not missing, f'{len(missing)} undefined config variables: {", ".join(missing)}'
+
+
+class IgnoreGraphQLErrors(logging.Filter):
+    """
+    python-graphene logs every intercepted exception twice with loglevel EXCEPTION, which gets picked up by Sentry.
+    This silences these logs unless we're in debug mode.
+    """
+    debug = False
+
+    def __init__(self, name='', debug=False):
+        self.debug = debug
+        super().__init__(name)
+
+    def filter(self, record:logging.LogRecord):
+        if record:
+            if record.exc_info and record.exc_info[0] is AssertionError and not self.debug:
+                return 0
+            if 'graphql.error.located_error.GraphQLLocatedError' in record.getMessage():
+                return 0
+        return 1
