@@ -43,7 +43,8 @@ class PurgeProject(graphene.Mutation):
 
         output = gclient.execute(gql('''mutation ($projIds:[uuid!]!) {
             delete_test_source(where:{project_id:{_in:$projIds}}) { affected_rows }
-            delete_test_creator_configuration_m2m (where:{project_id:{_in:$projIds}}) {affected_rows}
+            m2m_by_conf: delete_test_creator_configuration_m2m (where:{configuration:{project_id:{_in:$projIds}}}) {affected_rows}
+            m2m_by_proj: delete_test_creator_configuration_m2m (where:{project_id:{_in:$projIds}}) {affected_rows}
             delete_test_creator (where:{test_creator_configuration_m2m:{project_id:{_in:$projIds}}}) {affected_rows}
             delete_configuration_parameter (where:{configuration:{project_id:{_in:$projIds}}}) {affected_rows}
             delete_result_error (where:{execution:{configuration:{project_id:{_in:$projIds}}}}) {affected_rows}

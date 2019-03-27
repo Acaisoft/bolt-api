@@ -8,7 +8,7 @@ from app.hasura_client import hasura_client
 
 
 def create_app(test_config=None):
-    # setup_logging()
+    setup_logging()
 
     app = Flask(__name__, instance_relative_config=True)
 
