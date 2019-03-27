@@ -1,0 +1,8 @@
+- args:
+    name: test_creator
+    table:
+      name: test_source
+      schema: public
+    using:
+      foreign_key_constraint_on: test_creator_id
+  type: create_object_relationship

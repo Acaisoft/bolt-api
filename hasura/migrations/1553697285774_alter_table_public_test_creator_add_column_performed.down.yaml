@@ -1,0 +1,3 @@
+- args:
+    sql: ALTER TABLE "public"."test_creator" DROP COLUMN "performed"
+  type: run_sql

@@ -1,11 +1,21 @@
 Changelog
 =========
 
-## (unreleased)
+## 0.2.1 (2019-03-27)
 
 ### Changes
 
+* Changed repository and creator relations to configuration to go through test_source. [Piotr Mońko]
+
+* Delete test_creator_m2m table. [Piotr Mońko]
+
 * Increase deployer service connection timeout setting. [Piotr Mońko]
+
+### Other
+
+* Merge branch 'refactor_out_the_m2m' [Piotr Mońko]
+
+* Update changelog. [Piotr Mońko]
 
 
 ## 0.2.0 (2019-03-27)

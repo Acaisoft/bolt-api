@@ -12,7 +12,6 @@ def validate_repository(user_id, repo_config):
     ...  "url": "http://url.url/url",
     ...  "configuration_type": { "slug_name": "extreme_load" },
     ...  "project": {
-    ...    "is_deleted": False,
     ...    "userProjects": [
     ...      { "user_id": "4f2e6f44-9db9-47fd-a5c4-6c129ea70cc7" },
     ...    ]
@@ -25,7 +24,6 @@ def validate_repository(user_id, repo_config):
     ...  "url": "http://url.url/url",
     ...  "configuration_type": { "slug_name": "extreme_load" },
     ...  "project": {
-    ...    "is_deleted": False,
     ...    "userProjects": [
     ...      { "user_id": "4f2e6f44-9db9-47fd-a5c4-6c129ea70cc7" },
     ...      { "user_id": "u1" },
@@ -45,8 +43,6 @@ def validate_repository(user_id, repo_config):
 
 
 def is_user_project_valid(user_id, project_config):
-    assert not project_config['is_deleted'], 'invalid project, perhaps it has been deleted?'
-
     for up in project_config['userProjects']:
         if up['user_id'] == user_id:
             return True

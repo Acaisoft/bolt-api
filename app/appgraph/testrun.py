@@ -47,20 +47,27 @@ class TestrunStart(graphene.Mutation):
             test_config_response = gclient.execute(gql('''query ($confId:uuid!) {
                 configuration (where:{id:{_eq:$confId}}) {
                     project_id
-                    code_source
-                    
-                    repository {
-                        url
-                    }
-                    
-                    test_creator_configuration_m2m (order_by:{
-                        created_at:desc_nulls_last
-                    }, limit:1) {
+                    test_source {
+                        source_type
+                        project {
+                            userProjects { user_id }
+                        }
+                        repository {
+                            name
+                            url
+                            configuration_type { slug_name }
+                            project {
+                                userProjects { user_id }
+                            }
+                        }
                         test_creator {
-                            created_at
+                            name
                             data
-                            max_wait
                             min_wait
+                            max_wait
+                            project {
+                                userProjects { user_id }
+                            }
                         }
                     }
                 }
@@ -71,21 +78,29 @@ class TestrunStart(graphene.Mutation):
                     id:{_eq:$confId},
                     project:{userProjects:{user_id:{_eq:$userId}}}
                 }) {
-                    code_source
                     project_id
                     
-                    repository {
-                        url
-                    }
-                    
-                    test_creator_configuration_m2m (order_by:{
-                        created_at:desc_nulls_last
-                    }, limit:1) {
+                    test_source {
+                        source_type
+                        project {
+                            userProjects { user_id }
+                        }
+                        repository {
+                            name
+                            url
+                            configuration_type { slug_name }
+                            project {
+                                userProjects { user_id }
+                            }
+                        }
                         test_creator {
-                            created_at
+                            name
                             data
-                            max_wait
                             min_wait
+                            max_wait
+                            project {
+                                userProjects { user_id }
+                            }
                         }
                     }
                 }
@@ -95,7 +110,7 @@ class TestrunStart(graphene.Mutation):
             })
         assert test_config_response['configuration'], f'configuration not found ({str(test_config_response)})'
         test_config = test_config_response['configuration'][0]
-        code_source = test_config['code_source']
+        code_source = test_config['test_source']['source_type']
 
         initial_state = {
             'configuration_id': str(conf_id),
@@ -107,7 +122,7 @@ class TestrunStart(graphene.Mutation):
             deployer_response, execution_id = start_job(
                 app_config=current_app.config,
                 project_id=test_config['project_id'],
-                repo_url=test_config['repository']['url'],
+                repo_url=test_config['test_source']['repository']['url'],
                 no_cache_redis=no_cache or no_cache_redis,
                 no_cache_kaniko=no_cache or no_cache_kaniko,
             )
