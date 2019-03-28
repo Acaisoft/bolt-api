@@ -1,0 +1,20 @@
+- args:
+    permission:
+      allow_aggregations: false
+      columns:
+      - id
+      - project_id
+      - source_type
+      - repository_id
+      - test_creator_id
+      filter:
+        configurations:
+          executions:
+            id:
+              _eq: X-Hasura-Testruner-Id
+      limit: null
+    role: testrunner
+    table:
+      name: test_source
+      schema: public
+  type: create_select_permission
