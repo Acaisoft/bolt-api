@@ -14,8 +14,8 @@ def job_token():
     :return:
     """
     token, execution_id = hasura_token_for_testrunner(current_app.config)
-    claims = jwt.decode(token['access_token'], verify=False)
+    claims = jwt.decode(token, verify=False)
     print(f'> execution_id:\n{execution_id}')
-    print(f'> access_token:\n{token["access_token"]}')
+    print(f'> access_token:\n{token}')
     print('> claims:')
     print(json.dumps(claims, indent=4))
