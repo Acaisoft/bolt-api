@@ -173,7 +173,7 @@ class UpdateValidate(graphene.Mutation):
         gclient = hasura_client(current_app.config)
 
         if name:
-            name = validators.validate_text(name, required=False)
+            name = validators.validate_text(name)
 
         query = gclient.execute(gql('''query ($repoName:String!, $repoUrl:String!, $repoId:uuid!, $userId:uuid!, $confType:String) {
             uniqueName: repository(where:{
@@ -227,7 +227,7 @@ class UpdateValidate(graphene.Mutation):
         if repository_url and repository_url != query['repository'][0]['url']:
             assert not was_performed, \
                 f'cannot change repository_url, a test has been performed using this repository'
-            assert len(query.get('uniqueUrl')) == 0, f'repository with this repository_url already exists'
+            assert len(query.get('uniqueUrl')) == 0, f'repository with this url already exists'
             query_data['url'] = validators.validate_accessibility(current_app.config, repository_url)
 
         return query_data
