@@ -3,6 +3,7 @@ import re
 import deployer_cli
 import requests
 
+from app import const
 from app.deployer import clients
 
 
@@ -54,6 +55,9 @@ def validate_accessibility(app_config, repository_url:str):
     """
     Validate repo is accessible using the key provided by upstream bolt-deployer
     """
+    if repository_url.startswith(const.MOCK_REPOSITORY):
+        return repository_url
+
     repository_url = repository_url.strip()
     regex = '((git|ssh|http(s)?)|(git@[\w\.]+))(:(//)?)([\w\.@\:/\-~]+)(\.git)(/)?'
     assert re.match(regex, repository_url), f'invalid repository url ({repository_url})'

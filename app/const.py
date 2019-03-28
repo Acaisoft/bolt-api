@@ -39,3 +39,5 @@ REQUIRED_CONFIG_VARS = (
     'REDIS_PORT',
     'BUCKET_PUBLIC_UPLOADS',
 )
+
+MOCK_REPOSITORY = 'git@mock-bitbucket.org:repo'
