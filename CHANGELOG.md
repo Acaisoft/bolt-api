@@ -1,6 +1,31 @@
 Changelog
 =========
 
+## 0.2.2 (2019-03-28)
+
+### Changes
+
+* Refactor job status. [Piotr Mońko]
+
+* Adjusted permissions. [Piotr Mońko]
+
+* Change test_creator create and add update methods. [Piotr Mońko]
+
+* Add test_source creation on repository creation. [Piotr Mońko]
+
+### Fix
+
+* Fix empty name not required on repo update. [Piotr Mońko]
+
+### Other
+
+* Updated test runner image. [Piotr Mońko]
+
+* Add MOCK_REPO support. [Piotr Mońko]
+
+* Merge branch 'refactor_out_the_m2m' [Piotr Mońko]
+
+
 ## 0.2.1 (2019-03-27)
 
 ### Changes
