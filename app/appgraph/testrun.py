@@ -133,7 +133,8 @@ class TestrunStart(graphene.Mutation):
                 app_config=current_app.config,
                 project_id=test_config['project_id'],
             )
-            initial_state['test_preparation_job_id'] = deployer_response.name
+            initial_state['status'] = const.TESTRUN_STARTED
+            initial_state['test_job_id'] = deployer_response.name
             initial_state['test_preparation_job_status'] = str(deployer_response.status)
         else:
             raise Exception(f'invalid code source value {code_source}')

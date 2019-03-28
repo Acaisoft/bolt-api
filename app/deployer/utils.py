@@ -91,7 +91,7 @@ def get_test_run_status(execution_id: str):
             return get_test_preparation_job_status(execution_id, str(execution['test_preparation_job_id'])), execution
         else:
             return execution['test_preparation_job_status'], None
-    elif execution['status'] in (const.TESTRUN_RUNNING, const.TESTRUN_STARTED, const.TESTRUN_CRASHED) and execution[
+    elif execution['status'] in (const.TESTRUN_INIT, const.TESTRUN_RUNNING, const.TESTRUN_STARTED, const.TESTRUN_CRASHED) and execution[
         'test_job_id']:
         # state was updated by test wrapper to TESTRUN_RUNNING but double-check with deployer jobs api
         # in case wrapper crashed
