@@ -24,6 +24,8 @@ def execution_update():
         # mark as performed successfully
         resp = hasura_client(current_app.config).execute(gql('''mutation ($confId:uuid!) {
             update_configuration(_set:{performed:true}, where:{id:{_eq:$confId}}) { affected_rows }
+            update_test_creator(where:{test_sources:{configurations:{id:{_eq:$confId}}}}, _set:{performed:true}) { affected_rows }
+            update_repository(where:{test_sources:{configurations:{id:{_eq:$confId}}}}, _set:{performed:true}) { affected_rows }
         }'''), {'confId': new.get('configuration_id')})
         assert resp['update_configuration'].get('affected_rows') is not None, f'unexpected error: {str(resp)}'
 
