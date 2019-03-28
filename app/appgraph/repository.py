@@ -198,11 +198,6 @@ class UpdateValidate(graphene.Mutation):
                 url
                 type_slug
                 performed
-                configurations_aggregate (where:{performed:{_eq:true}}) {
-                    aggregate {
-                        count
-                    }
-                }
             }
             
             }'''), variable_values={
@@ -216,7 +211,7 @@ class UpdateValidate(graphene.Mutation):
         assert len(query.get('repository')) == 1, f'repository {str(id)} does not exists'
 
         query_data = {}
-        num_performed = query['repository'][0]['configurations_aggregate']['aggregate']['count']
+        was_performed = query['repository'][0]['performed']
 
         if name and name != query['repository'][0]['name']:
             assert len(query.get('uniqueName')) == 0, f'repository with this name already exists'
@@ -225,13 +220,13 @@ class UpdateValidate(graphene.Mutation):
         if type_slug and repository_url != query['repository'][0]['type_slug']:
             assert len(query.get('configuration_type',
                                  [])) == 1, f'invalid type_slug "{type_slug}", valid choices are: {const.TESTTYPE_LOAD}'
-            assert num_performed == 0, \
-                f'cannot change type_slug, repository is in use by {num_performed} configuration{"s" if num_performed > 1 else ""}'
+            assert not was_performed, \
+                f'cannot change type_slug, a test has been performed using this repository'
             query_data['type_slug'] = type_slug
 
         if repository_url and repository_url != query['repository'][0]['url']:
-            assert num_performed == 0, \
-                f'cannot update url, repository is in use by {num_performed} configuration{"s" if num_performed > 1 else ""}'
+            assert not was_performed, \
+                f'cannot change repository_url, a test has been performed using this repository'
             assert len(query.get('uniqueUrl')) == 0, f'repository with this repository_url already exists'
             query_data['url'] = validators.validate_accessibility(current_app.config, repository_url)
 

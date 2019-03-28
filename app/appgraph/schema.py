@@ -36,7 +36,8 @@ class TestrunMutations(graphene.ObjectType):
 
     # test creator
     testrun_creator_create = to_field(test_creator.Create)
-    testrun_creator_validate = to_field(test_creator.Validate)
+    testrun_creator_validate = to_field(test_creator.CreateValidate)
+    testrun_creator_update = to_field(test_creator.Update)
 
     # testrun management
     testrun_start = to_field(testrun.TestrunStart)
