@@ -1,6 +1,5 @@
 import json
 import click
-import ipdb
 from flask import current_app
 from flask.cli import with_appcontext
 from schematics import types
@@ -27,4 +26,3 @@ def user_create(email, project, role):
 
     client = kclient(current_app.config)
     print(client)
-    ipdb.set_trace()
