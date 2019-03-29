@@ -94,7 +94,7 @@ class DemoProject(graphene.Mutation):
 
             source_3: insert_test_source(objects:[{ id:$id, project_id:$id, source_type:"repository", repository_id:$id }]) { affected_rows }
             source_2: insert_test_source(objects:[{ id:$id2, project_id:$id, source_type:"repository", repository_id:$id2 }]) { affected_rows }
-            source_1: insert_test_source(objects:[{ id:$id3, project_id:$id, source_type:"creator", test_creator_id:$id3 }]) { affected_rows }
+            source_1: insert_test_source(objects:[{ id:$id3, project_id:$id, source_type:"test_creator", test_creator_id:$id3 }]) { affected_rows }
 
             insert_good_conf_repository: insert_configuration (objects:[{id:$id, name:$name, project_id:$id, test_source_id:$id, type_slug:"load_tests"}]) {affected_rows}
             insert_bad_conf_repository: insert_configuration (objects:[{id:$id2, name:$invalidRepoName, project_id:$id, test_source_id:$id2, type_slug:"load_tests"}]) {affected_rows}

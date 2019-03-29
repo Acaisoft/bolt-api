@@ -1,0 +1,12 @@
+- args:
+    name: test_sources
+    table:
+      name: project
+      schema: public
+    using:
+      foreign_key_constraint_on:
+        column: project_id
+        table:
+          name: test_source
+          schema: public
+  type: create_array_relationship
