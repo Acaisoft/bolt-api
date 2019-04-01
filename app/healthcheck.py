@@ -29,9 +29,9 @@ def register_app(app):
         try:
             response = deployer.clients.healthcheck(app.config).health_check_get()
         except Exception as e:
-            return False, str(e)
+            return True, str(e)
         if response.status != 'healthy':
-            return False, f'deployer is not healthy, it is {response.status}'
+            return True, f'deployer is not healthy, it is {response.status}'
         return True, 'ok'
 
     hc.add_check(redis_up)
