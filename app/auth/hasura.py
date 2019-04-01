@@ -72,6 +72,9 @@ def hasura_token_for_testrunner(config):
     :return: tuple: jwt token, testrunner id
     """
 
+    if config.get('SELFSIGNED_TOKEN_FOR_TESTRUNNER', False):
+        return hasura_selfsignedtoken_for_testrunner(config)
+
     server_url = config.get('KEYCLOAK_URL')
     client_id = config.get('KEYCLOAK_CLIENT_ID')
     realm_name = config.get('KEYCLOAK_REALM_NAME')
@@ -102,10 +105,10 @@ def hasura_selfsignedtoken_for_testrunner(config):
     payload = {"https://hasura.io/jwt/claims": {
         "x-hasura-allowed-roles": [const.ROLE_TESTRUNNER],
         "x-hasura-default-role": const.ROLE_TESTRUNNER,
-        "x-hasura-user-id": execution_id,
+        "x-hasura-testruner-id": execution_id,
     }}
 
     algo = config.get(const.JWT_ALGORITHM, 'HS256')
     secret = config.get(const.SECRET_KEY)
     assert secret, 'SECRET_KEY not defined'
-    return (jwt.encode(payload, secret, algorithm=algo), execution_id)
+    return jwt.encode(payload, secret, algorithm=algo), execution_id

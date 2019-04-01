@@ -1,0 +1,4 @@
+- args:
+    sql: ALTER TABLE "public"."configuration" ADD COLUMN "instances" integer NOT NULL
+      DEFAULT 1
+  type: run_sql
