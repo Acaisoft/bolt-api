@@ -18,8 +18,8 @@ DEPLOYER_TIMEOUT = 6
 
 def start_image(app_config, project_id):
     # request a testrun is started with parameters in execution's configuration
-    image = app_config.get('BOLT_TEST_RUNNER_IMAGE', app_config.get('DEFAULT_TEST_RUNNER_IMAGE', 'eu.gcr.io/acai-bolt/bolt-test-runner:0.1.3'))
-    assert image, 'BOLT_TEST_RUNNER_IMAGE is undefined'
+    image = app_config.get('BOLT_TEST_RUNNER_IMAGE', const.DEFAULT_TEST_RUNNER_IMAGE)
+    assert image, '*_TEST_RUNNER_IMAGE is undefined'
 
     job_token, execution_id = hasura_token_for_testrunner(app_config)
 
