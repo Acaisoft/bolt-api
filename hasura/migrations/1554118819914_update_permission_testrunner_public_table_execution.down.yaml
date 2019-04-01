@@ -1,0 +1,26 @@
+- args:
+    role: testrunner
+    table:
+      name: execution
+      schema: public
+  type: drop_update_permission
+- args:
+    permission:
+      columns:
+      - end
+      - end_locust
+      - start
+      - start_locust
+      - status
+      filter:
+        id:
+          _eq: X-Hasura-Testruner-Id
+      localSet:
+      - key: ""
+        value: ""
+      set: {}
+    role: testrunner
+    table:
+      name: execution
+      schema: public
+  type: create_update_permission
