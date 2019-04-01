@@ -16,6 +16,7 @@ HASURA_GQL = "http://hasura:8080/v1alpha1/graphql"
 
 BOLT_DEPLOYER_ADDR = 'localhost:7777'
 BOLT_TEST_RUNNER_IMAGE = 'eu.gcr.io/acai-bolt/bolt-test-runner:0.1.3'
+DEFAULT_TEST_RUNNER_IMAGE = 'eu.gcr.io/acai-bolt/bolt-test-runner:0.1.3'
 
 REDIS_HOST = 'redis'
 REDIS_PORT = 6379
