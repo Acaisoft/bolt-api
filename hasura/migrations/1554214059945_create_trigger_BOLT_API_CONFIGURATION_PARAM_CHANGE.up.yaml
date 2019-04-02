@@ -1,0 +1,18 @@
+- args:
+    headers: []
+    name: BOLT_API_CONFIGURATION_PARAM_CHANGE
+    retry_conf:
+      interval_sec: 10
+      num_retries: 0
+      timeout_sec: 60
+    table:
+      name: configuration_parameter
+      schema: public
+    update:
+      columns:
+      - id
+      - configuration_id
+      - value
+      - parameter_slug
+    webhook_from_env: BOLT_API_CONFIGURATION_PARAM_CHANGE
+  type: create_event_trigger

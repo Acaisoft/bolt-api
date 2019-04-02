@@ -1,0 +1,6 @@
+- args:
+    relationship: execution_instances
+    table:
+      name: execution
+      schema: public
+  type: drop_relationship

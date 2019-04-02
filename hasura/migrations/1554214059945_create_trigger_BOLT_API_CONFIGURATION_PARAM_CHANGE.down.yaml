@@ -1,0 +1,3 @@
+- args:
+    name: BOLT_API_CONFIGURATION_PARAM_CHANGE
+  type: delete_event_trigger

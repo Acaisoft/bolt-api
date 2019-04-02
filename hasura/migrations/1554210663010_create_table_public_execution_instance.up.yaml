@@ -1,0 +1,13 @@
+- args:
+    sql: CREATE EXTENSION IF NOT EXISTS pgcrypto;
+  type: run_sql
+- args:
+    sql: CREATE TABLE "public"."execution_instance"("id" uuid NOT NULL UNIQUE DEFAULT
+      gen_random_uuid(), "execution_id" uuid NOT NULL, "job_id" uuid , "status" text
+      NOT NULL, "instance_type" text NOT NULL DEFAULT 'master', "host" text , "port"
+      integer , "expect_slaves" integer NOT NULL DEFAULT 0, PRIMARY KEY ("id") );
+  type: run_sql
+- args:
+    name: execution_instance
+    schema: public
+  type: add_existing_table_or_view
