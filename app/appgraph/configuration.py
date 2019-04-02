@@ -1,6 +1,7 @@
 import json
 
 import graphene
+import math
 from flask import current_app
 from gql import gql
 
@@ -177,6 +178,9 @@ class CreateValidate(graphene.Mutation):
                     'parameter_slug': parameter_slug,
                     'value': param_value,
                 })
+                # calculate instances number based on num of users
+                if parameter_slug == const.TESTPARAM_USERS:
+                    query_data['instances'] = math.ceil(int(param_value) / const.TESTRUN_MAX_USERS_PER_INSTANCE)
 
         if test_source_id:
             test_source = repo.get('test_source')
@@ -388,6 +392,9 @@ class UpdateValidate(graphene.Mutation):
                         'parameter_slug': parameter_slug,
                         'value': param_value,
                     })
+                    # calculate instances number based on num of users
+                    if parameter_slug == const.TESTPARAM_USERS:
+                        query_data['instances'] = math.ceil(int(param_value) / const.TESTRUN_MAX_USERS_PER_INSTANCE)
 
         return query_data
 
