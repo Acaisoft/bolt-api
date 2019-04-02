@@ -1,6 +1,35 @@
 Changelog
 =========
 
+## 0.2.3 (2019-04-02)
+
+### Changes
+
+* Update configuration.instances on configuration param change. [Piotr Mońko]
+
+* Add permissions for testrunner role. [Piotr Mońko]
+
+* Add loucst_start and _end columns. [Piotr Mońko]
+
+* Bump test runner image to v0.1.3. [Piotr Mońko]
+
+### Other
+
+* Make deployer outage non-fatal. [Piotr Mońko]
+
+* Remove secret. [Piotr Mońko]
+
+* Remove secret. [Piotr Mońko]
+
+* Use selfsigned testrunner token in debug mode. [Piotr Mońko]
+
+* Fix bad import. [Piotr Mońko]
+
+* Rename 'creator' to 'test_creator' [Piotr Mońko]
+
+* Tagged release. [Piotr Mońko]
+
+
 ## 0.2.2 (2019-03-28)
 
 ### Changes
