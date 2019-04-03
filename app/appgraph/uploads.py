@@ -3,11 +3,9 @@ from datetime import timedelta, datetime
 
 import graphene
 from flask import current_app
-from gql import gql
 
 from app.appgraph.util import get_request_role_userid, OutputTypeFactory, OutputValueFromFactory
 from app import const
-from app.hasura_client import hasura_client
 
 from google.cloud import storage
 from google.cloud.storage._signing import generate_signed_url

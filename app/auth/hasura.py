@@ -1,9 +1,10 @@
 import logging
+import os
 import pprint
 import uuid
 
 import jwt
-from flask import make_response
+from flask import make_response, current_app
 from gql import gql
 from keycloak import KeycloakOpenID
 
@@ -72,7 +73,14 @@ def hasura_token_for_testrunner(config):
     :return: tuple: jwt token, testrunner id
     """
 
-    if config.get('SELFSIGNED_TOKEN_FOR_TESTRUNNER', False):
+    if config.get('SELFSIGNED_TOKEN_FOR_TESTRUNNER', False) or os.getenv('SELFSIGNED_TOKEN_FOR_TESTRUNNER', False):
+        # provide token and execution id through environment, or one will be generated
+        si_token = os.getenv('SELFSIGNED_TOKEN_EXECUTION_TOKEN', False)
+        si_id = os.getenv('SELFSIGNED_TOKEN_EXECUTION_ID', False)
+        if si_token and si_id:
+            current_app.logger.info('using predefined testrunner token and execution id')
+            return si_token, si_id
+        current_app.logger.info('using selfsigned testrunner token')
         return hasura_selfsignedtoken_for_testrunner(config)
 
     server_url = config.get('KEYCLOAK_URL')

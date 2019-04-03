@@ -1,6 +1,6 @@
 import graphene
 
-from app.appgraph import configuration, testrun, util, project, repository, test_creator, uploads, demo
+from app.appgraph import configuration, testrun, util, project, repository, test_creator, uploads, demo, users
 from app.appgraph import oauth
 
 
@@ -41,6 +41,9 @@ class TestrunMutations(graphene.ObjectType):
 
     # testrun management
     testrun_start = to_field(testrun.TestrunStart)
+
+    # user management
+    testrun_user_add = to_field(users.AssignUserToProject)
 
     # debug only
     testrun_project_purge = to_field(demo.PurgeProject)

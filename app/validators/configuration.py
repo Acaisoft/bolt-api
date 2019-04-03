@@ -82,6 +82,7 @@ def validate_test_configuration(conf: dict, defaultParams:list):
     validate_test_params(conf['configuration_parameters'], defaults=defaultParams)
 
     test_source = conf['test_source']
+    assert test_source, f'undefined configuration test_source'
 
     if test_source['source_type'] == const.CONF_SOURCE_REPO:
         assert test_source.get('repository', None), f'repository does not exist'
