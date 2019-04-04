@@ -1,6 +1,23 @@
 Changelog
 =========
 
+## 0.2.4 (2019-04-04)
+
+### Changes
+
+* Add user creation/registration mutation. [Piotr Mońko]
+
+* Update configuration.instances on configuration param change. [Piotr Mońko]
+
+### Other
+
+* Merge branch 'master' of bitbucket.org:acaisoft/bolt-api. [Piotr Mońko]
+
+* Add docker-compose file for mac. [art.barysevich]
+
+* Add user and user roles management mutations and commands. [Piotr Mońko]
+
+
 ## 0.2.3 (2019-04-02)
 
 ### Changes
