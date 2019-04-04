@@ -7,9 +7,9 @@ from flask import current_app
 from gql import gql
 
 from app import const
-from app.auth.hasura import hasura_token_for_testrunner
+from app.services.hasura.hasura import hasura_token_for_testrunner
 from app.const import TENANT_ID
-from app.deployer import clients
+from app.services.deployer import clients
 from app.hasura_client import hasura_client
 
 

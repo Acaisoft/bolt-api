@@ -4,7 +4,7 @@ from app.appgraph import configuration, testrun, util, project, repository, test
 from app.appgraph import oauth
 
 
-class TestrunQuery(oauth.QueryOauth, testrun.TestrunQueries):
+class TestrunQuery(users.UserQueries, oauth.QueryOauth, testrun.TestrunQueries):
     pass
 
 
@@ -44,6 +44,7 @@ class TestrunMutations(graphene.ObjectType):
 
     # user management
     testrun_user_add = to_field(users.AssignUserToProject)
+    testrun_user_roles = to_field(users.UserAddRole)
 
     # debug only
     testrun_project_purge = to_field(demo.PurgeProject)
@@ -60,6 +61,8 @@ AppSchema = graphene.Schema(
         oauth.OauthAuthtoken,
         testrun.TestrunStartObject,
         testrun.StatusResponse,
+        users.UserListType,
+        users.UserListItemType,
         util.ValidationResponse,
     ],
     auto_camelcase=False,

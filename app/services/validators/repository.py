@@ -1,10 +1,9 @@
 import re
 
 import deployer_cli
-import requests
 
 from app import const
-from app.deployer import clients
+from app.services.deployer import clients
 
 
 def validate_repository(user_id, repo_config):

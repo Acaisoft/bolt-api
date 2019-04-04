@@ -30,15 +30,16 @@ def configure(app: Flask):
         if ll:
             ll.addFilter(IgnoreGraphQLErrors(debug=app.debug))
 
-    validate(app.config)
+    validate(app)
 
 
-def validate(config):
+def validate(app):
     missing = []
     for var_name in const.REQUIRED_CONFIG_VARS:
-        if not config.get(var_name):
+        if not app.config.get(var_name):
             missing.append(var_name)
     assert not missing, f'{len(missing)} undefined config variables: {", ".join(missing)}'
+    app.logger.info('config valid')
 
 
 class IgnoreGraphQLErrors(logging.Filter):

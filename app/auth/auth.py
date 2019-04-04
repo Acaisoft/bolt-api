@@ -1,7 +1,7 @@
 from authlib.flask.client import OAuth
-from flask import Flask, jsonify, current_app
+from flask import Flask, current_app
 from loginpass import create_flask_blueprint, Google, GitHub
-from app.auth.hasura import hasura_token_for_user
+from app.services.hasura.hasura import hasura_token_for_user
 from app.cache import get_cache
 
 

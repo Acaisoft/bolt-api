@@ -1,13 +1,12 @@
-import json
-
 import graphene
 import math
 from flask import current_app
 from gql import gql
 
 from app.appgraph.util import get_request_role_userid, ValidationInterface, ValidationResponse, OutputTypeFactory, \
-    OutputValueFromFactory, OutputInterfaceFactory
-from app import validators, const
+    OutputValueFromFactory
+from app import const
+from app.services import validators
 from app.hasura_client import hasura_client
 
 
@@ -35,7 +34,7 @@ class ConfigurationInterface(graphene.Interface):
     type_slug = graphene.String(
         description=f'Configuration type: "{const.TESTTYPE_LOAD}"')
     project_id = graphene.UUID()
-    test_source_id = graphene.String(
+    test_source_id = graphene.UUID(
         required=False,
         description='Test source to fetch test definition from.')
     configuration_parameters = graphene.List(
@@ -64,7 +63,7 @@ class CreateValidate(graphene.Mutation):
         project_id = graphene.UUID(
             required=True,
             description='Project to create test in, user must have access to it.')
-        test_source_id = graphene.String(
+        test_source_id = graphene.UUID(
             required=False,
             description='Test source to fetch test definition from.')
         configuration_parameters = graphene.List(
@@ -251,7 +250,7 @@ class UpdateValidate(graphene.Mutation):
         type_slug = graphene.String(
             required=False,
             description=f'Configuration type: "{const.TESTTYPE_LOAD}"')
-        test_source_id = graphene.String(
+        test_source_id = graphene.UUID(
             required=False,
             description='Test source to fetch test definition from.')
         configuration_parameters = graphene.List(

@@ -1,6 +1,6 @@
 from flask import Blueprint, current_app, jsonify
 
-from app.deployer import clients
+from app.services.deployer import clients
 
 bp = Blueprint('deployer_service', __name__)
 

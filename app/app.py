@@ -1,6 +1,7 @@
 from flask import Flask
 
-from app import healthcheck, graphql, deployer, cmd, webhooks
+from app import healthcheck, graphql, cmd, webhooks
+from app.services import deployer
 from app.auth import auth
 from app.cache import get_cache
 from app.configure import configure
@@ -32,7 +33,7 @@ def create_app(test_config=None):
     webhooks.register_app(app)
 
     ## initialize cache and hasura clients
-    get_cache(app.config)
+    get_cache(app.config, app)
     hasura_client(app.config)
 
     cmd.register_commands(app)

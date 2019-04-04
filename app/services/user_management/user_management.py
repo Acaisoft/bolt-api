@@ -4,7 +4,7 @@ from schematics import types
 
 from app import const
 from app.hasura_client import hasura_client
-from app.keycloak.users import create_user_with_role
+from app.services.keycloak.users import create_user_with_role, list_users, user_assign_roles
 
 
 def user_create(email, project, role):
@@ -38,3 +38,30 @@ def user_create(email, project, role):
     }'''), {'data': {'user_id': user_id, 'project_id': project}})
 
     return user_id
+
+
+def list_users_in_project(project_id):
+    p = types.UUIDType()
+    p.validate(project_id)
+
+    gqlclient = hasura_client(current_app.config)
+    response = gqlclient.execute(gql('''query ($project:uuid!) {
+        user_project (where:{project_id:{_eq:$project}}) { user_id }
+    }'''), {'project': project_id})
+    assert response['user_project'], f'invalid project id f{project_id}: {response}'
+
+    user_ids = set([x['user_id'] for x in response['user_project']])
+
+    current_app.logger.info(f'looking up {len(user_ids)} users: {user_ids}')
+    k_users = list_users(current_app.config)
+
+    return [x for x in k_users if x.get('id', None) in user_ids]
+
+
+def user_roles_update(user_id, new_roles):
+    p = types.UUIDType()
+    p.validate(user_id)
+    r = types.BaseType(choices=const.ROLE_CHOICE)
+    r.validate(new_roles)
+
+    return user_assign_roles(current_app.config, user_id, new_roles)

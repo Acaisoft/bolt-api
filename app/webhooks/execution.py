@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify, current_app
 from gql import gql
 
 from app import const
-from app.deployer.utils import get_test_run_status
+from app.services.deployer.utils import get_test_run_status
 from app.hasura_client import hasura_client
 
 bp = Blueprint('webhooks_execution', __name__)

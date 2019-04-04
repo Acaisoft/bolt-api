@@ -1,0 +1,4 @@
+- args:
+    sql: ALTER TABLE "public"."test_creator" ADD COLUMN "type_slug" text NOT NULL
+      DEFAULT 'load_tests'
+  type: run_sql

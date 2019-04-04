@@ -6,9 +6,9 @@ from gql import gql
 
 from app import const
 from app.appgraph.util import get_request_role_userid
-from app.deployer import clients
-from app.deployer.utils import start_job, get_test_run_status, start_image
-from app.validators.configuration import validate_test_configuration_by_id
+from app.services.deployer import clients
+from app.services.deployer.utils import start_job, get_test_run_status, start_image
+from app.services.validators.configuration import validate_test_configuration_by_id
 from app.hasura_client import hasura_client
 
 

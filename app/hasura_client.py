@@ -1,4 +1,3 @@
-import logging
 import os
 
 import requests
@@ -6,6 +5,8 @@ from gql import Client
 from gql.transport.requests import RequestsHTTPTransport
 from graphql import print_ast
 from graphql.execution import ExecutionResult
+
+from app import const
 
 _client = None
 
@@ -50,14 +51,17 @@ def hasura_client(config=None):
         target = config.get('HASURA_GQL', 'http://localhost:8080/v1alpha1/graphql')
         access_key = config.get('HASURA_GRAPHQL_ACCESS_KEY')
         assert access_key, 'HASURA_GRAPHQL_ACCESS_KEY is not set'
-        logging.info(f'connecting hasura at {target} with access key:{bool(access_key)}')
+
         _client = Client(
             retries=0,
             transport=VerboseHTTPTransport(
                 url=target,
                 use_json=True,
-                headers={'X-Hasura-Access-Key': access_key},
+                headers={
+                    'X-Hasura-Access-Key': access_key,
+                    'X-Hasura-User-Id': const.HASURA_CLIENT_USER_ID,
+                    'X-Hasura-Role': 'admin',
+                },
             )
         )
-        logging.info('hasura connected')
     return _client

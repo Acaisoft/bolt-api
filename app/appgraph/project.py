@@ -4,7 +4,8 @@ from gql import gql
 
 from app.appgraph.util import get_request_role_userid, ValidationInterface, ValidationResponse, \
     OutputValueFromFactory, OutputInterfaceFactory
-from app import validators, const
+from app import const
+from app.services import validators
 from app.hasura_client import hasura_client
 
 
@@ -66,6 +67,7 @@ class CreateValidate(graphene.Mutation):
         return {
             'name': name,
             'description': description,
+            'image_url': image_url,
             'created_by_id': user_id,
         }
 

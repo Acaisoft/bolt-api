@@ -3,7 +3,7 @@ import click
 import jwt
 from flask import current_app
 from flask.cli import with_appcontext
-from app.auth.hasura import hasura_token_for_testrunner
+from app.services.hasura.hasura import hasura_token_for_testrunner
 
 
 @click.command(name='job_token')

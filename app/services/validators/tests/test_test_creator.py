@@ -3,7 +3,7 @@ import unittest
 
 from schematics.exceptions import DataError
 
-from app.validators.test_creator import validate_test_creator
+from app.services.validators.test_creator import validate_test_creator
 
 
 class TestTestCreatorValidation(unittest.TestCase):

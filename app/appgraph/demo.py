@@ -69,61 +69,136 @@ class DemoProject(graphene.Mutation):
     project_id = graphene.UUID()
 
     def mutate(self, info, name, req_user_id=None):
-
-        UUID = str(uuid.uuid4())
-        if not req_user_id:
-            req_user_id = UUID
         role, user_id = get_request_role_userid(info)
         assert user_id, f'unauthenticated request'
         assert role == const.ROLE_ADMIN, f'{role} user cannot create projects'
 
+        project_logo = 'https://storage.googleapis.com/media.bolt.acaisoft.io/project_logos/d85d29e5-8204-46a7-8218-40bdcf68c978'
+        if not req_user_id:
+            req_user_id = user_id
+        else:
+            req_user_id = str(req_user_id)
+
         gclient = hasura_client(current_app.config)
 
-        gclient.execute(gql('''mutation (
-                $id:uuid!, $id2:uuid!, $id3:uuid!, $userId:uuid!, $name:String!, $creatorConfName:String!, 
-                $invalidRepoName:String!, $test_creator_data:json!, $request_result:json!, 
-                $distribution_result:json!, $timestamp:timestamptz!
-        ) {
-            insert_project (objects:[{id:$id, name:$name}]) {affected_rows}
-            insert_user_project (objects:[{id:$id,, project_id:$id, user_id:$userId}]) {affected_rows}
-            
-            insert_good_repository: insert_repository (objects:[{id:$id, name:$name, project_id:$id, url:"git@bitbucket.org:acaisoft/load-events.git", type_slug:"load_tests"}]) {affected_rows}
-            insert_bad_repository: insert_repository (objects:[{id:$id2, name:$invalidRepoName, project_id:$id, url:"git@bitbucket.org:acaisoft/invalid-url.git", type_slug:"load_tests"}]) {affected_rows}
-            
-            insert_test_creator(objects:[{ id:$id3, max_wait:200, min_wait:100, data:$test_creator_data, name:$name, project_id:$id  }]) { affected_rows }
+        # create project
+        proj_resp = gclient.execute(gql('''mutation ($name:String!, $logo:String!) {
+            testrun_project_create (name:$name, description:"demo project", image_url:$logo) { returning {id} }
+        }'''), {'logo': project_logo, 'name': name})
+        project_id = proj_resp['testrun_project_create']['returning'][0]['id']
 
-            source_3: insert_test_source(objects:[{ id:$id, project_id:$id, source_type:"repository", repository_id:$id }]) { affected_rows }
-            source_2: insert_test_source(objects:[{ id:$id2, project_id:$id, source_type:"repository", repository_id:$id2 }]) { affected_rows }
-            source_1: insert_test_source(objects:[{ id:$id3, project_id:$id, source_type:"test_creator", test_creator_id:$id3 }]) { affected_rows }
+        # assign user to project
+        gclient.execute(gql('''mutation ($id:uuid!, $user_id:uuid!) {
+            insert_user_project (objects:[{id:$id,, project_id:$id, user_id:$user_id}]) {affected_rows}
+        }'''), {'id': project_id, 'user_id': req_user_id})
 
-            insert_good_conf_repository: insert_configuration (objects:[{id:$id, name:$name, project_id:$id, test_source_id:$id, type_slug:"load_tests"}]) {affected_rows}
-            insert_bad_conf_repository: insert_configuration (objects:[{id:$id2, name:$invalidRepoName, project_id:$id, test_source_id:$id2, type_slug:"load_tests"}]) {affected_rows}
-            insert_conf_creator: insert_configuration (objects:[{id:$id3, name:$creatorConfName, project_id:$id, test_source_id:$id3, type_slug:"load_tests"}]) {affected_rows}
-            
-            insert_host: insert_configuration_parameter (objects:[{configuration_id:$id, parameter_slug:"load_tests_host", value:"https://att-lwd-go-dev.acaisoft.net/api"}]) {affected_rows}
-            insert_duration: insert_configuration_parameter (objects:[{configuration_id:$id, parameter_slug:"load_tests_duration", value:"15"}]) {affected_rows}
-            insert_conf_bad_host: insert_configuration_parameter (objects:[{configuration_id:$id2, parameter_slug:"load_tests_host", value:"https://att-lwd-go-dev.acaisoft.net/api"}]) {affected_rows}
-            insert_conf_bad_duration: insert_configuration_parameter (objects:[{configuration_id:$id2, parameter_slug:"load_tests_duration", value:"15"}]) {affected_rows}
-            insert_conf_creator_host: insert_configuration_parameter (objects:[{configuration_id:$id3, parameter_slug:"load_tests_host", value:"https://att-lwd-go-dev.acaisoft.net/api"}]) {affected_rows}
-            insert_conf_creator_duration: insert_configuration_parameter (objects:[{configuration_id:$id3, parameter_slug:"load_tests_duration", value:"15"}]) {affected_rows}
-            
-            insert_execution (objects:[{id:$id, configuration_id:$id, status:"INIT"}]) {affected_rows}
-            insert_result_aggregate (objects:[{execution_id:$id, average_response_time:10, number_of_successes:100, number_of_errors:20, number_of_fails:30, average_response_size:1234}]) {affected_rows}
-            insert_result_distribution (objects:[{execution_id:$id, request_result:$request_result, distribution_result:$distribution_result, start:$timestamp, end:$timestamp}]) {affected_rows}
-            insert_result_error (objects:[{execution_id:$id, error_type:"AssertionError", name:$name, exception_data:"tralala", number_of_occurrences:120}]) {affected_rows}
-            
-        }'''), variable_values={
-            'id': UUID,
-            'id2': str(uuid.uuid4()),
-            'id3': str(uuid.uuid4()),
-            'name': name,
-            'userId': str(req_user_id),
-            'timestamp': datetime.now().astimezone().isoformat(),
-            'request_result': example_request_result,
-            'distribution_result': example_distribution_result,
-            'invalidRepoName': f'{name} - invalid repo',
-            'creatorConfName': f'{name} - test creator',
+        # create a repository test source
+        resp = gclient.execute(gql('''mutation ($name:String!, $id:UUID!) {
+        testrun_repository_create (
+            name:$name
+            project_id:$id
+            repository_url:"git@bitbucket.org:acaisoft/load-events.git"
+            type_slug:"load_tests"
+        ) { returning { id } }
+        }'''), {
+            'id': project_id,
+            'name': name + ' repository',
+        })
+        testsource_repo_id = resp['testrun_repository_create']['returning'][0]['id']
+
+        # create a creator test source
+        resp = gclient.execute(gql('''mutation ($name:String!, $id:UUID!, $test_creator_data:String!) {
+        testrun_creator_create (
+            name:$name
+            project_id:$id
+            max_wait:200
+            min_wait:100
+            data:$test_creator_data
+            type_slug:"load_tests"
+        ) { returning { id } }
+        }'''), {
+            'id': project_id,
+            'name': name + ' creator',
             'test_creator_data': example_test_creator_data,
         })
+        testsource_creator_id = resp['testrun_creator_create']['returning'][0]['id']
 
-        return DemoProject(project_id=UUID)
+        # create a repository configuration
+        resp = gclient.execute(gql('''mutation ($name:String!, $id:UUID!, $testsource_repo_id:UUID!) {
+        testrun_configuration_create(
+            name:$name
+            project_id:$id
+            type_slug:"load_tests"
+            test_source_id:$testsource_repo_id
+            configuration_parameters:[{
+                parameter_slug:"load_tests_host"
+                value:"https://att-lwd-go-dev.acaisoft.net/api"
+            }, {
+                parameter_slug:"load_tests_duration"
+                value:"10"
+            }]) { returning { id } }
+        }'''), {
+            'id': project_id,
+            'name': name + ' repo',
+            'testsource_repo_id': testsource_repo_id,
+        })
+        configuration_repo_id = resp['testrun_configuration_create']['returning'][0]['id']
+
+        # create a creator configuration
+        resp = gclient.execute(gql('''mutation ($name:String!, $id:UUID!, $testsource_creator_id:UUID!) {
+        testrun_configuration_create(
+            name:$name
+            project_id:$id
+            type_slug:"load_tests"
+            test_source_id:$testsource_creator_id
+            configuration_parameters:[{
+                parameter_slug:"load_tests_host"
+                value:"https://att-lwd-go-dev.acaisoft.net/api"
+            }]) { returning { id } }
+        }'''), {
+            'id': project_id,
+            'name': name + ' creator',
+            'testsource_creator_id': testsource_creator_id,
+        })
+        configuration_creator_id = resp['testrun_configuration_create']['returning'][0]['id']
+
+        # create an undefined configuration
+        gclient.execute(gql('''mutation ($name:String!, $id:UUID!) {
+        testrun_configuration_create(
+            name:$name
+            project_id:$id
+            type_slug:"load_tests"
+            configuration_parameters:[{
+                parameter_slug:"load_tests_host"
+                value:"https://att-lwd-go-dev.acaisoft.net/api"
+            }]) { returning { id } }
+        }'''), {
+            'id': project_id,
+            'name': name + ' undefined source',
+        })
+
+        # start both configurations
+        resp = gclient.execute(gql('''mutation ($id:UUID!) {
+        testrun_start( conf_id:$id ) { execution_id }
+        }'''), {
+            'id': configuration_repo_id,
+        })
+        execution_repo_id = resp['testrun_start']['execution_id']
+
+        resp = gclient.execute(gql('''mutation ($id:UUID!) {
+        testrun_start( conf_id:$id ) { execution_id }
+        }'''), {
+            'id': configuration_creator_id,
+        })
+        execution_creator_id = resp['testrun_start']['execution_id']
+
+        # check status on both executions
+        gclient.execute(gql('''query ($exid1:UUID!, $exid2:UUID!) {
+            status1: testrun_status(execution_id:$exid1) { status }
+            status2: testrun_status(execution_id:$exid2) { status }
+        }'''), {
+            'exid1': execution_repo_id,
+            'exid2': execution_creator_id,
+        })
+
+        return DemoProject(project_id=project_id)

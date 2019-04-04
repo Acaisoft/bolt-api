@@ -4,7 +4,7 @@ from flask.cli import with_appcontext
 from gql import gql
 
 from app import const
-from app.deployer.utils import get_test_run_status
+from app.services.deployer.utils import get_test_run_status
 from app.hasura_client import hasura_client
 
 

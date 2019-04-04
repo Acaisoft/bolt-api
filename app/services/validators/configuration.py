@@ -2,8 +2,9 @@ from flask import current_app
 from gql import gql
 
 from app import const
-from app.validators import repository, validate_test_creator
-from app.validators.validators import VALIDATORS
+from app.services.validators import validate_test_creator
+from app.services.validators import repository
+from app.services.validators.validators import VALIDATORS
 from app.hasura_client import hasura_client
 
 

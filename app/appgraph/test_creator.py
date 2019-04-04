@@ -4,8 +4,10 @@ import graphene
 from flask import current_app
 from gql import gql
 
-from app import validators, const
-from app.appgraph.util import get_request_role_userid, ValidationInterface, ValidationResponse
+from app import const
+from app.services import validators
+from app.appgraph.util import get_request_role_userid, ValidationInterface, ValidationResponse, OutputInterfaceFactory, \
+    OutputValueFromFactory
 from app.hasura_client import hasura_client
 
 
@@ -40,11 +42,14 @@ class CreateValidate(graphene.Mutation):
         min_wait = graphene.Int(
             required=True,
             description='Minimum response wait time.')
+        type_slug = graphene.String(
+            description=f'Configuration type: "{const.TESTTYPE_CHOICE}"')
 
     Output = ValidationInterface
 
     @staticmethod
-    def validate(info, name, data, project_id, max_wait, min_wait, validate_unique_name=True):
+    def validate(info, name, data, project_id, max_wait, min_wait, type_slug, validate_unique_name=True):
+        assert type_slug in const.TESTTYPE_CHOICE, f'invalid type_slug {type_slug}'
         project_id = str(project_id)
         role, user_id = get_request_role_userid(info)
         assert user_id, f'unauthenticated request'
@@ -87,23 +92,23 @@ class CreateValidate(graphene.Mutation):
             'created_by_id': user_id,
         }
 
-    def mutate(self, info, name, data, project_id, max_wait, min_wait):
-        CreateValidate.validate(info, name, data, project_id, max_wait, min_wait)
+    def mutate(self, info, name, data, project_id, max_wait, min_wait, type_slug):
+        CreateValidate.validate(info, name, data, project_id, max_wait, min_wait, type_slug)
         return ValidationResponse(ok=True)
 
 
 class Create(CreateValidate):
     """Validates and creates the test_creator json testrun definition."""
 
-    Output = TestCreatorInterface
+    Output = OutputInterfaceFactory(TestCreatorInterface, 'Create')
 
-    def mutate(self, info, name, data, project_id, max_wait, min_wait):
+    def mutate(self, info, name, data, project_id, max_wait, min_wait, type_slug):
         project_id = str(project_id)
         object_id = str(uuid.uuid4())
 
         gclient = hasura_client(current_app.config)
 
-        query_params = CreateValidate.validate(info, name, data, project_id, max_wait, min_wait)
+        query_params = CreateValidate.validate(info, name, data, project_id, max_wait, min_wait, type_slug)
 
         # preset object and test_source id to same id
         query_params['id'] = object_id
@@ -133,7 +138,7 @@ class Create(CreateValidate):
         assert test_source_response['insert_test_source'].get('affected_rows', 0) == 1, \
             f'cannot save test_source relation ({str(test_source_response)})'
 
-        return TestCreatorType(id=conf_response['insert_test_creator']['returning'][0]['id'])
+        return OutputValueFromFactory(Create, conf_response['insert_test_creator'])
 
 
 class Update(CreateValidate):
@@ -155,10 +160,12 @@ class Update(CreateValidate):
         min_wait = graphene.Int(
             required=False,
             description='Minimum response wait time.')
+        type_slug = graphene.String(
+            description=f'Configuration type: "{const.TESTTYPE_CHOICE}"')
 
     Output = TestCreatorInterface
 
-    def mutate(self, info, id, name=None, data=None, max_wait=None, min_wait=None):
+    def mutate(self, info, id, name=None, data=None, max_wait=None, min_wait=None, type_slug=None):
         id = str(id)
 
         role, user_id = get_request_role_userid(info)
@@ -178,6 +185,7 @@ class Update(CreateValidate):
                 test_source_id
                 max_wait
                 min_wait
+                type_slug
                 data
             }
         }'''), variable_values={
@@ -199,8 +207,10 @@ class Update(CreateValidate):
             max_wait = original['max_wait']
         if not min_wait:
             min_wait = original['min_wait']
+        if not type_slug:
+            type_slug = original['type_slug']
 
-        query_params = CreateValidate.validate(info, name, data, project_id, max_wait, min_wait, validate_unique_name=False)
+        query_params = CreateValidate.validate(info, name, data, project_id, max_wait, min_wait, type_slug, validate_unique_name=False)
 
         query_params['id'] = new_id
         query_params['test_source_id'] = test_source_id

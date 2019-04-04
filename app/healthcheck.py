@@ -1,7 +1,6 @@
 from gql import gql
 from healthcheck import HealthCheck, EnvironmentDump
 
-from app import deployer
 from app.cache import get_cache
 from app.hasura_client import hasura_client
 
@@ -9,7 +8,9 @@ from app.hasura_client import hasura_client
 def register_app(app):
 
     hc = HealthCheck(app, '/healthcheck')
-    EnvironmentDump(app, '/env')
+
+    if app.debug:
+        EnvironmentDump(app, '/env')
 
     def redis_up():
         info = get_cache(app.config).info()
@@ -27,7 +28,7 @@ def register_app(app):
 
     def deployer_up():
         try:
-            response = deployer.clients.healthcheck(app.config).health_check_get()
+            response = app.services.deployer.clients.healthcheck(app.config).health_check_get()
         except Exception as e:
             return True, str(e)
         if response.status != 'healthy':

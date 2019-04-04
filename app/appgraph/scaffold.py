@@ -1,12 +1,10 @@
-import json
-
 import graphene
 from flask import current_app
 from gql import gql
 
 from app.appgraph.util import get_request_role_userid, ValidationInterface, OutputValueFromFactory, \
     OutputInterfaceFactory
-from app import validators, const
+from app import const
 from app.hasura_client import hasura_client
 
 
