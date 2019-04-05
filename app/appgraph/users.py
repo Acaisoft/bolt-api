@@ -96,6 +96,29 @@ class AssignUserToProject(graphene.Mutation):
         }]})
 
 
+class RemoveUserFromProject(graphene.Mutation):
+    """Removes given user from given project."""
+
+    class Arguments:
+        user_id = graphene.String(
+            required=True,
+            description='User ID.')
+        project_id = graphene.UUID(
+            required=True,
+            description='Project ID.')
+
+    Output = OutputInterfaceFactory(UserInterface, 'Unassign')
+
+    def mutate(self, info, user_id, project_id):
+        req_role, req_user_id = get_request_role_userid(info)
+        assert req_user_id, f'unauthenticated request'
+        assert req_role in (const.ROLE_ADMIN,), f'user with role {req_role} cannot manage users'
+
+        resp = user_management.user_unassign_from_project(str(user_id), str(project_id))
+
+        return OutputValueFromFactory(AssignUserToProject, resp['delete_user_project'])
+
+
 class UserAddRole(graphene.Mutation):
     """Grant given user given role"""
 

@@ -1,11 +1,15 @@
 from flask import Flask
 
 from app import healthcheck, graphql, cmd, webhooks
+from app.logger import setup_custom_logger
 from app.services import deployer
 from app.auth import auth
 from app.cache import get_cache
 from app.configure import configure
 from app.hasura_client import hasura_client
+
+
+logger = setup_custom_logger(__name__)
 
 
 def create_app(test_config=None):
@@ -38,5 +42,5 @@ def create_app(test_config=None):
 
     cmd.register_commands(app)
 
-    app.logger.info('application ready')
+    logger.info('application ready')
     return app

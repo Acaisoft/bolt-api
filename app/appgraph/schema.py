@@ -45,6 +45,7 @@ class TestrunMutations(graphene.ObjectType):
     # user management
     testrun_user_add = to_field(users.AssignUserToProject)
     testrun_user_roles = to_field(users.UserAddRole)
+    testrun_user_remove = to_field(users.RemoveUserFromProject)
 
     # debug only
     testrun_project_purge = to_field(demo.PurgeProject)

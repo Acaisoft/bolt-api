@@ -1,1 +1,0 @@
-from .demo_project import setup_demo_project

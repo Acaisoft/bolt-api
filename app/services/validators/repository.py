@@ -72,9 +72,21 @@ def validate_accessibility(app_config, repository_url:str):
     if not repo_checked:
         logger.info(f'validating repository is accessible {repository_url}')
         req = deployer_cli.ValidateRepositorySchema(repository_url=repository_url)
-        response = clients.management(app_config).management_validate_repository_post(validate_repository_schema=req)
-        assert response.is_valid, f'it appears repository is not accessible ({str(response)})'
-        c.set(cn, 1, 60)
+        try:
+            # TODO: add a timeout on bolt-deployer end, should be lower than hasura-to-api itmeout (~10s)
+            # NOTE: assume remote is invalid if it cannot be contacted in less than 5 seconds
+            response = clients.management(app_config).management_validate_repository_post(
+                validate_repository_schema=req,
+                _request_timeout=6,
+            )
+        except Exception as e:
+            # catches remote not reachable/resolvable
+            logger.info(f'repo connectivity check failure: {str(e)}')
+            raise AssertionError('repository is not reachable')
+        else:
+            # catches remote not accessible
+            assert response.is_valid, f'repository is not accessible'
+            c.set(cn, 1, 60)
 
     return repository_url
 

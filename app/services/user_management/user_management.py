@@ -40,6 +40,23 @@ def user_create(email, project, role):
     return user_id
 
 
+def user_unassign_from_project(user_id, project_id):
+    p = types.UUIDType()
+    p.validate(user_id)
+    p.validate(project_id)
+
+    gqlclient = hasura_client(current_app.config)
+    return gqlclient.execute(gql('''mutation ($user_id:UUID!, $project_id:UUID!) {
+        delete_user_project(where:{
+            user_id:{_eq:$user_id}
+            project_id:{_eq:$project_id}
+        }) { returning { user_id project_id } }
+    }'''), {
+        'user_id': user_id,
+        'project_id': project_id,
+    })
+
+
 def list_users_in_project(project_id):
     p = types.UUIDType()
     p.validate(project_id)

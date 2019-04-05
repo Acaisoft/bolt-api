@@ -1,11 +1,9 @@
 import graphene
 from flask import current_app
-from gql import gql
 
 from app.appgraph.util import get_request_role_userid
 from app import const
-from app.hasura_client import hasura_client
-from app.services.demo.demo_project import setup_demo_project
+from app.services import projects
 
 
 class PurgeProject(graphene.Mutation):
@@ -18,36 +16,11 @@ class PurgeProject(graphene.Mutation):
     deleted_projects = graphene.List(graphene.UUID)
 
     def mutate(self, info, project_id=None, project_name=None):
-        assert not all((project_id, project_name)), f'use either id or name, not both'
-
         role, user_id = get_request_role_userid(info)
         assert user_id, f'unauthenticated request'
         assert role == const.ROLE_ADMIN, f'{role} user cannot create projects'
 
-        gclient = hasura_client(current_app.config)
-
-        if project_name:
-            projects = gclient.execute(
-                gql('''query ($name:String!) { project(where:{name:{_ilike:$name}}) { id } }'''),
-                variable_values={'name': project_name}
-            )
-            project_ids_list = [str(x['id']) for x in projects['project']]
-        else:
-            project_ids_list = [str(project_id)]
-
-        output = gclient.execute(gql('''mutation ($projIds:[uuid!]!) {
-            delete_configuration_parameter (where:{configuration:{project_id:{_in:$projIds}}}) {affected_rows}
-            delete_result_error (where:{execution:{configuration:{project_id:{_in:$projIds}}}}) {affected_rows}
-            delete_result_distribution (where:{execution:{configuration:{project_id:{_in:$projIds}}}}) {affected_rows}
-            delete_result_aggregate (where:{execution:{configuration:{project_id:{_in:$projIds}}}}) {affected_rows}
-            delete_execution (where:{configuration:{project_id:{_in:$projIds}}}) {affected_rows}
-            delete_configuration (where:{project_id:{_in:$projIds}}) {affected_rows}
-            delete_test_source(where:{project_id:{_in:$projIds}}) { affected_rows }
-            delete_test_creator (where:{project_id:{_in:$projIds}}) {affected_rows}
-            delete_repository (where:{project_id:{_in:$projIds}}) {affected_rows}
-            delete_user_project (where:{project_id:{_in:$projIds}}) {affected_rows}
-            delete_project(where:{id:{_in:$projIds}}) {affected_rows}
-        }'''), variable_values={'projIds': project_ids_list})
+        project_ids_list = projects.teardown(current_app.config, project_name=project_name, project_id=project_id)
 
         return PurgeProject(deleted_projects=project_ids_list)
 
@@ -71,6 +44,6 @@ class DemoProject(graphene.Mutation):
         else:
             req_user_id = str(req_user_id)
 
-        project_id = setup_demo_project(name, req_user_id)
+        project_id = projects.setup_demo_project(current_app.config, name, req_user_id)
 
         return DemoProject(project_id=project_id)

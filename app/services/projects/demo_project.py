@@ -1,6 +1,5 @@
 import threading
 
-from flask import current_app
 from gql import gql
 from app.hasura_client import hasura_client
 from app.logger import setup_custom_logger
@@ -13,10 +12,10 @@ example_distribution_result = [{"90%":"210","100%":"360","80%":"170","99%":"360"
 example_test_creator_data = '''{"global_headers":{"HASURA_GRAPHQL_JWT_SECRET":"secret-key","Token":"Bearer ${token}"},"on_start":{"endpoints":[{"actions":[{"variable_path":"auth.token","location":"response","variable_name":"token","action_type":"set_variable"},{"variable_path":"auth.type","location":"response","variable_name":"token_type","action_type":"set_variable"}],"url":"/auth-response","payload":{"username":"my_user","password":"my_password"},"name":"Auth","method":"post"}]},"endpoints":[{"url":"/user/info","payload":{"my_token_type":"JWT","my_token":"My token is ${token}"},"asserts":[{"value":"200","assert_type":"response_code","message":"Eh... Not 200"}],"headers":{"Content-Type":"application/json","Test-Data-Key":"Test data value"},"name":"User info","method":"get","task_value":1},{"url":"/user/save","payload":{"my_name":"Hello, my name is ${name}","my_token_type":"JWT"},"asserts":[{"value":"200","assert_type":"response_code","message":"Eh... Not 200"}],"name":"User save","method":"post","task_value":2},{"url":"/user/delete","asserts":[{"value":"204","assert_type":"response_code","message":"Status code is not 204 for delete"}],"headers":{"TokenType":"token ${token_type}"},"name":"User delete","method":"delete","task_value":3}],"test_type":"set"}'''
 
 
-def setup_demo_project(name, req_user_id):
+def setup_demo_project(config, name, req_user_id):
     project_logo = 'https://storage.googleapis.com/media.bolt.acaisoft.io/project_logos/d85d29e5-8204-46a7-8218-40bdcf68c978'
 
-    gclient = hasura_client(current_app.config)
+    gclient = hasura_client(config)
 
     # create project
     logger.info(f'creating project {name}')
@@ -31,7 +30,7 @@ def setup_demo_project(name, req_user_id):
         insert_user_project (objects:[{id:$id,, project_id:$id, user_id:$user_id}]) {affected_rows}
     }'''), {'id': project_id, 'user_id': req_user_id})
 
-    threading.Thread(target=fill_in_project, args=(current_app.config, name, project_id)).start()
+    threading.Thread(target=fill_in_project, args=(config, name, project_id)).start()
 
     logger.info('setup_demo_project finished')
     return project_id
