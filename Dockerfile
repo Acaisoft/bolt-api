@@ -23,4 +23,4 @@ COPY wsgi.py /app/wsgi.py
 COPY bolt-deployer/sdk /app/bolt-deployer/sdk
 RUN pip install /app/bolt-deployer/sdk
 WORKDIR /app
-CMD gunicorn wsgi:application --bind 0.0.0.0:80
+CMD gunicorn wsgi:application -w 8 --bind 0.0.0.0:80

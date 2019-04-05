@@ -1,3 +1,5 @@
+import threading
+
 from flask import current_app
 from gql import gql
 from app.hasura_client import hasura_client
@@ -28,6 +30,17 @@ def setup_demo_project(name, req_user_id):
     gclient.execute(gql('''mutation ($id:uuid!, $user_id:uuid!) {
         insert_user_project (objects:[{id:$id,, project_id:$id, user_id:$user_id}]) {affected_rows}
     }'''), {'id': project_id, 'user_id': req_user_id})
+
+    threading.Thread(target=fill_in_project, args=(current_app.config, name, project_id)).start()
+
+    logger.info('setup_demo_project finished')
+    return project_id
+
+
+def fill_in_project(config, name, project_id):
+    logger.info('fill_in_project starting')
+
+    gclient = hasura_client(config)
 
     # create a repository test source
     logger.info('creating a repository test source')
@@ -147,4 +160,5 @@ def setup_demo_project(name, req_user_id):
     })
     logger.info(f'executions: {str(resp)}')
 
+    logger.info('fill_in_project done')
     return project_id
