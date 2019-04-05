@@ -1,6 +1,9 @@
 from flask import current_app
 from gql import gql
 from app.hasura_client import hasura_client
+from app.logger import setup_custom_logger
+
+logger = setup_custom_logger(__name__)
 
 
 example_request_result = [{"Min response time":"146","Average Content Size":"12","# failures":"0","Median response time":"150","Name":"/api/","Method":"GET","Max response time":"363","Average response time":"176","Requests/s":"1.13","# requests":"11"},{"Min response time":"0","Average Content Size":"0","# failures":"7","Median response time":"0","Name":"/api/echo/hello","Method":"GET","Max response time":"0","Average response time":"0","Requests/s":"0.00","# requests":"0"},{"Min response time":"0","Average Content Size":"0","# failures":"2","Median response time":"0","Name":"/api/error/400or500","Method":"GET","Max response time":"0","Average response time":"0","Requests/s":"0.00","# requests":"0"},{"Min response time":"0","Average Content Size":"0","# failures":"6","Median response time":"0","Name":"/api/error/401","Method":"GET","Max response time":"0","Average response time":"0","Requests/s":"0.00","# requests":"0"},{"Min response time":"0","Average Content Size":"0","# failures":"8","Median response time":"0","Name":"/api/error/404","Method":"GET","Max response time":"0","Average response time":"0","Requests/s":"0.00","# requests":"0"},{"Min response time":"0","Average Content Size":"0","# failures":"4","Median response time":"0","Name":"/api/random","Method":"GET","Max response time":"0","Average response time":"0","Requests/s":"0.00","# requests":"0"},{"Min response time":"0","Average Content Size":"0","# failures":"4","Median response time":"0","Name":"/api/send","Method":"POST","Max response time":"0","Average response time":"0","Requests/s":"0.00","# requests":"0"},{"Min response time":"146","Average Content Size":"12","# failures":"31","Median response time":"150","Name":"Total","Method":"None","Max response time":"363","Average response time":"176","Requests/s":"1.13","# requests":"11"}]
@@ -14,17 +17,20 @@ def setup_demo_project(name, req_user_id):
     gclient = hasura_client(current_app.config)
 
     # create project
+    logger.info(f'creating project {name}')
     proj_resp = gclient.execute(gql('''mutation ($name:String!, $logo:String!) {
         testrun_project_create (name:$name, description:"demo project", image_url:$logo) { returning {id} }
     }'''), {'logo': project_logo, 'name': name})
     project_id = proj_resp['testrun_project_create']['returning'][0]['id']
 
     # assign user to project
+    logger.info(f'assigning user {req_user_id} to project {project_id}')
     gclient.execute(gql('''mutation ($id:uuid!, $user_id:uuid!) {
         insert_user_project (objects:[{id:$id,, project_id:$id, user_id:$user_id}]) {affected_rows}
     }'''), {'id': project_id, 'user_id': req_user_id})
 
     # create a repository test source
+    logger.info('creating a repository test source')
     resp = gclient.execute(gql('''mutation ($name:String!, $id:UUID!) {
     testrun_repository_create (
         name:$name
@@ -39,6 +45,7 @@ def setup_demo_project(name, req_user_id):
     testsource_repo_id = resp['testrun_repository_create']['returning'][0]['id']
 
     # create a creator test source
+    logger.info('creating a test_creator test source')
     resp = gclient.execute(gql('''mutation ($name:String!, $id:UUID!, $test_creator_data:String!) {
     testrun_creator_create (
         name:$name
@@ -56,6 +63,7 @@ def setup_demo_project(name, req_user_id):
     testsource_creator_id = resp['testrun_creator_create']['returning'][0]['id']
 
     # create a repository configuration
+    logger.info('creating a repository test configuration')
     resp = gclient.execute(gql('''mutation ($name:String!, $id:UUID!, $testsource_repo_id:UUID!) {
     testrun_configuration_create(
         name:$name
@@ -77,6 +85,7 @@ def setup_demo_project(name, req_user_id):
     configuration_repo_id = resp['testrun_configuration_create']['returning'][0]['id']
 
     # create a creator configuration
+    logger.info('creating a test_creator test configuration')
     resp = gclient.execute(gql('''mutation ($name:String!, $id:UUID!, $testsource_creator_id:UUID!) {
     testrun_configuration_create(
         name:$name
@@ -95,6 +104,7 @@ def setup_demo_project(name, req_user_id):
     configuration_creator_id = resp['testrun_configuration_create']['returning'][0]['id']
 
     # create an undefined configuration
+    logger.info('creating an undefined test configuration')
     gclient.execute(gql('''mutation ($name:String!, $id:UUID!) {
     testrun_configuration_create(
         name:$name
@@ -110,6 +120,7 @@ def setup_demo_project(name, req_user_id):
     })
 
     # start both configurations
+    logger.info('starting tests of repository configuration')
     resp = gclient.execute(gql('''mutation ($id:UUID!) {
     testrun_start( conf_id:$id ) { execution_id }
     }'''), {
@@ -117,6 +128,7 @@ def setup_demo_project(name, req_user_id):
     })
     execution_repo_id = resp['testrun_start']['execution_id']
 
+    logger.info('starting tests of test_creator configuration')
     resp = gclient.execute(gql('''mutation ($id:UUID!) {
     testrun_start( conf_id:$id ) { execution_id }
     }'''), {
@@ -125,12 +137,14 @@ def setup_demo_project(name, req_user_id):
     execution_creator_id = resp['testrun_start']['execution_id']
 
     # check status on both executions
-    gclient.execute(gql('''query ($exid1:UUID!, $exid2:UUID!) {
+    logger.info('checking status of executions')
+    resp = gclient.execute(gql('''query ($exid1:UUID!, $exid2:UUID!) {
         status1: testrun_status(execution_id:$exid1) { status }
         status2: testrun_status(execution_id:$exid2) { status }
     }'''), {
         'exid1': execution_repo_id,
         'exid2': execution_creator_id,
     })
+    logger.info(f'executions: {str(resp)}')
 
     return project_id
