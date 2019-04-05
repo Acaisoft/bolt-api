@@ -9,6 +9,8 @@ from app import const
 
 
 def configure(app: Flask):
+    app.logger.setLevel(logging.DEBUG if app.debug else logging.INFO)
+
     conf_file_path = os.environ.get('CONFIG_FILE_PATH', 'localhost-config.py')
     app.config.from_pyfile(conf_file_path)
 

@@ -3,7 +3,12 @@ import re
 import deployer_cli
 
 from app import const
+from app.cache import get_cache
+from app.logger import setup_custom_logger
 from app.services.deployer import clients
+
+
+logger = setup_custom_logger(__name__)
 
 
 def validate_repository(user_id, repo_config):
@@ -61,9 +66,16 @@ def validate_accessibility(app_config, repository_url:str):
     regex = '((git|ssh|http(s)?)|(git@[\w\.]+))(:(//)?)([\w\.@\:/\-~]+)(\.git)(/)?'
     assert re.match(regex, repository_url), f'invalid repository url ({repository_url})'
 
-    req = deployer_cli.ValidateRepositorySchema(repository_url=repository_url)
-    response = clients.management(app_config).management_validate_repository_post(validate_repository_schema=req)
-    assert response.is_valid, f'it appears repository is not accessible ({str(response)})'
+    c = get_cache(app_config)
+    cn = f'validate_accessibility_{hash(repository_url)}'
+    repo_checked = c.get(cn)
+    if not repo_checked:
+        logger.info(f'validating repository is accessible {repository_url}')
+        req = deployer_cli.ValidateRepositorySchema(repository_url=repository_url)
+        response = clients.management(app_config).management_validate_repository_post(validate_repository_schema=req)
+        assert response.is_valid, f'it appears repository is not accessible ({str(response)})'
+        c.set(cn, 1, 60)
+
     return repository_url
 
 
