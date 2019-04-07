@@ -38,7 +38,7 @@ node('docker') {
                 Utils.markStageSkippedForConditional('Build image')
                 return;
             }
-            sh "docker build -t ${DOCKER_REPOSITORY}:${version} ."
+            sh "docker build --build-arg release=${version} -t ${DOCKER_REPOSITORY}:${version} ."
         }
 
         stage('Push image') {
