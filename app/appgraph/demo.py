@@ -24,22 +24,21 @@ class PurgeProject(graphene.Mutation):
 
 
 class DemoProject(graphene.Mutation):
-    """DO NOT USE. Debug use only. Creates a project with minimal data in database."""
+    """DO NOT USE.
+    Debug use only. Creates a complete project and starts two tests.
+    Optionally creates a reader user in keycloak.
+    """
 
     class Arguments:
         name = graphene.String()
-        req_user_id = graphene.UUID(required=False)
+        project_user_id = graphene.UUID(required=False)
+        project_user_email = graphene.String(required=False)
 
     project_id = graphene.UUID()
 
-    def mutate(self, info, name, req_user_id=None):
+    def mutate(self, info, name, project_user_id=None, project_user_email=None):
         role, user_id = get_request_role_userid(info, (const.ROLE_ADMIN,))
 
-        if not req_user_id:
-            req_user_id = user_id
-        else:
-            req_user_id = str(req_user_id)
-
-        project_id = projects.setup_demo_project(current_app.config, name, req_user_id)
+        project_id = projects.setup_demo_project(current_app.config, name, project_user_id, project_user_email)
 
         return DemoProject(project_id=project_id)

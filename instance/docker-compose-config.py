@@ -1,6 +1,3 @@
-GOOGLE_CLIENT_ID = '397503896505-i6rhbac9sb63uhi05pu3oo6h70tv9vhj.apps.googleusercontent.com'
-
-GITHUB_CLIENT_ID = '6f1b565171e2f15e2afd'
 
 KEYCLOAK_URL = 'https://keycloak.dev.bolt.acaisoft.io/auth/'
 KEYCLOAK_CLIENT_ID = 'test-runner'

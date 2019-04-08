@@ -1,10 +1,9 @@
 import graphene
 
 from app.appgraph import configuration, testrun, util, project, repository, test_creator, uploads, demo, users
-from app.appgraph import oauth
 
 
-class TestrunQuery(users.UserQueries, oauth.QueryOauth, testrun.TestrunQueries):
+class TestrunQuery(users.UserQueries, testrun.TestrunQueries):
     pass
 
 
@@ -58,8 +57,6 @@ AppSchema = graphene.Schema(
     types=[
         configuration.ConfigurationType,
         test_creator.TestCreatorType,
-        oauth.Oauth,
-        oauth.OauthAuthtoken,
         testrun.TestrunStartObject,
         testrun.StatusResponse,
         users.UserListType,

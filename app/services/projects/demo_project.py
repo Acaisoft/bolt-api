@@ -1,8 +1,11 @@
 import threading
 
 from gql import gql
+
+from app import const
 from app.hasura_client import hasura_client
 from app.logger import setup_custom_logger
+from app.services.user_management import user_management
 
 logger = setup_custom_logger(__name__)
 
@@ -12,8 +15,11 @@ example_distribution_result = [{"90%":"210","100%":"360","80%":"170","99%":"360"
 example_test_creator_data = '''{"global_headers":{"HASURA_GRAPHQL_JWT_SECRET":"secret-key","Token":"Bearer ${token}"},"on_start":{"endpoints":[{"actions":[{"variable_path":"auth.token","location":"response","variable_name":"token","action_type":"set_variable"},{"variable_path":"auth.type","location":"response","variable_name":"token_type","action_type":"set_variable"}],"url":"/auth-response","payload":{"username":"my_user","password":"my_password"},"name":"Auth","method":"post"}]},"endpoints":[{"url":"/user/info","payload":{"my_token_type":"JWT","my_token":"My token is ${token}"},"asserts":[{"value":"200","assert_type":"response_code","message":"Eh... Not 200"}],"headers":{"Content-Type":"application/json","Test-Data-Key":"Test data value"},"name":"User info","method":"get","task_value":1},{"url":"/user/save","payload":{"my_name":"Hello, my name is ${name}","my_token_type":"JWT"},"asserts":[{"value":"200","assert_type":"response_code","message":"Eh... Not 200"}],"name":"User save","method":"post","task_value":2},{"url":"/user/delete","asserts":[{"value":"204","assert_type":"response_code","message":"Status code is not 204 for delete"}],"headers":{"TokenType":"token ${token_type}"},"name":"User delete","method":"delete","task_value":3}],"test_type":"set"}'''
 
 
-def setup_demo_project(config, name, req_user_id):
+def setup_demo_project(config, name, req_user_id, req_user_email):
     project_logo = 'https://storage.googleapis.com/media.bolt.acaisoft.io/project_logos/d85d29e5-8204-46a7-8218-40bdcf68c978'
+
+    assert not all((req_user_id, req_user_email)), 'must provide one of user_id, user_email'
+    assert any((req_user_id, req_user_email)), 'must provide either user_id or user_email'
 
     gclient = hasura_client(config)
 
@@ -24,11 +30,15 @@ def setup_demo_project(config, name, req_user_id):
     }'''), {'logo': project_logo, 'name': name})
     project_id = proj_resp['testrun_project_create']['returning'][0]['id']
 
-    # assign user to project
-    logger.info(f'assigning user {req_user_id} to project {project_id}')
-    gclient.execute(gql('''mutation ($id:uuid!, $user_id:uuid!) {
-        insert_user_project (objects:[{id:$id,, project_id:$id, user_id:$user_id}]) {affected_rows}
-    }'''), {'id': project_id, 'user_id': req_user_id})
+    if req_user_email:
+        # create and assign user
+        user_management.user_create(req_user_email, project_id, const.ROLE_READER)
+    elif req_user_id:
+        # assign user to project
+        logger.info(f'assigning user {req_user_id} to project {project_id}')
+        gclient.execute(gql('''mutation ($id:uuid!, $user_id:uuid!) {
+            insert_user_project (objects:[{id:$id,, project_id:$id, user_id:$user_id}]) {affected_rows}
+        }'''), {'id': project_id, 'user_id': req_user_id})
 
     threading.Thread(target=fill_in_project, args=(config, name, project_id)).start()
 

@@ -3,7 +3,6 @@ from flask import Flask
 from app import healthcheck, graphql, cmd, webhooks
 from app.logger import setup_custom_logger
 from app.services import deployer
-from app.auth import auth
 from app.cache import get_cache
 from app.configure import configure
 from app.hasura_client import hasura_client
@@ -23,9 +22,6 @@ def create_app(test_config=None):
 
     ## this app's graphs
     graphql.register_app(app)
-
-    ## authorization endpoints
-    auth.register_app(app)
 
     ## deployer service
     deployer.register_app(app)
