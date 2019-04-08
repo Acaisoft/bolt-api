@@ -35,10 +35,7 @@ class TestrunStart(graphene.Mutation):
     Output = TestrunStartInterface
 
     def mutate(self, info, conf_id, no_cache=False, no_cache_redis=False, no_cache_kaniko=False, **kwargs):
-        role, user_id = get_request_role_userid(info)
-
-        assert role in (
-            const.ROLE_ADMIN, const.ROLE_MANAGER), f'only managers and admins may start a test run (you are {role})'
+        role, user_id = get_request_role_userid(info, (const.ROLE_ADMIN, const.ROLE_MANAGER, const.ROLE_TESTER))
 
         validate_test_configuration_by_id(str(conf_id))
 

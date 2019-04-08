@@ -3,6 +3,8 @@ from typing import Type
 import graphene
 from graphql.language.ast import FragmentSpread
 
+from app import const
+
 
 def OutputTypeFactory(cls:Type[graphene.ObjectType], postfix=""):
     return type(cls.__name__ + postfix + 'ReturnType', (graphene.ObjectType,), {
@@ -56,7 +58,15 @@ def get_selected_fields(info):
     return ' '.join([n for n in get_selections(info)])
 
 
-def get_request_role_userid(info) -> (str, str):
+def get_request_role_userid(info, roles=None) -> (str, str):
     headers = info.context.headers.environ
-    role = headers.get('HTTP_X_HASURA_ROLE', '')
-    return role.split(',')[0], headers.get('HTTP_X_HASURA_USER_ID', '').split(',')[0]
+    role = headers.get('HTTP_X_HASURA_ROLE', '').split(',')[0]
+    user_id = headers.get('HTTP_X_HASURA_USER_ID', '').split(',')[0]
+
+    if roles:
+        for required_role in roles:
+            assert required_role in const.ROLE_CHOICE, f'invalid required role: {required_role}'
+        assert user_id, f'unauthenticated request'
+        assert role in roles, f'unauthorized role, (need one of {roles})'
+
+    return role, user_id

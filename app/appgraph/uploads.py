@@ -35,9 +35,7 @@ class UploadUrl(graphene.Mutation):
 
     @staticmethod
     def validate(info, content_type, content_md5, content_length, object_id=None):
-        role, user_id = get_request_role_userid(info)
-        assert user_id, f'unauthenticated request'
-        assert role in (const.ROLE_ADMIN, const.ROLE_MANAGER), f'user with role {role} cannot update projects'
+        role, user_id = get_request_role_userid(info, (const.ROLE_ADMIN, const.ROLE_MANAGER))
 
         # gclient = hasura_client(current_app.config)
         #

@@ -51,8 +51,7 @@ class CreateValidate(graphene.Mutation):
     def validate(info, name, data, project_id, max_wait, min_wait, type_slug, validate_unique_name=True):
         assert type_slug in const.TESTTYPE_CHOICE, f'invalid type_slug {type_slug}'
         project_id = str(project_id)
-        role, user_id = get_request_role_userid(info)
-        assert user_id, f'unauthenticated request'
+        role, user_id = get_request_role_userid(info, (const.ROLE_ADMIN, const.ROLE_MANAGER, const.ROLE_TESTER))
 
         name = validators.validate_text(name)
 
@@ -168,8 +167,7 @@ class Update(CreateValidate):
     def mutate(self, info, id, name=None, data=None, max_wait=None, min_wait=None, type_slug=None):
         id = str(id)
 
-        role, user_id = get_request_role_userid(info)
-        assert user_id, f'unauthenticated request'
+        role, user_id = get_request_role_userid(info, (const.ROLE_ADMIN, const.ROLE_MANAGER, const.ROLE_TESTER))
 
         gclient = hasura_client(current_app.config)
 

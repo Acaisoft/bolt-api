@@ -49,14 +49,12 @@ class CreateValidate(graphene.Mutation):
 
     @staticmethod
     def validate(info, name, repository_url, project_id, type_slug):
-        role, user_id = get_request_role_userid(info)
-        assert role in (const.ROLE_ADMIN, const.ROLE_MANAGER), f'{role} user {user_id} cannot create a repository'
+        role, user_id = get_request_role_userid(info, (const.ROLE_ADMIN, const.ROLE_MANAGER, const.ROLE_TESTER))
 
         gclient = hasura_client(current_app.config)
 
         project_id = str(project_id)
 
-        assert user_id, f'unauthenticated request'
         name = validators.validate_text(name)
 
         query = gclient.execute(gql('''query ($projId:uuid!, $repoName:String!, $repoUrl:String!, $userId:uuid!, $confType:uuid!) {
@@ -163,9 +161,7 @@ class UpdateValidate(graphene.Mutation):
 
     @staticmethod
     def validate(info, id, name=None, repository_url=None, type_slug=None):
-        role, user_id = get_request_role_userid(info)
-
-        assert role in (const.ROLE_ADMIN, const.ROLE_MANAGER), f'{role} user {user_id} cannot update repository'
+        role, user_id = get_request_role_userid(info, (const.ROLE_ADMIN, const.ROLE_MANAGER, const.ROLE_TESTER))
 
         gclient = hasura_client(current_app.config)
 

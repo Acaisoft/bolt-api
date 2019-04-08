@@ -39,9 +39,7 @@ class CreateValidate(graphene.Mutation):
 
     @staticmethod
     def validate(info, name, description=None, image_url=None):
-        role, user_id = get_request_role_userid(info)
-        assert user_id, f'unauthenticated request'
-        assert role == const.ROLE_ADMIN, f'user with role {role} cannot create projects'
+        role, user_id = get_request_role_userid(info, (const.ROLE_ADMIN,))
 
         gclient = hasura_client(current_app.config)
 
@@ -77,12 +75,12 @@ class CreateValidate(graphene.Mutation):
 
 
 class Create(CreateValidate):
-    """Validates and saves configuration for a testrun."""
+    """Validates and saves configuration for a project."""
 
     Output = OutputInterfaceFactory(ProjectInterface, 'Create')
 
     def mutate(self, info, name, description=None, image_url=None):
-        _, user_id = get_request_role_userid(info)
+        _, user_id = get_request_role_userid(info, (const.ROLE_ADMIN,))
 
         gclient = hasura_client(current_app.config)
 
@@ -131,9 +129,7 @@ class UpdateValidate(graphene.Mutation):
 
     @staticmethod
     def validate(info, id, name=None, description=None, image_url=None):
-        role, user_id = get_request_role_userid(info)
-        assert user_id, f'unauthenticated request'
-        assert role in (const.ROLE_ADMIN, const.ROLE_MANAGER), f'user with role {role} cannot update projects'
+        role, user_id = get_request_role_userid(info, (const.ROLE_ADMIN, const.ROLE_MANAGER,))
 
         gclient = hasura_client(current_app.config)
 

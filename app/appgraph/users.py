@@ -48,9 +48,7 @@ class UserQueries(graphene.ObjectType):
     )
 
     def resolve_testrun_user_list(self, info, project_id):
-        req_role, user_id = get_request_role_userid(info)
-        assert user_id, f'unauthenticated request'
-        assert req_role in (const.ROLE_ADMIN, const.ROLE_MANAGER), f'user with role {req_role} cannot list users'
+        req_role, user_id = get_request_role_userid(info, (const.ROLE_ADMIN, const.ROLE_MANAGER))
 
         project_id = str(project_id)
         c = get_cache(current_app.config)
@@ -83,9 +81,7 @@ class AssignUserToProject(graphene.Mutation):
     Output = OutputInterfaceFactory(UserInterface, 'Assign')
 
     def mutate(self, info, email, project_id, role):
-        req_role, user_id = get_request_role_userid(info)
-        assert user_id, f'unauthenticated request'
-        assert req_role in (const.ROLE_ADMIN,), f'user with role {req_role} cannot manage users'
+        req_role, user_id = get_request_role_userid(info, (const.ROLE_ADMIN, const.ROLE_MANAGER))
 
         user_id = user_management.user_create(email, str(project_id), role)
         return OutputValueFromFactory(AssignUserToProject, {'returning': [{
@@ -110,9 +106,7 @@ class RemoveUserFromProject(graphene.Mutation):
     Output = OutputInterfaceFactory(UserInterface, 'Unassign')
 
     def mutate(self, info, user_id, project_id):
-        req_role, req_user_id = get_request_role_userid(info)
-        assert req_user_id, f'unauthenticated request'
-        assert req_role in (const.ROLE_ADMIN,), f'user with role {req_role} cannot manage users'
+        req_role, req_user_id = get_request_role_userid(info, (const.ROLE_ADMIN, const.ROLE_MANAGER))
 
         resp = user_management.user_unassign_from_project(str(user_id), str(project_id))
 
@@ -131,9 +125,7 @@ class UserAddRole(graphene.Mutation):
     Output = OutputInterfaceFactory(UserInterface, 'Roles')
 
     def mutate(self, info, user_id, roles):
-        req_role, req_user_id = get_request_role_userid(info)
-        assert req_user_id, f'unauthenticated request'
-        assert req_role in (const.ROLE_ADMIN,), f'user with role {req_role} cannot manage roles'
+        req_role, req_user_id = get_request_role_userid(info, (const.ROLE_ADMIN,))
 
         for r in roles:
             assert r in const.ROLE_CHOICE, f'invalid role: {r}'

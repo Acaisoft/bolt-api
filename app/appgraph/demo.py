@@ -16,9 +16,7 @@ class PurgeProject(graphene.Mutation):
     deleted_projects = graphene.List(graphene.UUID)
 
     def mutate(self, info, project_id=None, project_name=None):
-        role, user_id = get_request_role_userid(info)
-        assert user_id, f'unauthenticated request'
-        assert role == const.ROLE_ADMIN, f'{role} user cannot create projects'
+        role, user_id = get_request_role_userid(info, (const.ROLE_ADMIN,))
 
         project_ids_list = projects.teardown(current_app.config, project_name=project_name, project_id=project_id)
 
@@ -35,9 +33,7 @@ class DemoProject(graphene.Mutation):
     project_id = graphene.UUID()
 
     def mutate(self, info, name, req_user_id=None):
-        role, user_id = get_request_role_userid(info)
-        assert user_id, f'unauthenticated request'
-        assert role == const.ROLE_ADMIN, f'{role} user cannot create projects'
+        role, user_id = get_request_role_userid(info, (const.ROLE_ADMIN,))
 
         if not req_user_id:
             req_user_id = user_id

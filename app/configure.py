@@ -20,7 +20,7 @@ def configure(app: Flask):
     sentry_dsn = app.config.get('SENTRY_DSN', None)
     if sentry_dsn and not app.debug:
         logging.info(f'sentry logging to {sentry_dsn.split("@")[-1]}')
-        sentry_sdk.init(sentry_dsn, integrations=[FlaskIntegration()], release='v0.1.2')
+        sentry_sdk.init(sentry_dsn, integrations=[FlaskIntegration()])
 
     config_ver = app.config.get('CONFIG_VERSION', None)
     secrets_ver = app.config.get('SECRETS_VERSION', None)
