@@ -59,6 +59,12 @@ def get_selected_fields(info):
 
 
 def get_request_role_userid(info, roles=None) -> (str, str):
+    """
+    Extract authorization headers from hasura/graphene info object.
+    :param info: hasura's request info
+    :param roles: iterable of const.ROLE_XXX
+    :return: tuple of (role, user_id)
+    """
     headers = info.context.headers.environ
     role = headers.get('HTTP_X_HASURA_ROLE', '').split(',')[0]
     user_id = headers.get('HTTP_X_HASURA_USER_ID', '').split(',')[0]
