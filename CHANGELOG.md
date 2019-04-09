@@ -1,6 +1,29 @@
 Changelog
 =========
 
+## 0.2.5 (2019-04-08)
+
+### Fix
+
+* Fix slow repository validation, fix invalid error message (caused by timeouts), fix openapi sdk errors with headers returned to users. [Piotr Mońko]
+
+### Other
+
+* Update bolt-deployer. [Piotr Mońko]
+
+* Merge branch 'master' of bitbucket.org:acaisoft/bolt-api. [Piotr Mońko]
+
+* Add release env var to docker image. [jroslaniec-acaisoft]
+
+* Move demo setup to thread. [Piotr Mońko]
+
+* Add logging to debugging. [Piotr Mońko]
+
+* Add cache to deployer repository validation. [Piotr Mońko]
+
+* Merge branch 'master' of bitbucket.org:acaisoft/bolt-api. [Piotr Mońko]
+
+
 ## 0.2.4 (2019-04-04)
 
 ### Changes
