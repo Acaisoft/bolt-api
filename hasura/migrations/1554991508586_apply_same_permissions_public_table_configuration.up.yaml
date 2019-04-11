@@ -1,0 +1,66 @@
+- args:
+    role: reader
+    table:
+      name: configuration
+      schema: public
+  type: drop_select_permission
+- args:
+    permission:
+      allow_aggregations: false
+      columns:
+      - created_by_id
+      - id
+      - instances
+      - name
+      - performed
+      - project_id
+      - test_source_id
+      - type_slug
+      filter:
+        _and:
+        - executions:
+            id:
+              _eq: X-Hasura-Testruner-Id
+        - project:
+            is_deleted:
+              _eq: false
+        - is_deleted:
+            _eq: false
+    role: reader
+    table:
+      name: configuration
+      schema: public
+  type: create_select_permission
+- args:
+    role: testrunner
+    table:
+      name: configuration
+      schema: public
+  type: drop_select_permission
+- args:
+    permission:
+      allow_aggregations: false
+      columns:
+      - created_by_id
+      - id
+      - instances
+      - name
+      - performed
+      - project_id
+      - test_source_id
+      - type_slug
+      filter:
+        _and:
+        - executions:
+            id:
+              _eq: X-Hasura-Testruner-Id
+        - project:
+            is_deleted:
+              _eq: false
+        - is_deleted:
+            _eq: false
+    role: testrunner
+    table:
+      name: configuration
+      schema: public
+  type: create_select_permission

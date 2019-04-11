@@ -1,0 +1,18 @@
+- args:
+    permission:
+      columns:
+      - name
+      filter:
+        project:
+          userProjects:
+            user_id:
+              _eq: X-HASURA-USER-ID
+      localPresets:
+      - key: ""
+        value: ""
+      set: {}
+    role: manager
+    table:
+      name: repository
+      schema: public
+  type: create_update_permission

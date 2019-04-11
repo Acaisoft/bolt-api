@@ -1,0 +1,58 @@
+- args:
+    permission:
+      allow_aggregations: false
+      columns:
+      - id
+      - name
+      - project_id
+      - type_slug
+      - url
+      filter:
+        _or:
+        - project:
+            userProjects:
+              user_id:
+                _eq: X-HASURA-USER-ID
+    role: reader
+    table:
+      name: repository
+      schema: public
+  type: create_select_permission
+- args:
+    role: reader
+    table:
+      name: repository
+      schema: public
+  type: drop_select_permission
+- args:
+    permission:
+      allow_aggregations: false
+      columns:
+      - id
+      - name
+      - performed
+      - project_id
+      - type_slug
+      - url
+      filter:
+        _and:
+        - project:
+            userProjects:
+              user_id:
+                _eq: X-Hasura-User-Id
+        - project:
+            is_deleted:
+              _eq: false
+        - is_deleted:
+            _eq: false
+    role: manager
+    table:
+      name: repository
+      schema: public
+  type: create_select_permission
+- args:
+    role: manager
+    table:
+      name: repository
+      schema: public
+  type: drop_select_permission

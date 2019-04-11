@@ -1,0 +1,11 @@
+- args:
+    permission:
+      allow_aggregations: false
+      columns: []
+      filter: {}
+      limit: null
+    role: tester
+    table:
+      name: execution_users
+      schema: public
+  type: create_select_permission
