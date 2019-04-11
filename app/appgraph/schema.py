@@ -3,7 +3,7 @@ import graphene
 from app.appgraph import configuration, testrun, util, project, repository, test_creator, uploads, demo, users
 
 
-class TestrunQuery(users.UserQueries, testrun.TestrunQueries):
+class TestrunQuery(users.UserQueries, testrun.TestrunQueries, project.TestrunQueries):
     pass
 
 
@@ -26,12 +26,14 @@ class TestrunMutations(graphene.ObjectType):
     testrun_project_create_validate = to_field(project.CreateValidate)
     testrun_project_update = to_field(project.Update)
     testrun_project_update_validate = to_field(project.UpdateValidate)
+    testrun_project_delete = to_field(project.Delete)
 
     # repositories
     testrun_repository_create = to_field(repository.Create)
     testrun_repository_create_validate = to_field(repository.CreateValidate)
     testrun_repository_update = to_field(repository.Update)
     testrun_repository_update_validate = to_field(repository.UpdateValidate)
+    testrun_repository_delete = to_field(repository.Delete)
 
     # test creator
     testrun_creator_create = to_field(test_creator.Create)
@@ -62,6 +64,7 @@ AppSchema = graphene.Schema(
         users.UserListType,
         users.UserListItemType,
         util.ValidationResponse,
+        project.SummaryResponse,
     ],
     auto_camelcase=False,
 )

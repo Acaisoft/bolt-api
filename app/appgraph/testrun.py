@@ -76,6 +76,7 @@ class TestrunStart(graphene.Mutation):
                     project:{userProjects:{user_id:{_eq:$userId}}}
                 }) {
                     project_id
+                    instances
                     
                     test_source {
                         source_type
@@ -119,6 +120,7 @@ class TestrunStart(graphene.Mutation):
             deployer_response, execution_id = start_job(
                 app_config=current_app.config,
                 project_id=test_config['project_id'],
+                workers=test_config['workers'],
                 repo_url=test_config['test_source']['repository']['url'],
                 no_cache_redis=no_cache or no_cache_redis,
                 no_cache_kaniko=no_cache or no_cache_kaniko,
@@ -129,6 +131,7 @@ class TestrunStart(graphene.Mutation):
             deployer_response, execution_id = start_image(
                 app_config=current_app.config,
                 project_id=test_config['project_id'],
+                workers=test_config['workers'],
             )
             initial_state['status'] = const.TESTRUN_STARTED
             initial_state['test_job_id'] = deployer_response.name

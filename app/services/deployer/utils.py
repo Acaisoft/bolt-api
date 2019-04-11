@@ -16,7 +16,7 @@ from app.hasura_client import hasura_client
 DEPLOYER_TIMEOUT = 6
 
 
-def start_image(app_config, project_id):
+def start_image(app_config, project_id, workers):
     # request a testrun is started with parameters in execution's configuration
     image = app_config.get('BOLT_TEST_RUNNER_IMAGE', const.DEFAULT_TEST_RUNNER_IMAGE)
     assert image, '*_TEST_RUNNER_IMAGE is undefined'
@@ -25,6 +25,7 @@ def start_image(app_config, project_id):
 
     data = deployer_cli.JobCreateSchema(
         docker_image=image,
+        workers=workers,
         tenant_id=TENANT_ID,
         project_id=project_id,
         test_run_execution_id=execution_id,
@@ -36,13 +37,14 @@ def start_image(app_config, project_id):
     ), execution_id
 
 
-def start_job(app_config, project_id, repo_url, no_cache_redis=False, no_cache_kaniko=False):
+def start_job(app_config, project_id, repo_url, workers, no_cache_redis=False, no_cache_kaniko=False):
     # request an image is built from repository sources and executed as testrun
 
     job_token, execution_id = hasura_token_for_testrunner(app_config)
 
     data = deployer_cli.ImageBuildRequestSchema(
         repo_url=repo_url,
+        workers=workers,
         tenant_id=TENANT_ID,
         project_id=project_id,
         start_proper_job=True,
