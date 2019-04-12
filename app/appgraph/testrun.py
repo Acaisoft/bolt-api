@@ -40,72 +40,42 @@ class TestrunStart(graphene.Mutation):
         validate_test_configuration_by_id(str(conf_id))
 
         gclient = hasura_client(current_app.config)
-        if role == const.ROLE_ADMIN:
-            test_config_response = gclient.execute(gql('''query ($confId:uuid!) {
-                configuration (where:{id:{_eq:$confId}}) {
-                    project_id
-                    test_source {
-                        source_type
+        test_config_response = gclient.execute(gql('''query ($confId:uuid!, $userId:uuid!) {
+            configuration (where:{
+                id:{_eq:$confId},
+                project:{userProjects:{user_id:{_eq:$userId}}}
+            }) {
+                project_id
+                instances
+                
+                test_source {
+                    source_type
+                    project {
+                        userProjects { user_id }
+                    }
+                    repository {
+                        name
+                        url
+                        configuration_type { slug_name }
                         project {
                             userProjects { user_id }
                         }
-                        repository {
-                            name
-                            url
-                            configuration_type { slug_name }
-                            project {
-                                userProjects { user_id }
-                            }
-                        }
-                        test_creator {
-                            name
-                            data
-                            min_wait
-                            max_wait
-                            project {
-                                userProjects { user_id }
-                            }
-                        }
                     }
-                }
-            }'''), {'confId': str(conf_id)})
-        else:
-            test_config_response = gclient.execute(gql('''query ($confId:uuid!, $userId:uuid!) {
-                configuration (where:{
-                    id:{_eq:$confId},
-                    project:{userProjects:{user_id:{_eq:$userId}}}
-                }) {
-                    project_id
-                    instances
-                    
-                    test_source {
-                        source_type
+                    test_creator {
+                        name
+                        data
+                        min_wait
+                        max_wait
                         project {
                             userProjects { user_id }
                         }
-                        repository {
-                            name
-                            url
-                            configuration_type { slug_name }
-                            project {
-                                userProjects { user_id }
-                            }
-                        }
-                        test_creator {
-                            name
-                            data
-                            min_wait
-                            max_wait
-                            project {
-                                userProjects { user_id }
-                            }
-                        }
                     }
                 }
-            }'''), {
-                'confId': str(conf_id),
-                'userId': user_id,
-            })
+            }
+        }'''), {
+            'confId': str(conf_id),
+            'userId': user_id,
+        })
         assert test_config_response['configuration'], f'configuration not found ({str(test_config_response)})'
         test_config = test_config_response['configuration'][0]
         code_source = test_config['test_source']['source_type']
@@ -120,7 +90,7 @@ class TestrunStart(graphene.Mutation):
             deployer_response, execution_id = start_job(
                 app_config=current_app.config,
                 project_id=test_config['project_id'],
-                workers=test_config['workers'],
+                workers=test_config['instances'],
                 repo_url=test_config['test_source']['repository']['url'],
                 no_cache_redis=no_cache or no_cache_redis,
                 no_cache_kaniko=no_cache or no_cache_kaniko,
@@ -131,7 +101,7 @@ class TestrunStart(graphene.Mutation):
             deployer_response, execution_id = start_image(
                 app_config=current_app.config,
                 project_id=test_config['project_id'],
-                workers=test_config['workers'],
+                workers=test_config['instances'],
             )
             initial_state['status'] = const.TESTRUN_STARTED
             initial_state['test_job_id'] = deployer_response.name
