@@ -1,7 +1,7 @@
 import os
 
 import requests
-from gql import Client
+from gql import Client, gql
 from gql.transport.requests import RequestsHTTPTransport
 from graphql import print_ast
 from graphql.execution import ExecutionResult
@@ -65,3 +65,7 @@ def hasura_client(config=None):
             )
         )
     return _client
+
+
+def hce(config, query, *args, **kwargs):
+    return hasura_client(config).execute(gql(query), *args, **kwargs)

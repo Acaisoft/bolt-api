@@ -3,6 +3,7 @@ from flask import current_app
 
 from app import const
 from app.appgraph.util import get_request_role_userid
+from app.hasura_client import hce
 from app.services.projects.summary import get_project_summary
 
 
@@ -27,9 +28,14 @@ class TestrunQueries(graphene.ObjectType):
     )
 
     def resolve_testrun_project_summary(self, info, project_id):
-        role, user_id = get_request_role_userid(info, const.ROLE_CHOICE)
+        _, user_id = get_request_role_userid(info, const.ROLE_CHOICE)
 
-        # TODO: check user role
+        projects = hce(current_app.config, '''query ($pid:uuid!, $uid:uuid!) {
+            user_project(where:{user_id:{_eq:$uid}, project_id:{_eq:$pid}}) {
+            id
+            }
+        }''', {'pid': str(project_id), 'uid': user_id})
+        assert projects['user_project'], f'unauthorized request'
 
         stats = get_project_summary(current_app.config, project_id)
 
