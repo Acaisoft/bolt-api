@@ -90,7 +90,7 @@ def fill_in_project(config, name, project_id):
     })
     testsource_creator_id = resp['testrun_creator_create']['returning'][0]['id']
 
-    # create a repository configuration
+    # create a repository configuration with master/slave setup
     logger.info('creating a repository test configuration')
     resp = gclient.execute(gql('''mutation ($name:String!, $id:UUID!, $testsource_repo_id:UUID!) {
     testrun_configuration_create(
@@ -103,10 +103,14 @@ def fill_in_project(config, name, project_id):
             value:"%(SMOKE_TEST_TARGET)s"
         }, {
             parameter_slug:"load_tests_duration"
-            value:"10"
+            value:"30"
+        }, {
+            parameter_slug:"load_tests_users"
+            value:"%(load_tests_users)s"
         }]) { returning { id } }
     }''' % {
         'SMOKE_TEST_TARGET': SMOKE_TEST_TARGET,
+        'load_tests_users': int(const.TESTRUN_MAX_USERS_PER_INSTANCE * 2),
     }), {
         'id': project_id,
         'name': name + ' repo',

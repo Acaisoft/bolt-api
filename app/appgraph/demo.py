@@ -39,6 +39,6 @@ class DemoProject(graphene.Mutation):
     def mutate(self, info, name, project_user_id=None, project_user_email=None):
         role, user_id = get_request_role_userid(info, (const.ROLE_ADMIN,))
 
-        project_id = projects.setup_demo_project(current_app.config, name, project_user_id, project_user_email)
+        project_id = projects.setup_demo_project(current_app.config, name, str(project_user_id), project_user_email)
 
         return DemoProject(project_id=project_id)
