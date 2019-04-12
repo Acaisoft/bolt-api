@@ -10,6 +10,10 @@ from app.services.user_management import user_management
 logger = setup_custom_logger(__name__)
 
 
+SMOKE_TEST_REPO = 'git@bitbucket.org:acaisoft/bolt-sample-load.git'
+SMOKE_TEST_TARGET = 'https://test-target.dev.bolt.acaisoft.io'
+
+
 example_request_result = [{"Min response time":"146","Average Content Size":"12","# failures":"0","Median response time":"150","Name":"/api/","Method":"GET","Max response time":"363","Average response time":"176","Requests/s":"1.13","# requests":"11"},{"Min response time":"0","Average Content Size":"0","# failures":"7","Median response time":"0","Name":"/api/echo/hello","Method":"GET","Max response time":"0","Average response time":"0","Requests/s":"0.00","# requests":"0"},{"Min response time":"0","Average Content Size":"0","# failures":"2","Median response time":"0","Name":"/api/error/400or500","Method":"GET","Max response time":"0","Average response time":"0","Requests/s":"0.00","# requests":"0"},{"Min response time":"0","Average Content Size":"0","# failures":"6","Median response time":"0","Name":"/api/error/401","Method":"GET","Max response time":"0","Average response time":"0","Requests/s":"0.00","# requests":"0"},{"Min response time":"0","Average Content Size":"0","# failures":"8","Median response time":"0","Name":"/api/error/404","Method":"GET","Max response time":"0","Average response time":"0","Requests/s":"0.00","# requests":"0"},{"Min response time":"0","Average Content Size":"0","# failures":"4","Median response time":"0","Name":"/api/random","Method":"GET","Max response time":"0","Average response time":"0","Requests/s":"0.00","# requests":"0"},{"Min response time":"0","Average Content Size":"0","# failures":"4","Median response time":"0","Name":"/api/send","Method":"POST","Max response time":"0","Average response time":"0","Requests/s":"0.00","# requests":"0"},{"Min response time":"146","Average Content Size":"12","# failures":"31","Median response time":"150","Name":"Total","Method":"None","Max response time":"363","Average response time":"176","Requests/s":"1.13","# requests":"11"}]
 example_distribution_result = [{"90%":"210","100%":"360","80%":"170","99%":"360","50%":"150","95%":"360","98%":"360","Name":"GET /api/","75%":"170","66%":"170","# requests":"11"},{"90%":"N/A","100%":"N/A","80%":"N/A","99%":"N/A","50%":"N/A","95%":"N/A","98%":"N/A","Name":"/api/echo/hello","75%":"N/A","66%":"N/A","# requests":"0"},{"90%":"N/A","100%":"N/A","80%":"N/A","99%":"N/A","50%":"N/A","95%":"N/A","98%":"N/A","Name":"/api/error/400or500","75%":"N/A","66%":"N/A","# requests":"0"},{"90%":"N/A","100%":"N/A","80%":"N/A","99%":"N/A","50%":"N/A","95%":"N/A","98%":"N/A","Name":"/api/error/401","75%":"N/A","66%":"N/A","# requests":"0"},{"90%":"N/A","100%":"N/A","80%":"N/A","99%":"N/A","50%":"N/A","95%":"N/A","98%":"N/A","Name":"/api/error/404","75%":"N/A","66%":"N/A","# requests":"0"},{"90%":"N/A","100%":"N/A","80%":"N/A","99%":"N/A","50%":"N/A","95%":"N/A","98%":"N/A","Name":"/api/random","75%":"N/A","66%":"N/A","# requests":"0"},{"90%":"N/A","100%":"N/A","80%":"N/A","99%":"N/A","50%":"N/A","95%":"N/A","98%":"N/A","Name":"/api/send","75%":"N/A","66%":"N/A","# requests":"0"},{"90%":"210","100%":"360","80%":"170","99%":"360","50%":"150","95%":"360","98%":"360","Name":"Total","75%":"170","66%":"170","# requests":"11"}]
 example_test_creator_data = '''{"global_headers":{"HASURA_GRAPHQL_JWT_SECRET":"secret-key","Token":"Bearer ${token}"},"on_start":{"endpoints":[{"actions":[{"variable_path":"auth.token","location":"response","variable_name":"token","action_type":"set_variable"},{"variable_path":"auth.type","location":"response","variable_name":"token_type","action_type":"set_variable"}],"url":"/auth-response","payload":{"username":"my_user","password":"my_password"},"name":"Auth","method":"post"}]},"endpoints":[{"url":"/user/info","payload":{"my_token_type":"JWT","my_token":"My token is ${token}"},"asserts":[{"value":"200","assert_type":"response_code","message":"Eh... Not 200"}],"headers":{"Content-Type":"application/json","Test-Data-Key":"Test data value"},"name":"User info","method":"get","task_value":1},{"url":"/user/save","payload":{"my_name":"Hello, my name is ${name}","my_token_type":"JWT"},"asserts":[{"value":"200","assert_type":"response_code","message":"Eh... Not 200"}],"name":"User save","method":"post","task_value":2},{"url":"/user/delete","asserts":[{"value":"204","assert_type":"response_code","message":"Status code is not 204 for delete"}],"headers":{"TokenType":"token ${token_type}"},"name":"User delete","method":"delete","task_value":3}],"test_type":"set"}'''
@@ -57,10 +61,12 @@ def fill_in_project(config, name, project_id):
     testrun_repository_create (
         name:$name
         project_id:$id
-        repository_url:"git@bitbucket.org:acaisoft/load-events.git"
+        repository_url:"%(SMOKE_TEST_REPO)s"
         type_slug:"load_tests"
     ) { returning { id } }
-    }'''), {
+    }''' % {
+        'SMOKE_TEST_REPO': SMOKE_TEST_REPO,
+    }), {
         'id': project_id,
         'name': name + ' repository',
     })
@@ -94,12 +100,14 @@ def fill_in_project(config, name, project_id):
         test_source_id:$testsource_repo_id
         configuration_parameters:[{
             parameter_slug:"load_tests_host"
-            value:"https://att-lwd-go-dev.acaisoft.net/api"
+            value:"%(SMOKE_TEST_TARGET)s"
         }, {
             parameter_slug:"load_tests_duration"
             value:"10"
         }]) { returning { id } }
-    }'''), {
+    }''' % {
+        'SMOKE_TEST_TARGET': SMOKE_TEST_TARGET,
+    }), {
         'id': project_id,
         'name': name + ' repo',
         'testsource_repo_id': testsource_repo_id,
@@ -116,9 +124,11 @@ def fill_in_project(config, name, project_id):
         test_source_id:$testsource_creator_id
         configuration_parameters:[{
             parameter_slug:"load_tests_host"
-            value:"https://att-lwd-go-dev.acaisoft.net/api"
+            value:"%(SMOKE_TEST_TARGET)s"
         }]) { returning { id } }
-    }'''), {
+    }''' % {
+        'SMOKE_TEST_TARGET': SMOKE_TEST_TARGET,
+    }), {
         'id': project_id,
         'name': name + ' creator',
         'testsource_creator_id': testsource_creator_id,
@@ -134,9 +144,11 @@ def fill_in_project(config, name, project_id):
         type_slug:"load_tests"
         configuration_parameters:[{
             parameter_slug:"load_tests_host"
-            value:"https://att-lwd-go-dev.acaisoft.net/api"
+            value:"%(SMOKE_TEST_TARGET)s"
         }]) { returning { id } }
-    }'''), {
+    }''' % {
+        'SMOKE_TEST_TARGET': SMOKE_TEST_TARGET,
+    }), {
         'id': project_id,
         'name': name + ' undefined source',
     })

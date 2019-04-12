@@ -1,9 +1,11 @@
+from app import const
+
 
 def validate_time(value: str):
     value = value.strip()
     assert value, 'test duration parameter is required'
     assert value.isdigit(), f'expected numeric value of seconds for duration, got {value}'
-    assert int(value) <= 1800, 'maximum testrun duration is 30 minutes or 1800 seconds'
+    assert int(value) <= const.TESTRUN_MAX_DURATION, f'maximum testrun duration {const.TESTRUN_MAX_DURATION} seconds'
     return value
 
 
@@ -11,7 +13,7 @@ def validate_users(value: str):
     value = value.strip()
     assert value, 'number of users is required'
     assert value.isdigit(), f'expected numeric value for number of users, got {value}'
-    assert int(value) <= 5000, 'maximum simultaneous users limit is 5000'
+    assert int(value) <= const.TESTRUN_MAX_USERS, f'maximum simultaneous users limit is {const.TESTRUN_MAX_USERS}'
     return value
 
 
