@@ -1,0 +1,39 @@
+- args:
+    role: manager
+    table:
+      name: test_creator
+      schema: public
+  type: drop_select_permission
+- args:
+    permission:
+      allow_aggregations: false
+      columns:
+      - created_at
+      - created_by_id
+      - data
+      - id
+      - max_wait
+      - min_wait
+      - name
+      - performed
+      - previous_version_id
+      - project_id
+      - test_source_id
+      - type_slug
+      filter:
+        _and:
+        - test_sources:
+            is_deleted:
+              _eq: false
+        - project:
+            is_deleted:
+              _eq: false
+        - project:
+            userProjects:
+              user_id:
+                _eq: X-Hasura-User-Id
+    role: manager
+    table:
+      name: test_creator
+      schema: public
+  type: create_select_permission

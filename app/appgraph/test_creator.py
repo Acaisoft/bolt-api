@@ -59,12 +59,20 @@ class CreateValidate(graphene.Mutation):
         # validate configuration exists and user has access to it
         creators = gclient.execute(gql('''
             query ($userId: uuid!, $project_id: uuid!, $name:String!) {
-                project (where: {id: {_eq: $project_id}, userProjects: {user_id: {_eq: $userId}}}) {
+                project (where: {
+                    id: {_eq: $project_id}, 
+                    is_deleted: {_eq:false},
+                    userProjects: {user_id: {_eq: $userId}}
+                }) {
                     name
                 }
                 
                 test_source(where:{
-                    project:{userProjects:{user_id:{_eq:$userId}}}
+                    project:{
+                        userProjects:{user_id:{_eq:$userId}},
+                        is_deleted: {_eq:false},
+                        id: {_eq:$project_id},
+                    }
                     test_creator:{name:{_eq:$name}}
                 }) {
                     id
@@ -174,7 +182,10 @@ class Update(CreateValidate):
         original = gclient.execute(gql('''query ($objId:uuid!, $userId:uuid!) {
             test_creator (where:{
                     id:{_eq:$objId}
-                    project:{userProjects:{user_id:{_eq:$userId}}}
+                    project:{
+                        userProjects:{user_id:{_eq:$userId}}
+                        is_deleted: {_eq:false}
+                    }
             }) {
                 id
                 name

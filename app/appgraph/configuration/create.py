@@ -61,7 +61,10 @@ class CreateValidate(graphene.Mutation):
         ) {
             test_source (where:{
                     id:{_eq:$sourceId}, 
-                    project:{userProjects:{user_id:{_eq:$userId}}}
+                    project:{
+                        userProjects:{user_id:{_eq:$userId}}
+                        is_deleted: {_eq:false}
+                    }
             }) @include(if:$fetchSource) {
                 source_type
                 project {
@@ -102,9 +105,13 @@ class CreateValidate(graphene.Mutation):
             }
             
             configuration (where:{
+                is_deleted: {_eq:false},
                 name:{_eq:$confName}, 
                 project_id:{_eq:$projId}, 
-                project:{userProjects:{user_id:{_eq:$userId}}}
+                project:{
+                    userProjects:{user_id:{_eq:$userId}},
+                    is_deleted: {_eq:false}
+                }
             }) {
                 id
             }

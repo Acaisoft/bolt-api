@@ -40,7 +40,11 @@ class UpdateValidate(graphene.Mutation):
         projects = gclient.execute(gql('''query ($projId:uuid!, $userId:uuid!, $name:String!) {
             original: project_by_pk(id:$projId) { id name }
             
-            uniqueName: project (where:{name:{_eq:$name}, userProjects:{user_id:{_eq:$userId}}}) {
+            uniqueName: project (where:{
+                name:{_eq:$name},
+                is_deleted: {_eq:false}, 
+                userProjects:{user_id:{_eq:$userId}}
+            }) {
                 name
             }
         }'''), {

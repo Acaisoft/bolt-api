@@ -37,16 +37,6 @@ class UploadUrl(graphene.Mutation):
     def validate(info, content_type, content_md5, content_length, object_id=None):
         role, user_id = get_request_role_userid(info, (const.ROLE_ADMIN, const.ROLE_MANAGER))
 
-        # gclient = hasura_client(current_app.config)
-        #
-        # projects = gclient.execute(gql('''query ($projId:uuid!, $userId:uuid!) {
-        #     project (where:{id:{_eq:$projId}, userProjects:{user_id:{_eq:$userId}}}) { id }
-        # }'''), {
-        #     'projId': str(id),
-        #     'userId': user_id,
-        # })
-        # assert len(projects.get('project', [])), f'project {str(id)} does not exist or user is not authorized'
-
         assert content_type in const.IMAGE_CONTENT_TYPES, f'illegal content_type "{content_type}", valid choices are: {const.IMAGE_CONTENT_TYPES}'
 
         assert content_md5 and len(content_md5) > 10, f'invalid content_md5'

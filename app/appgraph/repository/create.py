@@ -43,6 +43,7 @@ class CreateValidate(graphene.Mutation):
         query = gclient.execute(gql('''query ($projId:uuid!, $repoName:String!, $repoUrl:String!, $userId:uuid!, $confType:uuid!) {
             project(where:{
                 id:{_eq:$projId}, 
+                is_deleted: {_eq:false},
                 userProjects:{user_id:{_eq:$userId}}
             }) { id }
             
@@ -50,11 +51,13 @@ class CreateValidate(graphene.Mutation):
             
             uniqueName: repository(where:{
                 project_id:{_eq:$projId},
+                is_deleted: {_eq:false},
                 name:{_eq:$repoName}
             }) { id }
             
             uniqueUrl: repository(where:{
                 project_id:{_eq:$projId},
+                is_deleted: {_eq:false},
                 url:{_eq:$repoUrl}
             }) { id }
             

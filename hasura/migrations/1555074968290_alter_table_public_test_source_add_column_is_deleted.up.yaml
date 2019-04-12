@@ -1,0 +1,4 @@
+- args:
+    sql: ALTER TABLE "public"."test_source" ADD COLUMN "is_deleted" boolean NOT NULL
+      DEFAULT false
+  type: run_sql

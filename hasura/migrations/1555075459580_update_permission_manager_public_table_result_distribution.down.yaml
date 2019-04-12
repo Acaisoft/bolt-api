@@ -1,0 +1,28 @@
+- args:
+    role: manager
+    table:
+      name: result_distribution
+      schema: public
+  type: drop_select_permission
+- args:
+    permission:
+      allow_aggregations: false
+      columns:
+      - id
+      - execution_id
+      - request_result
+      - distribution_result
+      - start
+      - end
+      filter:
+        execution:
+          configuration:
+            project:
+              userProjects:
+                user_id:
+                  _eq: X-Hasura-User-Id
+    role: manager
+    table:
+      name: result_distribution
+      schema: public
+  type: create_select_permission

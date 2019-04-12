@@ -43,7 +43,10 @@ class TestrunStart(graphene.Mutation):
         test_config_response = gclient.execute(gql('''query ($confId:uuid!, $userId:uuid!) {
             configuration (where:{
                 id:{_eq:$confId},
-                project:{userProjects:{user_id:{_eq:$userId}}}
+                project:{
+                    userProjects:{user_id:{_eq:$userId}}
+                    is_deleted: {_eq:false}
+                }
             }) {
                 project_id
                 instances

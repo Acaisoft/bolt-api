@@ -26,7 +26,10 @@ class Delete(graphene.Mutation):
                 where:{
                     id:{_eq:$pk}
                     is_deleted:{_eq:false}
-                    project:{userProjects: {user_id: {_eq:$userId}}}
+                    project:{
+                        userProjects: {user_id: {_eq:$userId}},
+                        is_deleted: {_eq:false}
+                    }
                 },
                 _set: {is_deleted:true}
             ) {

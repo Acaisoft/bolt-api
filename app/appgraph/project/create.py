@@ -35,7 +35,11 @@ class CreateValidate(graphene.Mutation):
         validators.validate_text(name)
 
         projects = gclient.execute(gql('''query ($userId:uuid!, $name:String!) {
-            project (where:{name:{_eq:$name}, userProjects:{user_id:{_eq:$userId}}}) {
+            project (where:{
+                name:{_eq:$name},
+                is_deleted: {_eq:false}, 
+                userProjects:{user_id:{_eq:$userId}}
+            }) {
                 name
             }
         }'''), {

@@ -38,12 +38,20 @@ class UpdateValidate(graphene.Mutation):
         query = gclient.execute(gql('''query ($repoName:String!, $repoUrl:String!, $repoId:uuid!, $userId:uuid!, $confType:String) {
             uniqueName: repository(where:{
                 name:{_eq:$repoName},
-                project: {userProjects: {user_id: {_eq:$userId}}}
+                is_deleted: {_eq:false},
+                project: {
+                    userProjects: {user_id: {_eq:$userId}},
+                    is_deleted: {_eq:false}
+                }
             }) { id }
 
             uniqueUrl: repository(where:{
                 url:{_eq:$repoUrl},
-                project: {userProjects: {user_id: {_eq:$userId}}}
+                is_deleted: {_eq:false},
+                project: {
+                    userProjects: {user_id: {_eq:$userId}},
+                    is_deleted: {_eq:false}
+                }
             }) { id }
 
             configuration_type(where:{slug_name:{_eq:$confType}}, limit:1) { id }
@@ -51,7 +59,11 @@ class UpdateValidate(graphene.Mutation):
             repository(
                 where:{
                     id:{_eq:$repoId},
-                    project:{userProjects:{user_id:{_eq:$userId}}}
+                    is_deleted: {_eq:false},
+                    project: {
+                        userProjects: {user_id: {_eq:$userId}},
+                        is_deleted: {_eq:false}
+                    }
                 }
             ) {
                 name

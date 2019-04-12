@@ -44,7 +44,13 @@ class UpdateValidate(graphene.Mutation):
         gclient = hasura_client(current_app.config)
 
         original = gclient.execute(gql('''query ($confId:uuid!, $userId:uuid!) {
-            configuration (where:{id:{_eq:$confId}, project:{userProjects:{user_id:{_eq:$userId}}}}) {
+            configuration (where:{
+                id:{_eq:$confId}, 
+                project:{
+                    userProjects:{user_id:{_eq:$userId}}
+                    is_deleted: {_eq:false}
+                }
+            }) {
                 performed
                 name
                 type_slug
@@ -79,8 +85,12 @@ class UpdateValidate(graphene.Mutation):
 
         repo = gclient.execute(gql('''query ($confId:uuid!, $confName:String, $sourceId:uuid!, $fetchSource:Boolean!, $userId:uuid!, $type_slug:String!) {
             test_source (where:{
-                    id:{_eq:$sourceId}, 
-                    project:{userProjects:{user_id:{_eq:$userId}}}
+                    id:{_eq:$sourceId},
+                    is_deleted: {_eq:false}, 
+                    project:{
+                        userProjects:{user_id:{_eq:$userId}}
+                        is_deleted: {_eq:false}
+                    }
             }) @include(if:$fetchSource) {
                 source_type
                 project {
@@ -113,7 +123,10 @@ class UpdateValidate(graphene.Mutation):
                 slug_name
             }
                         
-            isNameUnique: configuration (where:{name:{_eq:$confName}, project:{userProjects:{user_id:{_eq:$userId}}}}) {
+            isNameUnique: configuration (where:{name:{_eq:$confName}, project:{
+                userProjects:{user_id:{_eq:$userId}}
+                is_deleted: {_eq:false}
+            }}) {
                 id
             }
             
