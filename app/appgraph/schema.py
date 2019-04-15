@@ -1,9 +1,10 @@
 import graphene
 
-from app.appgraph import configuration, testrun, util, project, repository, test_creator, uploads, demo, users
+from app.appgraph import configuration, util, project, repository, test_creator, uploads, users, test_runs
+from app.appgraph.project import demo
 
 
-class TestrunQuery(users.UserQueries, testrun.TestrunQueries, project.TestrunQueries):
+class TestrunQuery(users.UserList, test_runs.TestrunQueries, project.TestrunQueries):
     pass
 
 
@@ -37,16 +38,16 @@ class TestrunMutations(graphene.ObjectType):
 
     # test creator
     testrun_creator_create = to_field(test_creator.Create)
-    testrun_creator_validate = to_field(test_creator.CreateValidate)
+    testrun_creator_validate = to_field(test_creator.Validate)
     testrun_creator_update = to_field(test_creator.Update)
 
     # testrun management
-    testrun_start = to_field(testrun.TestrunStart)
+    testrun_start = to_field(test_runs.TestrunStart)
 
     # user management
-    testrun_user_add = to_field(users.AssignUserToProject)
+    testrun_user_assign = to_field(users.UserAssignToProject)
     testrun_user_roles = to_field(users.UserAddRole)
-    testrun_user_remove = to_field(users.RemoveUserFromProject)
+    testrun_user_unassign = to_field(users.UserRemoveFromProject)
 
     # debug only
     testrun_project_purge = to_field(demo.PurgeProject)
@@ -59,8 +60,8 @@ AppSchema = graphene.Schema(
     types=[
         configuration.ConfigurationType,
         test_creator.TestCreatorType,
-        testrun.TestrunStartObject,
-        testrun.StatusResponse,
+        test_runs.TestrunStartObject,
+        test_runs.StatusResponse,
         users.UserListType,
         users.UserListItemType,
         util.ValidationResponse,
