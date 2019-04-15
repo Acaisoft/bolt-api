@@ -2,12 +2,11 @@ import uuid
 
 import graphene
 from flask import current_app
-from gql import gql
 
 from app import const
 from app.appgraph.test_creator import types, validate
 from app.appgraph.util import get_request_role_userid
-from app.hasura_client import hasura_client
+from app.services.hasura import hce
 
 
 class Update(validate.Validate):
@@ -39,9 +38,7 @@ class Update(validate.Validate):
 
         role, user_id = get_request_role_userid(info, (const.ROLE_ADMIN, const.ROLE_MANAGER, const.ROLE_TESTER))
 
-        gclient = hasura_client(current_app.config)
-
-        original = gclient.execute(gql('''query ($objId:uuid!, $userId:uuid!) {
+        original = hce(current_app.config, '''query ($objId:uuid!, $userId:uuid!) {
             test_creator (where:{
                     id:{_eq:$objId}
                     project:{
@@ -59,7 +56,7 @@ class Update(validate.Validate):
                 type_slug
                 data
             }
-        }'''), variable_values={
+        }''', variable_values={
             'objId': id,
             'userId': user_id,
         })
@@ -87,7 +84,7 @@ class Update(validate.Validate):
         query_params['test_source_id'] = test_source_id
         query_params['previous_version_id'] = id
 
-        query = gql('''mutation ($oldId:uuid!, $newId:uuid!, $data:[test_creator_insert_input!]!) {
+        query = '''mutation ($oldId:uuid!, $newId:uuid!, $data:[test_creator_insert_input!]!) {
             insert_test_creator(
                 objects: $data
             ) {
@@ -97,9 +94,9 @@ class Update(validate.Validate):
                 where:{test_creator_id:{_eq:$oldId}}
                 _set:{test_creator_id:$newId}
             ) { affected_rows }
-        }''')
+        }'''
 
-        conf_response = gclient.execute(query, variable_values={
+        conf_response = hce(current_app.config, query, variable_values={
             'data': query_params,
             'oldId': id,
             'newId': new_id,

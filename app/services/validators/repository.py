@@ -77,7 +77,7 @@ def validate_accessibility(app_config, repository_url:str):
             # NOTE: assume remote is invalid if it cannot be contacted in less than 5 seconds
             response = clients.management(app_config).management_validate_repository_post(
                 validate_repository_schema=req,
-                _request_timeout=6,
+                _request_timeout=20,
             )
         except Exception as e:
             # catches remote not reachable/resolvable

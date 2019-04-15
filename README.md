@@ -1,5 +1,12 @@
 # ACAI⚡BOLT API
 
+This repo holds the microservice gluing together the bolt-deployer, bolt-wrapper, hasura, database 
+and keycloak services. 
+
+Note: Use `git clone --recurse-submodules <reponame>` to pull dependencies 
+while cloning, or `git submodule update --init --recursive` from within project dir 
+to fetch dependencies after cloning.
+
 ### Development
 
 Almost everything needed to run bolt-api in development mode is contained in

@@ -1,6 +1,5 @@
 import logging
 import os
-import pprint
 import uuid
 
 import jwt
@@ -9,7 +8,7 @@ from gql import gql
 from keycloak import KeycloakOpenID
 
 from app import const
-from app.hasura_client import hasura_client
+from app.services.hasura import hasura_client
 
 
 def hasura_token_for_user(config, user_email):

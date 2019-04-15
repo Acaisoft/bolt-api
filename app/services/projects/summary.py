@@ -1,13 +1,9 @@
-from gql import gql
-
-from app.hasura_client import hasura_client
+from app.services.hasura import hce
 
 
 def get_project_summary(config, project_id):
 
-    gclient = hasura_client(config)
-
-    resp = gclient.execute(gql('''query ($pid:uuid!) {
+    resp = hce(config, '''query ($pid:uuid!) {
       scenarios: configuration_aggregate(where:{
         project_id:{_eq:$pid}
         is_deleted:{_eq:false}
@@ -35,7 +31,7 @@ def get_project_summary(config, project_id):
           }
         }
       }
-    }'''), {'pid': str(project_id)})
+    }''', {'pid': str(project_id)})
 
     return {
         'num_scenarios': resp['scenarios']['aggregate']['count'],

@@ -1,15 +1,14 @@
 from flask import current_app
-from gql import gql
 
 from app import const
 from app.services.validators import validate_test_creator
 from app.services.validators import repository
 from app.services.validators.validators import VALIDATORS
-from app.hasura_client import hasura_client
+from app.services.hasura import hce
 
 
 def validate_test_configuration_by_id(test_conf_id):
-    conf = hasura_client(current_app.config).execute(gql('''query ($conf_id:uuid!) {
+    conf = hce(current_app.config, '''query ($conf_id:uuid!) {
         parameter {
             id
             default_value
@@ -54,7 +53,7 @@ def validate_test_configuration_by_id(test_conf_id):
                 parameter_slug
             }
         }
-    }'''), {'conf_id': test_conf_id})
+    }''', {'conf_id': test_conf_id})
     assert conf['configuration_by_pk'], f'configuration not found ({str(conf)})'
 
     validate_test_configuration(conf['configuration_by_pk'], defaultParams=conf['parameter'])

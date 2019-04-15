@@ -1,11 +1,11 @@
 from flask import Flask
 
-from app import healthcheck, graphql, cmd, webhooks
+from app import healthcheck, cmd, webhooks, appgraph
 from app.logger import setup_custom_logger
 from app.services import deployer
 from app.cache import get_cache
 from app.configure import configure
-from app.hasura_client import hasura_client
+from app.services.hasura import hasura_client
 
 
 logger = setup_custom_logger(__name__)
@@ -21,7 +21,7 @@ def create_app(test_config=None):
         app.config.from_object(test_config)
 
     ## this app's graphs
-    graphql.register_app(app)
+    appgraph.register_app(app)
 
     ## deployer service
     deployer.register_app(app)

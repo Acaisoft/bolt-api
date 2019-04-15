@@ -1,13 +1,12 @@
 import graphene
 from flask import current_app
-from gql import gql
 
 from app.appgraph.project import types
 from app.appgraph.util import get_request_role_userid, ValidationInterface, ValidationResponse, \
     OutputValueFromFactory, OutputInterfaceFactory
 from app import const
 from app.services import validators
-from app.hasura_client import hasura_client
+from app.services.hasura import hce
 
 
 class UpdateValidate(graphene.Mutation):
@@ -32,12 +31,10 @@ class UpdateValidate(graphene.Mutation):
     def validate(info, id, name=None, description=None, image_url=None):
         role, user_id = get_request_role_userid(info, (const.ROLE_ADMIN, const.ROLE_MANAGER,))
 
-        gclient = hasura_client(current_app.config)
-
         if name:
             name = validators.validate_text(name)
 
-        projects = gclient.execute(gql('''query ($projId:uuid!, $userId:uuid!, $name:String!) {
+        projects = hce(current_app.config, '''query ($projId:uuid!, $userId:uuid!, $name:String!) {
             original: project_by_pk(id:$projId) { id name }
             
             uniqueName: project (where:{
@@ -47,7 +44,7 @@ class UpdateValidate(graphene.Mutation):
             }) {
                 name
             }
-        }'''), {
+        }''', {
             'projId': str(id),
             'userId': user_id,
             'name': name or '',
@@ -81,20 +78,19 @@ class Update(UpdateValidate):
     Output = OutputInterfaceFactory(types.ProjectInterface, 'Update')
 
     def mutate(self, info, id, name=None, description=None, image_url=None):
-        gclient = hasura_client(current_app.config)
 
         query_params = UpdateValidate.validate(info, id, name, description, image_url)
 
-        query = gql('''mutation ($id:uuid!, $data:project_set_input!) {
+        query = '''mutation ($id:uuid!, $data:project_set_input!) {
             update_project(
                 where:{id:{_eq:$id}},
                 _set: $data
             ) {
                 returning { id name description image_url } 
             }
-        }''')
+        }'''
 
-        conf_response = gclient.execute(query, variable_values={'id': str(id), 'data': query_params})
+        conf_response = hce(current_app.config, query, variable_values={'id': str(id), 'data': query_params})
         assert conf_response['update_project'], f'cannot update project ({str(conf_response)})'
 
         return OutputValueFromFactory(Update, conf_response['update_project'])

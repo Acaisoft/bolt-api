@@ -1,14 +1,12 @@
 import graphene
 import math
 from flask import current_app
-from gql import gql
-
 from app.appgraph.configuration import types
 from app.appgraph.util import get_request_role_userid, ValidationInterface, ValidationResponse, OutputTypeFactory, \
     OutputValueFromFactory
 from app import const
 from app.services import validators
-from app.hasura_client import hasura_client
+from app.services.hasura import hce
 
 
 class CreateValidate(graphene.Mutation):
@@ -44,8 +42,6 @@ class CreateValidate(graphene.Mutation):
 
         role, user_id = get_request_role_userid(info, (const.ROLE_ADMIN, const.ROLE_MANAGER, const.ROLE_TESTER))
 
-        gclient = hasura_client(current_app.config)
-
         repo_query = {
             'type_slug': type_slug,
             'confName': name,
@@ -55,7 +51,7 @@ class CreateValidate(graphene.Mutation):
             'fetchSource': bool(test_source_id),
         }
 
-        repo = gclient.execute(gql('''query (
+        repo = hce(current_app.config, '''query (
                 $confName:String, $sourceId:uuid!, $fetchSource:Boolean!, 
                 $projId:uuid!, $userId:uuid!, $type_slug:String!
         ) {
@@ -115,7 +111,7 @@ class CreateValidate(graphene.Mutation):
             }) {
                 id
             }
-        }'''), repo_query)
+        }''', repo_query)
 
         if role != const.ROLE_ADMIN:
             assert repo.get('user_project', None), \
@@ -182,11 +178,10 @@ class Create(CreateValidate):
     Output = OutputTypeFactory(types.ConfigurationType, 'Create')
 
     def mutate(self, info, name, type_slug, project_id, test_source_id=None, configuration_parameters=None):
-        gclient = hasura_client(current_app.config)
 
         query_params = CreateValidate.validate(info, name, type_slug, project_id, test_source_id, configuration_parameters)
 
-        query = gql('''mutation ($data:[configuration_insert_input!]!) {
+        query = '''mutation ($data:[configuration_insert_input!]!) {
             insert_configuration(
                 objects: $data
             ) {
@@ -194,9 +189,9 @@ class Create(CreateValidate):
                     id name type_slug project_id test_source_id 
                 } 
             }
-        }''')
+        }'''
 
-        conf_response = gclient.execute(query, variable_values={'data': query_params})
+        conf_response = hce(current_app.config, query, variable_values={'data': query_params})
         assert conf_response['insert_configuration'], f'cannot save configuration ({str(conf_response)})'
 
         return OutputValueFromFactory(Create, conf_response['insert_configuration'])

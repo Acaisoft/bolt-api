@@ -1,8 +1,7 @@
-from gql import gql
 from healthcheck import HealthCheck, EnvironmentDump
 
 from app.cache import get_cache
-from app.hasura_client import hasura_client
+from app.services.hasura import hasura_client, hce
 
 
 def register_app(app):
@@ -19,7 +18,7 @@ def register_app(app):
     def hasura_up():
         client = hasura_client(app.config)
         try:
-            response = client.execute(gql('query { user { id } }'))
+            response = hce(app.config, 'query { user { id } }')
         except Exception as e:
             return False, str(e)
         if not response.get('user', None):

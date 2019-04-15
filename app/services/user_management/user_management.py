@@ -1,9 +1,8 @@
 from flask import current_app
-from gql import gql
 from schematics import types
 
 from app import const
-from app.hasura_client import hasura_client
+from app.services.hasura import hce
 from app.services.keycloak.users import create_user_with_role, list_users, user_assign_roles
 
 
@@ -18,14 +17,13 @@ def user_create(email, project, role):
     r = types.BaseType(choices=const.ROLE_CHOICE)
     r.validate(role)
 
-    gqlclient = hasura_client(current_app.config)
-    project_query = gqlclient.execute(gql('''query ($project:uuid!) {
+    project_query = hce(current_app.config, '''query ($project:uuid!) {
         project_by_pk (id:$project) {
             is_deleted
             name
             userProjects { user_id }
         }
-    }'''), {'project': project})
+    }''', {'project': project})
     assert project_query['project_by_pk'], f'invalid project id f{project}: {project_query}'
 
     current_app.logger.info('adding keycloak user')
@@ -33,9 +31,9 @@ def user_create(email, project, role):
     assert user_id, f'expected a non-empty keycloak user_id instead of {user_id}'
 
     current_app.logger.info('adding user-project relation')
-    gqlclient.execute(gql('''mutation ($data:user_project_insert_input!) {
+    hce(current_app.config, '''mutation ($data:user_project_insert_input!) {
         insert_user_project(objects: [$data]) { affected_rows }
-    }'''), {'data': {'user_id': user_id, 'project_id': project}})
+    }''', {'data': {'user_id': user_id, 'project_id': project}})
 
     return user_id
 
@@ -45,13 +43,12 @@ def user_unassign_from_project(user_id, project_id):
     p.validate(user_id)
     p.validate(project_id)
 
-    gqlclient = hasura_client(current_app.config)
-    return gqlclient.execute(gql('''mutation ($user_id:UUID!, $project_id:UUID!) {
+    return hce(current_app.config, '''mutation ($user_id:UUID!, $project_id:UUID!) {
         delete_user_project(where:{
             user_id:{_eq:$user_id}
             project_id:{_eq:$project_id}
         }) { returning { user_id project_id } }
-    }'''), {
+    }''', {
         'user_id': user_id,
         'project_id': project_id,
     })
@@ -61,10 +58,9 @@ def list_users_in_project(project_id):
     p = types.UUIDType()
     p.validate(project_id)
 
-    gqlclient = hasura_client(current_app.config)
-    response = gqlclient.execute(gql('''query ($project:uuid!) {
+    response = hce(current_app.config, '''query ($project:uuid!) {
         user_project (where:{project_id:{_eq:$project}}) { user_id }
-    }'''), {'project': project_id})
+    }''', {'project': project_id})
     assert response['user_project'], f'invalid project id f{project_id}: {response}'
 
     user_ids = set([x['user_id'] for x in response['user_project']])

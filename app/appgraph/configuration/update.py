@@ -1,14 +1,13 @@
 import graphene
 import math
 from flask import current_app
-from gql import gql
 
 from app.appgraph.configuration import types
 from app.appgraph.util import get_request_role_userid, ValidationInterface, ValidationResponse, OutputTypeFactory, \
     OutputValueFromFactory
 from app import const
 from app.services import validators
-from app.hasura_client import hasura_client
+from app.services.hasura import hasura_client, hce
 
 
 class UpdateValidate(graphene.Mutation):
@@ -41,9 +40,7 @@ class UpdateValidate(graphene.Mutation):
 
         role, user_id = get_request_role_userid(info, (const.ROLE_ADMIN, const.ROLE_MANAGER, const.ROLE_TESTER))
 
-        gclient = hasura_client(current_app.config)
-
-        original = gclient.execute(gql('''query ($confId:uuid!, $userId:uuid!) {
+        original = hce(current_app.config, '''query ($confId:uuid!, $userId:uuid!) {
             configuration (where:{
                 id:{_eq:$confId}, 
                 project:{
@@ -57,7 +54,7 @@ class UpdateValidate(graphene.Mutation):
                 project_id
                 test_source_id
             }
-        }'''), {'confId': str(id), 'userId': user_id})
+        }''', {'confId': str(id), 'userId': user_id})
         assert len(original['configuration']), f'configuration does not exist'
 
         is_performed = original['configuration'][0]['performed']
@@ -83,7 +80,7 @@ class UpdateValidate(graphene.Mutation):
             'fetchSource': bool(test_source_id),
         }
 
-        repo = gclient.execute(gql('''query ($confId:uuid!, $confName:String, $sourceId:uuid!, $fetchSource:Boolean!, $userId:uuid!, $type_slug:String!) {
+        repo = hce(current_app.config, '''query ($confId:uuid!, $confName:String, $sourceId:uuid!, $fetchSource:Boolean!, $userId:uuid!, $type_slug:String!) {
             test_source (where:{
                     id:{_eq:$sourceId},
                     is_deleted: {_eq:false}, 
@@ -133,7 +130,7 @@ class UpdateValidate(graphene.Mutation):
             hasUserAccess: configuration (where:{id:{_eq:$confId}, project:{userProjects:{user_id:{_eq:$userId}}}}) {
                 id
             }
-        }'''), repo_query)
+        }''', repo_query)
 
         if role != const.ROLE_ADMIN:
             assert repo.get('hasUserAccess', None), \
@@ -203,27 +200,27 @@ class Update(UpdateValidate):
         conf_params = query_params.pop('configuration_parameters', None)
         if conf_params:
             for cp in conf_params['data']:
-                gclient.execute(gql('''mutation ($confId:uuid!, $slug:String!, $value:String!) {
+                hce(current_app.config, '''mutation ($confId:uuid!, $slug:String!, $value:String!) {
                     update_configuration_parameter(
                         where:{ configuration_id:{_eq:$confId}, parameter_slug:{_eq:$slug} },
                         _set:{ value: $value }
                     ) {
                         affected_rows
                     }
-                }'''), variable_values={
+                }''', variable_values={
                     'confId': str(id),
                     'slug': cp['parameter_slug'],
                     'value': cp['value']
                 })
 
-        query = gql('''mutation ($id:uuid!, $data:configuration_set_input!) {
+        query = '''mutation ($id:uuid!, $data:configuration_set_input!) {
             update_configuration(
                 where:{id:{_eq:$id}},
                 _set: $data
             ) {
                 returning { id name type_slug project_id test_source_id } 
             }
-        }''')
+        }'''
 
         conf_response = gclient.execute(query, variable_values={'id': str(id), 'data': query_params})
         assert conf_response['update_configuration'], f'cannot update configuration ({str(conf_response)})'

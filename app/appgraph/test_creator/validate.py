@@ -3,7 +3,7 @@ from flask import current_app
 
 from app import const
 from app.appgraph.util import ValidationResponse, get_request_role_userid, ValidationInterface
-from app.hasura_client import hce
+from app.services.hasura.hasura_client import hce
 from app.services import validators
 
 

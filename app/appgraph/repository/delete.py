@@ -1,11 +1,10 @@
 import graphene
 from flask import current_app
-from gql import gql
 
 from app import const
 from app.appgraph.repository import types
 from app.appgraph.util import OutputInterfaceFactory, get_request_role_userid, OutputValueFromFactory
-from app.hasura_client import hasura_client
+from app.services.hasura import hce
 
 
 class Delete(graphene.Mutation):
@@ -19,9 +18,7 @@ class Delete(graphene.Mutation):
     def mutate(self, info, pk):
         role, user_id = get_request_role_userid(info, (const.ROLE_ADMIN, const.ROLE_MANAGER))
 
-        gclient = hasura_client(current_app.config)
-
-        query = gql('''mutation ($pk:uuid!, $userId:uuid!) {
+        query = '''mutation ($pk:uuid!, $userId:uuid!) {
             update_repository(
                 where:{
                     id:{_eq:$pk}
@@ -33,9 +30,9 @@ class Delete(graphene.Mutation):
                 affected_rows
                 returning { id name repository_url:url project_id type_slug } 
             }
-        }''')
+        }'''
 
-        query_response = gclient.execute(query, {
+        query_response = hce(current_app.config, query, {
             'pk': str(pk),
             'userId': user_id,
         })

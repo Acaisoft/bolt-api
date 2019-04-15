@@ -1,13 +1,12 @@
 import graphene
 from flask import current_app
-from gql import gql
 
 from app.appgraph.repository import types
 from app.appgraph.util import get_request_role_userid, ValidationInterface, ValidationResponse, OutputValueFromFactory, \
     OutputInterfaceFactory
 from app import const
 from app.services import validators
-from app.hasura_client import hasura_client
+from app.services.hasura import hce
 
 
 class UpdateValidate(graphene.Mutation):
@@ -30,12 +29,10 @@ class UpdateValidate(graphene.Mutation):
     def validate(info, id, name=None, repository_url=None, type_slug=None):
         role, user_id = get_request_role_userid(info, (const.ROLE_ADMIN, const.ROLE_MANAGER, const.ROLE_TESTER))
 
-        gclient = hasura_client(current_app.config)
-
         if name:
             name = validators.validate_text(name)
 
-        query = gclient.execute(gql('''query ($repoName:String!, $repoUrl:String!, $repoId:uuid!, $userId:uuid!, $confType:String) {
+        query = hce(current_app.config, '''query ($repoName:String!, $repoUrl:String!, $repoId:uuid!, $userId:uuid!, $confType:String) {
             uniqueName: repository(where:{
                 name:{_eq:$repoName},
                 is_deleted: {_eq:false},
@@ -72,7 +69,7 @@ class UpdateValidate(graphene.Mutation):
                 performed
             }
 
-            }'''), variable_values={
+            }''', variable_values={
             'userId': user_id,
             'repoName': name or '',
             'repoUrl': repository_url or '',
@@ -115,20 +112,19 @@ class Update(UpdateValidate):
     Output = OutputInterfaceFactory(types.RepositoryInterface, 'Update')
 
     def mutate(self, info, id, name=None, repository_url=None, type_slug=None):
-        gclient = hasura_client(current_app.config)
 
         query_params = UpdateValidate.validate(info, id, name, repository_url, type_slug)
 
-        query = gql('''mutation ($id:uuid!, $data:repository_set_input!) {
+        query = '''mutation ($id:uuid!, $data:repository_set_input!) {
             update_repository(
                 where:{id:{_eq:$id}},
                 _set: $data
             ) {
                 returning { id name repository_url:url project_id type_slug } 
             }
-        }''')
+        }'''
 
-        query_response = gclient.execute(query, variable_values={'id': str(id), 'data': query_params})
+        query_response = hce(current_app.config, query, variable_values={'id': str(id), 'data': query_params})
         assert query_response['update_repository'], f'cannot save repository ({str(query_response)})'
 
         return OutputValueFromFactory(Update, query_response['update_repository'])

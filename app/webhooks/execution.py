@@ -1,9 +1,8 @@
 from flask import Blueprint, request, jsonify, current_app
-from gql import gql
 
 from app import const
 from app.services.deployer.utils import get_test_run_status
-from app.hasura_client import hasura_client
+from app.services.hasura import hce
 
 bp = Blueprint('webhooks_execution', __name__)
 
@@ -22,11 +21,11 @@ def execution_update():
 
     if new.get('status') == const.TESTRUN_FINISHED:
         # mark as performed successfully
-        resp = hasura_client(current_app.config).execute(gql('''mutation ($confId:uuid!) {
+        resp = hce(current_app.config, '''mutation ($confId:uuid!) {
             update_configuration(_set:{performed:true}, where:{id:{_eq:$confId}}) { affected_rows }
             update_test_creator(where:{test_sources:{configurations:{id:{_eq:$confId}}}}, _set:{performed:true}) { affected_rows }
             update_repository(where:{test_sources:{configurations:{id:{_eq:$confId}}}}, _set:{performed:true}) { affected_rows }
-        }'''), {'confId': new.get('configuration_id')})
+        }''', {'confId': new.get('configuration_id')})
         assert resp['update_configuration'].get('affected_rows') is not None, f'unexpected error: {str(resp)}'
 
     return jsonify({})

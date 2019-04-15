@@ -2,13 +2,12 @@ from datetime import datetime
 
 import graphene
 from flask import current_app
-from gql import gql
 
 from app import const
 from app.appgraph.util import get_request_role_userid
 from app.services.deployer.utils import start_job, start_image
 from app.services.validators.configuration import validate_test_configuration_by_id
-from app.hasura_client import hasura_client
+from app.services.hasura import hce
 
 
 class TestrunStartInterface(graphene.Interface):
@@ -38,8 +37,7 @@ class TestrunStart(graphene.Mutation):
 
         validate_test_configuration_by_id(str(conf_id))
 
-        gclient = hasura_client(current_app.config)
-        test_config_response = gclient.execute(gql('''query ($confId:uuid!, $userId:uuid!) {
+        test_config_response = hce(current_app.config, '''query ($confId:uuid!, $userId:uuid!) {
             configuration (where:{
                 id:{_eq:$confId},
                 project:{
@@ -74,7 +72,7 @@ class TestrunStart(graphene.Mutation):
                     }
                 }
             }
-        }'''), {
+        }''', {
             'confId': str(conf_id),
             'userId': user_id,
         })
@@ -113,10 +111,10 @@ class TestrunStart(graphene.Mutation):
 
         initial_state['id'] = str(execution_id)
 
-        exec_result = gclient.execute(gql('''mutation ($data:[execution_insert_input!]!) {
+        exec_result = hce(current_app.config, '''mutation ($data:[execution_insert_input!]!) {
         insert_execution(objects:$data) 
             {returning {id}}
-        }'''), variable_values={'data': initial_state})
+        }''', variable_values={'data': initial_state})
         assert exec_result['insert_execution'], f'execution creation failed ({str(exec_result)}'
 
         return TestrunStartObject(execution_id=execution_id)

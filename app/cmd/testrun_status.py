@@ -1,19 +1,18 @@
 import click
 from flask import current_app
 from flask.cli import with_appcontext
-from gql import gql
 
 from app import const
 from app.services.deployer.utils import get_test_run_status
-from app.hasura_client import hasura_client
+from app.services.hasura import hce
 
 
 @click.command(name='testrun_status')
 @with_appcontext
 def testrun_status():
-    executions = hasura_client(current_app.config).execute(gql('''query ($finalStates:[String!]!) {
+    executions = hce(current_app.config, '''query ($finalStates:[String!]!) {
         execution(where:{status:{_nin:$finalStates}}) { id, status }
-    }'''), {'finalStates': [
+    }''', {'finalStates': [
         const.TESTRUN_FINISHED,
         const.TESTRUN_CRASHED,
     ]})

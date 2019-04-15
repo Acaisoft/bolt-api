@@ -1,14 +1,13 @@
 import uuid
 import graphene
 from flask import current_app
-from gql import gql
 
 from app.appgraph.repository import types
 from app.appgraph.util import get_request_role_userid, ValidationInterface, ValidationResponse, OutputValueFromFactory, \
     OutputInterfaceFactory
 from app import const
 from app.services import validators
-from app.hasura_client import hasura_client
+from app.services.hasura import hce
 
 
 class CreateValidate(graphene.Mutation):
@@ -34,13 +33,11 @@ class CreateValidate(graphene.Mutation):
     def validate(info, name, repository_url, project_id, type_slug):
         role, user_id = get_request_role_userid(info, (const.ROLE_ADMIN, const.ROLE_MANAGER, const.ROLE_TESTER))
 
-        gclient = hasura_client(current_app.config)
-
         project_id = str(project_id)
 
         name = validators.validate_text(name)
 
-        query = gclient.execute(gql('''query ($projId:uuid!, $repoName:String!, $repoUrl:String!, $userId:uuid!, $confType:uuid!) {
+        query = hce(current_app.config, '''query ($projId:uuid!, $repoName:String!, $repoUrl:String!, $userId:uuid!, $confType:uuid!) {
             project(where:{
                 id:{_eq:$projId}, 
                 is_deleted: {_eq:false},
@@ -61,7 +58,7 @@ class CreateValidate(graphene.Mutation):
                 url:{_eq:$repoUrl}
             }) { id }
             
-            }'''), {
+            }''', {
             'userId': user_id,
             'repoName': name,
             'repoUrl': repository_url,
@@ -98,8 +95,6 @@ class Create(CreateValidate):
     Output = OutputInterfaceFactory(types.RepositoryInterface, 'Create')
 
     def mutate(self, info, name, repository_url, project_id, type_slug):
-        gclient = hasura_client(current_app.config)
-
         query_params = CreateValidate.validate(info, name, repository_url, project_id, type_slug)
         query_params['id'] = str(uuid.uuid4())
         test_source_params = {
@@ -109,7 +104,7 @@ class Create(CreateValidate):
             'repository_id': query_params['id'],
         }
 
-        query = gql('''mutation ($data:[repository_insert_input!]!, $test_source_params:test_source_insert_input!) {
+        query = '''mutation ($data:[repository_insert_input!]!, $test_source_params:test_source_insert_input!) {
             insert_repository(
                 objects: $data
             ) {
@@ -118,9 +113,9 @@ class Create(CreateValidate):
             insert_test_source (objects:[$test_source_params]) {
                 returning { id }
             }
-        }''')
+        }'''
 
-        query_response = gclient.execute(query, variable_values={
+        query_response = hce(current_app.config, query, variable_values={
             'data': query_params,
             'test_source_params': test_source_params,
         })

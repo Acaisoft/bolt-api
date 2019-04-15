@@ -1,13 +1,12 @@
 import graphene
 from flask import current_app
-from gql import gql
 
 from app.appgraph.project import types
 from app.appgraph.util import get_request_role_userid, ValidationInterface, ValidationResponse, \
     OutputValueFromFactory, OutputInterfaceFactory
 from app import const
 from app.services import validators
-from app.hasura_client import hasura_client
+from app.services.hasura import hasura_client, hce
 
 
 class CreateValidate(graphene.Mutation):
@@ -30,11 +29,9 @@ class CreateValidate(graphene.Mutation):
     def validate(info, name, description=None, image_url=None):
         role, user_id = get_request_role_userid(info, (const.ROLE_ADMIN,))
 
-        gclient = hasura_client(current_app.config)
-
         validators.validate_text(name)
 
-        projects = gclient.execute(gql('''query ($userId:uuid!, $name:String!) {
+        projects = hce(current_app.config, '''query ($userId:uuid!, $name:String!) {
             project (where:{
                 name:{_eq:$name},
                 is_deleted: {_eq:false}, 
@@ -42,7 +39,7 @@ class CreateValidate(graphene.Mutation):
             }) {
                 name
             }
-        }'''), {
+        }''', {
             'userId': user_id,
             'name': name,
         })
@@ -75,26 +72,24 @@ class Create(CreateValidate):
     def mutate(self, info, name, description=None, image_url=None):
         _, user_id = get_request_role_userid(info, (const.ROLE_ADMIN,))
 
-        gclient = hasura_client(current_app.config)
-
         query_params = CreateValidate.validate(info, name, description, image_url)
 
-        query = gql('''mutation ($data:[project_insert_input!]!) {
+        query = '''mutation ($data:[project_insert_input!]!) {
             insert_project(
                 objects: $data
             ) {
                 returning { id name description } 
             }
-        }''')
+        }'''
 
-        conf_response = gclient.execute(query, variable_values={'data': query_params})
+        conf_response = hce(current_app.config, query, variable_values={'data': query_params})
         assert conf_response['insert_project'], f'cannot save project ({str(conf_response)})'
 
         proj_id = conf_response['insert_project']['returning'][0]['id']
 
-        gclient.execute(gql('''mutation ($data:[user_project_insert_input!]!){
+        hce(current_app.config, '''mutation ($data:[user_project_insert_input!]!){
             insert_user_project (objects:$data) { affected_rows }
-        }'''), variable_values={'data': {
+        }''', variable_values={'data': {
             'user_id': str(user_id),
             'project_id': proj_id,
         }})

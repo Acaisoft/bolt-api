@@ -10,7 +10,7 @@ from app import const
 from app.services.hasura.hasura import hasura_token_for_testrunner
 from app.const import TENANT_ID
 from app.services.deployer import clients
-from app.hasura_client import hasura_client
+from app.services.hasura import hce
 
 
 DEPLOYER_TIMEOUT = 6
@@ -73,7 +73,7 @@ def get_test_run_status(execution_id: str):
     :param execution_id:
     :return:
     """
-    exec_response = hasura_client(current_app.config).execute(gql('''query ($exec_id:uuid!) {
+    exec_response = hce(current_app.config, '''query ($exec_id:uuid!) {
         execution_by_pk (id:$exec_id) {
             status
             test_preparation_job_id
@@ -82,7 +82,7 @@ def get_test_run_status(execution_id: str):
             test_preparation_job_statuscheck_timestamp
             test_job_id
         }
-    }'''), {'exec_id': execution_id})
+    }''', {'exec_id': execution_id})
 
     assert exec_response['execution_by_pk'], f'invalid execution id: {str(exec_response)}'
 
@@ -138,9 +138,9 @@ def get_test_preparation_job_status(execution_id: str, test_preparation_job_id: 
     if commit_sha:
         update_data['data']['commit_hash'] = commit_sha
 
-    update_response = hasura_client(current_app.config).execute(gql('''mutation ($exec_id:uuid!, $data:execution_insert_input!) {
+    update_response = hce(current_app.config, '''mutation ($exec_id:uuid!, $data:execution_insert_input!) {
         update_execution(_set: $data, where:{id:{_eq:$exec_id}}) { returning { id } }
-    }'''), update_data)
+    }''', update_data)
     assert not update_response.get('error'), f'error updating execution: {str(update_response)}'
 
     return response.status
@@ -174,9 +174,9 @@ def get_test_job_status(execution_id: str, test_job_id: str):
         },
     }
 
-    update_response = hasura_client(current_app.config).execute(gql('''mutation ($exec_id:uuid!, $data:execution_insert_input!) {
+    update_response = hce(current_app.config, '''mutation ($exec_id:uuid!, $data:execution_insert_input!) {
         update_execution(_set:$data, where:{id:{_eq:$exec_id}}) { returning { id } }
-    }'''), update_data)
+    }''', update_data)
     assert not update_response.get('error'), f'error updating execution: {str(update_response)}'
 
     return status, response_data

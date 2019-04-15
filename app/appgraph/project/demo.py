@@ -33,12 +33,13 @@ class DemoProject(graphene.Mutation):
         name = graphene.String()
         project_user_id = graphene.UUID(required=False)
         project_user_email = graphene.String(required=False)
+        async = graphene.Boolean(required=False)
 
     project_id = graphene.UUID()
 
-    def mutate(self, info, name, project_user_id=None, project_user_email=None):
+    def mutate(self, info, name, project_user_id=None, project_user_email=None, async=True):
         role, user_id = get_request_role_userid(info, (const.ROLE_ADMIN,))
 
-        project_id = projects.setup_demo_project(current_app.config, name, str(project_user_id), project_user_email)
+        project_id = projects.setup_demo_project(current_app.config, name, str(project_user_id), project_user_email, async)
 
         return DemoProject(project_id=project_id)

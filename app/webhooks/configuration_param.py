@@ -1,9 +1,8 @@
 import math
 from flask import Blueprint, request, jsonify, current_app
-from gql import gql
 
 from app import const
-from app.hasura_client import hasura_client
+from app.services.hasura import hce
 
 bp = Blueprint('webhooks_configuration_param', __name__)
 
@@ -20,9 +19,9 @@ def configuration_param_update():
         new_instances = math.ceil(int(new.get('value')) / const.TESTRUN_MAX_USERS_PER_INSTANCE)
         current_app.logger.info(f'updating configuration({new.get("configuration_id")}).instances to {new_instances}')
         # update instances in related configuration if number of users has changed
-        resp = hasura_client(current_app.config).execute(gql('''mutation ($confId:uuid!, $numInstances:Int!) {
+        resp = hce(current_app.config, '''mutation ($confId:uuid!, $numInstances:Int!) {
             update_configuration(_set:{instances:$numInstances}, where:{id:{_eq:$confId}}) { affected_rows }
-        }'''), {
+        }''', {
             'confId': new.get('configuration_id'),
             'numInstances': new_instances,
         })
