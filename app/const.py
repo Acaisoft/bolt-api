@@ -53,4 +53,4 @@ REQUIRED_CONFIG_VARS = (
 DEFAULT_TEST_RUNNER_IMAGE = 'eu.gcr.io/acai-bolt/bolt-test-runner:0.1.6'
 
 # allows load tests setup/teardown to work without getting ratelimited by repository hosting
-MOCK_REPOSITORY = 'git@mock-bitbucket.org:repo'
+MOCK_REPOSITORY = 'git@mockbitbucket.org:repo'
