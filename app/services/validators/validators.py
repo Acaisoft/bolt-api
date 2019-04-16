@@ -11,7 +11,7 @@ def validate_users(value: str):
     value = value.strip()
     assert value, 'number of users is required'
     assert value.isdigit(), f'expected numeric value for number of users, got {value}'
-    assert int(value) <= 5000, 'maximum simultaneous users limit is 5000'
+    assert int(value) <= 30000, 'maximum simultaneous users limit is 30000'
     return value
 
 
