@@ -31,7 +31,7 @@ class Delete(graphene.Mutation):
                 _set: {is_deleted:true}
             ) {
                 affected_rows
-                returning { id name description image_url } 
+                returning { id name type_slug project_id test_source_id } 
             }
         }'''
 
