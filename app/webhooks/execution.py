@@ -9,7 +9,8 @@ bp = Blueprint('webhooks_execution', __name__)
 
 @bp.route('/update', methods=['POST'])
 def execution_update():
-    event = request.get_json().get('event')
+    req_body = request.get_json()
+    event = req_body.get('event')
     assert event and event.get('op') == 'UPDATE', f'invalid event input: {str(event)}'
 
     old = event.get('data', {}).get('old')

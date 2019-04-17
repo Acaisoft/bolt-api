@@ -1,6 +1,6 @@
 from flask import Flask
 
-from app import healthcheck, cmd, webhooks, appgraph
+from app import healthcheck, cmd, webhooks, appgraph, exports
 from app.logger import setup_custom_logger
 from app.services import deployer
 from app.cache import get_cache
@@ -22,6 +22,8 @@ def create_app(test_config=None):
 
     ## this app's graphs
     appgraph.register_app(app)
+    ## and public REST apis
+    exports.register_app(app)
 
     ## deployer service
     deployer.register_app(app)

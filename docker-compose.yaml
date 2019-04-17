@@ -48,6 +48,16 @@ services:
       CONFIG_FILE_PATH: docker-compose-config.py
     entrypoint: ["flask", "run", "--host", "0.0.0.0"]
     network_mode: "host"
+  graphana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - "api"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: 123
+      GF_INSTALL_PLUGINS: grafana-simple-json-datasource
+    network_mode: "host"
 volumes:
   hasura_migrations:
   db_data:

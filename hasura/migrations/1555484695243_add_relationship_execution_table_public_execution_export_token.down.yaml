@@ -1,0 +1,6 @@
+- args:
+    relationship: execution
+    table:
+      name: execution_export_token
+      schema: public
+  type: drop_relationship
