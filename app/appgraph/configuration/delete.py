@@ -16,7 +16,7 @@ class Delete(graphene.Mutation):
     Output = OutputTypeFactory(types.ConfigurationType, 'Delete')
 
     def mutate(self, info, pk):
-        _, user_id = get_request_role_userid(info, (const.ROLE_ADMIN,))
+        _, user_id = get_request_role_userid(info, (const.ROLE_ADMIN, const.ROLE_MANAGER))
 
         query = '''mutation ($pk:uuid!, $userId:uuid!) {
             update_configuration(

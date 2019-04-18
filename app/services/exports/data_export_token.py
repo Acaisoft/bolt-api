@@ -9,7 +9,7 @@ from app.services.hasura import hce
 logger = setup_custom_logger(__file__)
 
 
-def issue_export_token(config, execution_id, requested_by=None):
+def issue_export_token(config, execution_id, requested_by=None, valid_hours=24):
     """
     Creates and records an access token to project's execution data.
     Token contains project and execution id.
@@ -49,7 +49,7 @@ def issue_export_token(config, execution_id, requested_by=None):
     else:
         logger.warn('issuing data token without explicit user id, no access rights validation made')
 
-    expires = datetime.utcnow() + timedelta(hours=24)
+    expires = datetime.utcnow() + timedelta(hours=valid_hours)
     payload = {
         'exp': expires,
         'execution_id': str(execution_id),
@@ -60,9 +60,9 @@ def issue_export_token(config, execution_id, requested_by=None):
     algo = config.get(const.JWT_ALGORITHM, 'HS256')
     secret = config.get(const.SECRET_KEY)
     assert secret, 'SECRET_KEY not defined'
-    token = jwt.encode(payload, secret, algorithm=algo)
+    token = jwt.encode(payload, secret, algorithm=algo).decode('utf-8')
 
-    storage_params['token'] = str(token)
+    storage_params['token'] = token
 
     hce(config, '''mutation ($data:execution_export_token_insert_input!) {
         insert_execution_export_token(objects:[$data]) { affected_rows }

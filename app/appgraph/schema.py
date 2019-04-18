@@ -1,6 +1,6 @@
 import graphene
 
-from app.appgraph import configuration, util, project, repository, test_creator, uploads, users, test_runs
+from app.appgraph import configuration, util, project, repository, test_creator, uploads, users, test_runs, data_export
 from app.appgraph.project import demo
 
 
@@ -44,6 +44,9 @@ class TestrunMutations(graphene.ObjectType):
 
     # testrun management
     testrun_start = to_field(test_runs.TestrunStart)
+
+    # testrun (execution) data export
+    testrun_data_export = to_field(data_export.DataExportLink)
 
     # user management
     testrun_user_assign = to_field(users.UserAssignToProject)
