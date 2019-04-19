@@ -1,6 +1,59 @@
 Changelog
 =========
 
+## (unreleased)
+
+### Changes
+
+* Bump test-runner version, add delete perm to manager. [Piotr Mońko]
+
+* Add number of users to result aggregate. [Piotr Mońko]
+
+* Allow manager to do aggregation requests on configuration and execution. [Piotr Mońko]
+
+* Add testrun_project_summary endpoint. [Piotr Mońko]
+
+* Adjust smoke test project. [Piotr Mońko]
+
+* Adjust smoketest and validation parameters. [Piotr Mońko]
+
+### Other
+
+* Wip: refactor to split into multiple api servers and common services. [Piotr Mońko]
+
+* Fix returned fields. [Piotr Mońko]
+
+* Add missing testrun_conf_delete. [Piotr Mońko]
+
+* Bump test-runner version. [Piotr Mońko]
+
+* Merge branch 'master' of bitbucket.org:acaisoft/bolt-api. [Piotr Mońko]
+
+* Update version of image for test runner. [art.barysevich]
+
+* Merge branch 'prod' [Piotr Mońko]
+
+* Increase maximum simultaneous users limit to 30000. [Piotr Mońko]
+
+* Adjust mock repo hostname. [Piotr Mońko]
+
+* Update permissiong. [Piotr Mońko]
+
+* Fix workers/instances. [Piotr Mońko]
+
+* Add soft-deletion support. [Piotr Mońko]
+
+* Add db support for is_deleted flag. [Piotr Mońko]
+
+* Merged in update-version-of-image-0.1.6 (pull request #9) [Artiom Borysiewicz]
+
+  Update version of image 0.1.6
+
+* Update version of image 0.1.6. [art.barysevich]
+
+* Update changelog. [Piotr Mońko]
+
+
 ## 0.2.5 (2019-04-08)
 
 ### Fix
