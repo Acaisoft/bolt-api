@@ -1,0 +1,5 @@
+- args:
+    sql: alter table "public"."execution_export_token" add constraint execution_export_token_project_id_fkey
+      foreign key ("project_id") references "public"."project"("id") on update cascade
+      on delete cascade;
+  type: run_sql

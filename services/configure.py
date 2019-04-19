@@ -32,7 +32,7 @@ def configure(app: Flask):
 def validate(app, required_config_vars):
     missing = []
     for var_name in required_config_vars:
-        if not app.config.get(var_name):
+        if app.config.get(var_name, None) is None:
             missing.append(var_name)
     assert not missing, f'{len(missing)} undefined config variables: {", ".join(missing)}'
     app.logger.info('config valid')

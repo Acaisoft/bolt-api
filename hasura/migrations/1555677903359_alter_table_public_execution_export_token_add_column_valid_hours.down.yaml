@@ -1,0 +1,3 @@
+- args:
+    sql: ALTER TABLE "public"."execution_export_token" DROP COLUMN "valid_hours"
+  type: run_sql

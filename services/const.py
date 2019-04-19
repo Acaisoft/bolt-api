@@ -46,7 +46,9 @@ REQUIRED_BOLT_API_CONFIG_VARS = (
     # 'BOLT_TEST_RUNNER_IMAGE',
     'REDIS_HOST',
     'REDIS_PORT',
+    'REDIS_DB',
     'BUCKET_PUBLIC_UPLOADS',
+    'SECRET_KEY',
 )
 
 REQUIRED_METRICS_API_CONFIG_VARS = (
@@ -54,6 +56,8 @@ REQUIRED_METRICS_API_CONFIG_VARS = (
     'HASURA_GRAPHQL_ACCESS_KEY',
     'REDIS_HOST',
     'REDIS_PORT',
+    'REDIS_DB',
+    'SECRET_KEY',
 )
 
 # default testrunner image for use by `test_creator` tests, override with BOLT_TEST_RUNNER_IMAGE
