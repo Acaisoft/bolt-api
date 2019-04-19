@@ -171,6 +171,7 @@ def get_export_data(config, oid, t_from, t_to, fields_to_query):
         dataset = []
         for e in resp['execution']:
             dataset.extend(e['result_aggregate'])
+        sorted(dataset, key=lambda x: x['timestamp'])
         return dataset
 
 
