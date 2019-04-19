@@ -4,7 +4,7 @@ import jwt
 from flask import current_app
 from flask.cli import with_appcontext
 
-from services.exports.const import EXPORT_SCOPE_EXECUTION, EXPORT_SCOPE_PROJECT
+from services.const import EXPORT_SCOPE_EXECUTION, EXPORT_SCOPE_PROJECT
 from services.hasura.hasura import hasura_token_for_testrunner, hasura_selfsignedtoken_for_testrunner
 from services.exports.data_export_token import issue_export_token
 

@@ -1,18 +1,20 @@
 # development server, enables flask commands
+from flask import Flask
+
 import cmd
-from apps.bolt_api.app import create_app
+from services import const
+from services.configure import configure, validate
+
+
+def create_app():
+    app = Flask(__name__, instance_relative_config=True)
+
+    configure(app)
+    validate(app, const.REQUIRED_BOLT_API_CONFIG_VARS)
+
+    cmd.register_commands(app)
+
+    return app
 
 
 application = create_app()
-
-cmd.register_commands(application)
-
-
-def run_app():
-    port = application.config.get('PORT')
-    application.logger.info(f'listening on port {port}')
-    application.run(host='0.0.0.0', debug=True, port=port, threaded=True)
-
-
-if __name__ == '__main__':
-    run_app()

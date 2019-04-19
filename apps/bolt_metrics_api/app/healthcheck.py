@@ -18,10 +18,10 @@ def register_app(app):
     def hasura_up():
         client = hasura_client(app.config)
         try:
-            response = hce(app.config, 'query { user { id } }')
+            response = hce(app.config, 'query { user_project { id } }')
         except Exception as e:
             return False, str(e)
-        if not response.get('user', None):
+        if not response.get('user_project', None):
             return False, 'missing root tables'
         return True, 'ok'
 

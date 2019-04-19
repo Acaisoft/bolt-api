@@ -36,9 +36,9 @@ services:
   api:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: apps/bolt_api/Dockerfile
     volumes:
-      - .:/app
+      - .:/apps
     ports:
       - "5000:5000"
     depends_on:
@@ -46,7 +46,23 @@ services:
     restart: always
     environment:
       CONFIG_FILE_PATH: docker-compose-config.py
-    entrypoint: ["flask", "run", "--host", "0.0.0.0"]
+    entrypoint: ["flask", "run", "--eager-loading", "--host", "0.0.0.0", "--port", "5000"]
+    network_mode: "host"
+  metrics:
+    build:
+      context: .
+      dockerfile: apps/bolt_metrics_api/Dockerfile
+    volumes:
+      - .:/apps
+    ports:
+      - "5005:5005"
+    depends_on:
+      - "redis"
+      - "hasura"
+    restart: always
+    environment:
+      CONFIG_FILE_PATH: docker-compose-config.py
+    entrypoint: ["flask", "run", "--eager-loading", "--host", "0.0.0.0", "--port", "5005"]
     network_mode: "host"
   grafana:
     image: grafana/grafana

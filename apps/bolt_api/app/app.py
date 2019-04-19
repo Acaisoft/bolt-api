@@ -3,7 +3,6 @@ import logging
 from flask import Flask
 
 from apps.bolt_api.app import appgraph, healthcheck, webhooks
-from apps.bolt_metrics_api.app import exports
 from services.configure import configure, validate
 from services.logger import setup_custom_logger
 from services import deployer, const
@@ -35,10 +34,6 @@ def create_app(test_config=None):
 
     ## this app's graphs
     appgraph.register_app(app)
-
-    ## and public REST apis for easier development debugging
-    if app.debug:
-        exports.register_app(app)
 
     ## deployer service
     deployer.register_app(app)

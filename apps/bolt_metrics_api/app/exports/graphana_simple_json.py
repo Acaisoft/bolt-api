@@ -2,7 +2,7 @@ from pprint import pprint
 from flask import Blueprint, jsonify, request, current_app
 from flask import abort
 
-from apps.bolt_metrics_api.app.exports import l2u, fields_to_columns
+from apps.bolt_metrics_api.app.exports.utils import fields_to_columns, l2u
 from services.logger import setup_custom_logger
 from services.exports.verify_token import verify_token
 from services.hasura import hce

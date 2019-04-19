@@ -48,7 +48,8 @@ def hasura_client(config=None):
         if not config:
             config = os.environ
 
-        target = config.get('HASURA_GQL', 'http://localhost:8080/v1alpha1/graphql')
+        target = config.get('HASURA_GQL')
+        assert target, 'HASURA_GQL is not set'
         access_key = config.get('HASURA_GRAPHQL_ACCESS_KEY')
         assert access_key, 'HASURA_GRAPHQL_ACCESS_KEY is not set'
 
