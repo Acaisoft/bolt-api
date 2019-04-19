@@ -21,11 +21,11 @@ COPY services /services
 COPY instance /instance
 COPY bolt-deployer/sdk /bolt-deployer/sdk
 RUN pip install /bolt-deployer/sdk
-WORKDIR /apps/bolt_api
+WORKDIR /
 RUN ls
 
 ARG release
 ENV SENTRY_RELEASE $release
 ENV FLASK_APP=apps.bolt_api.wsgi:application
 
-CMD gunicorn wsgi:application -w 8 --bind 0.0.0.0:80
+CMD gunicorn apps.bolt_api.wsgi:application -w 8 --bind 0.0.0.0:80

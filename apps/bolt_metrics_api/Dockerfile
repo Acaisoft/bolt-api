@@ -19,10 +19,10 @@ COPY --from=metrics_builder /install /usr/local
 COPY apps /apps
 COPY services /services
 COPY instance /instance
-WORKDIR /apps/bolt_metrics_api
+WORKDIR /
 
 ARG release
 ENV SENTRY_RELEASE $release
 ENV FLASK_APP=apps.bolt_metrics_api.wsgi:application
 
-CMD gunicorn wsgi:application -w 8 --bind 0.0.0.0:80
+CMD gunicorn apps.bolt_metrics_api.wsgi:application -w 8 --bind 0.0.0.0:80
