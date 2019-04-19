@@ -1,7 +1,11 @@
-from app import create_app
+# development server, enables flask commands
+import cmd
+from apps.bolt_api.app import create_app
 
 
 application = create_app()
+
+cmd.register_commands(application)
 
 
 def run_app():

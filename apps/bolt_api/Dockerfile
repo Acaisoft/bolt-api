@@ -8,7 +8,7 @@ WORKDIR /install
 
 RUN apk add --no-cache openssl-dev
 RUN apk add --no-cache --virtual .build-deps gcc musl-dev libffi-dev
-COPY apps/bolt_api/requirements /requirements.txt
+COPY requirements/core.txt /requirements.txt
 RUN pip install --no-cache-dir -U pip
 RUN pip install --install-option="--prefix=/install" -r /requirements.txt
 RUN apk del .build-deps gcc musl-dev libffi-dev
