@@ -4,6 +4,14 @@
 
 replicaCount: 1
 
+# Name of the config map for a service
+# This map needs to have `config.py` key in it
+configMapName: "bolt-metrics-config"
+
+# Name of the secret with configuration for a service
+# This map needs to have `secrets.py` key in it
+configSecretName: "bolt-metrics-secret"
+
 image:
   repository: eu.gcr.io/acai-bolt/bolt-metrics-api
   pullPolicy: IfNotPresent

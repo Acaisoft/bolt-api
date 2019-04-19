@@ -42,6 +42,13 @@ spec:
               port: http
           resources:
 {{ toYaml .Values.resources | indent 12 }}
+      volumes:
+      - name: secrets
+        secret:
+          secretName: {{ .Values.configSecretName }}
+      - name: config
+        configMap:
+          name: {{ .Values.configMapName }}
     {{- with .Values.nodeSelector }}
       nodeSelector:
 {{ toYaml . | indent 8 }}
