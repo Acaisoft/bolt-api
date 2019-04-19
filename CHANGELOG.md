@@ -1,7 +1,7 @@
 Changelog
 =========
 
-## (unreleased)
+## 0.2.6 (2019-04-19)
 
 ### Changes
 
@@ -18,6 +18,8 @@ Changelog
 * Adjust smoketest and validation parameters. [Piotr Mońko]
 
 ### Other
+
+* Update changelog. [Piotr Mońko]
 
 * Wip: refactor to split into multiple api servers and common services. [Piotr Mońko]
 
