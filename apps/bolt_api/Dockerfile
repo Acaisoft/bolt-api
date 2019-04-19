@@ -28,4 +28,4 @@ ARG release
 ENV SENTRY_RELEASE $release
 ENV FLASK_APP=apps.bolt_api.wsgi:application
 
-CMD gunicorn wsgi:app -w 8 --bind 0.0.0.0:80
+CMD gunicorn wsgi:application -w 8 --bind 0.0.0.0:80
