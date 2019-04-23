@@ -27,6 +27,11 @@ spec:
             - name: http
               containerPort: 80
               protocol: TCP
+          volumeMounts:
+            - name: secrets
+              mountPath: /etc/secrets
+            - name: config
+              mountPath: /etc/config
           env:
             - name: CONFIG_FILE_PATH
               value: /etc/config/config.py
