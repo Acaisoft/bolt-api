@@ -1,10 +1,10 @@
 from flask import Blueprint, jsonify, request, current_app
 from flask import abort
 
-from apps.bolt_metrics_api.app.exports.utils import dataset_to_timeserie, dataset_to_table
 from services import exports
+from services.exports.data_extractor import l2u, fields_to_columns
 from services.logger import setup_custom_logger
-from services.exports.verify_token import verify_token
+from services.exports import verify_token
 
 
 logger = setup_custom_logger(__file__)
@@ -117,3 +117,83 @@ def tag_values(request_token):
     # appears not used
     eid = _verify(request_token)
     return jsonify({})
+
+
+def dataset_to_timeserie(dataset:dict, targets):
+    """
+    Convert locust testrun data to grafana/annotated timeserie format.
+    Non-timeserie targets in @targets are ignored bc. locust limitations.
+    :param dataset: data from db's execution table
+    :param targets: fields to query on
+    :return: jsonifiable ordered list of stucts
+    """
+    results_per_target = {}
+    results = []
+
+    for row in dataset.get('timeserie'):
+        _ts = row.get('timestamp', None)
+        if _ts is None:
+            # get_export_data must include the timestamp column regardless of user spec
+            raise RuntimeError('input data does not contain timestamp, unsuitable for timeserie')
+        ts = l2u(_ts)
+        for target in targets:
+            metric, field = target.split(':')
+            if target == 'timeserie:timestamp':
+                continue
+            if metric != 'timeserie':
+                # Non-timeserie targets in @targets are ignored bc. locust limitations.
+                continue
+            if target not in results_per_target:
+                results_per_target[target] = []
+            results_per_target[target].append((float(row.get(field, 0)), ts))
+
+    for k, v in results_per_target.items():
+        results.append({
+            'target': k,
+            'datapoints': v
+        })
+    return results
+
+
+def dataset_to_table(dataset:dict, targets):
+    """
+    Example dataset combining different categories of metrics
+    {'timeserie': [],
+    'requests': [],
+    'errors': [
+        {'name': '/'}, {'name': '/random'}, {'name': '/send'}, {'name': '/echo/hello'},
+        {'name': '/error/400or500'}, {'name': '/error/401'}, {'name': '/error/404'},
+        {'name': '/echo/hello'}, {'name': '/'}, {'name': '/send'}, {'name': '/error/404'},
+    ]}
+    """
+    def empty_row():
+        return [0 for i in range(len(targets))]
+    result_rows = []
+    for t_index, target in enumerate(targets):
+        metric, field = target.split(':')
+
+        if metric in ('timeserie', 'errors'):
+            # field is a raw column
+            enumerable = enumerate(dataset[metric])
+        elif metric == 'requests':
+            # field is a json of lists of dicts and needs to be parsed deeper for actual fields
+            enumerable = enumerate(dataset[metric][0]['request_result'])
+        elif metric == 'distributions':
+            # field is a json of lists of dicts and needs to be parsed deeper for actual fields
+            enumerable = enumerate(dataset[metric][0]['distribution_result'])
+        else:
+            raise Exception(f'invalid metric category: {metric} in target {target}')
+
+        for d_index, data_row in enumerable:
+            if len(result_rows) <= d_index:
+                result_rows.append(empty_row())
+            value = data_row.get(field, None)
+            if target == 'timeserie:timestamp':
+                value = l2u(value)
+            result_rows[d_index][t_index] = value
+
+    return [{
+        'type': 'table',
+        'columns': fields_to_columns(targets),
+        'rows': result_rows,
+    }]

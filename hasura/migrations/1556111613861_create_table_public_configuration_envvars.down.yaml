@@ -1,0 +1,3 @@
+- args:
+    sql: DROP TABLE "public"."configuration_envvars"
+  type: run_sql

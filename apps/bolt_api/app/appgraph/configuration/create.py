@@ -27,11 +27,15 @@ class CreateValidate(graphene.Mutation):
             types.ConfigurationParameterInput,
             required=True,
             description='Default parameter types overrides.')
+        runner_parameters = graphene.List(
+            types.ConfigurationParameterInput,
+            required=False,
+            description='Parameters passed as environment variables to testrunner.')
 
     Output = gql_util.ValidationInterface
 
     @staticmethod
-    def validate(info, name, type_slug, project_id, test_source_id=None, configuration_parameters=None):
+    def validate(info, name, type_slug, project_id, test_source_id=None, configuration_parameters=None, runner_parameters=None):
         project_id = str(project_id)
 
         assert type_slug in const.TESTTYPE_CHOICE, f'invalid choice of type_slug (valid choices: {const.TESTTYPE_CHOICE})'
@@ -130,6 +134,11 @@ class CreateValidate(graphene.Mutation):
         if type_slug:
             query_data['type_slug'] = type_slug
 
+        if runner_parameters:
+            query_data['configuration_envvars'] = {
+                'data': [{'name': x['parameter_slug'], 'value': x['value']} for x in runner_parameters]
+            }
+
         patched_params = validators.validate_test_params(configuration_parameters, defaults=repo['parameter'])
         if patched_params:
             query_data['configuration_parameters'] = {'data': []}
@@ -165,8 +174,8 @@ class CreateValidate(graphene.Mutation):
 
         return query_data
 
-    def mutate(self, info, name, type_slug, project_id, test_source_id=None, configuration_parameters=None):
-        CreateValidate.validate(info, name, type_slug, project_id, test_source_id, configuration_parameters)
+    def mutate(self, info, name, type_slug, project_id, test_source_id=None, configuration_parameters=None, runner_parameters=None):
+        CreateValidate.validate(info, name, type_slug, project_id, test_source_id, configuration_parameters, runner_parameters)
         return gql_util.ValidationResponse(ok=True)
 
 
@@ -175,9 +184,9 @@ class Create(CreateValidate):
 
     Output = gql_util.OutputTypeFactory(types.ConfigurationType, 'Create')
 
-    def mutate(self, info, name, type_slug, project_id, test_source_id=None, configuration_parameters=None):
+    def mutate(self, info, name, type_slug, project_id, test_source_id=None, configuration_parameters=None, runner_parameters=None):
 
-        query_params = CreateValidate.validate(info, name, type_slug, project_id, test_source_id, configuration_parameters)
+        query_params = CreateValidate.validate(info, name, type_slug, project_id, test_source_id, configuration_parameters, runner_parameters)
 
         query = '''mutation ($data:[configuration_insert_input!]!) {
             insert_configuration(

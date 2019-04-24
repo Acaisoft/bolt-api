@@ -2,7 +2,7 @@ import json
 import os
 import unittest
 
-from apps.bolt_metrics_api.app.exports.utils import dataset_to_table, dataset_to_timeserie
+from apps.bolt_metrics_api.app.exports.graphana_simple_json import dataset_to_timeserie, dataset_to_table
 
 
 class TestExportDataToTable(unittest.TestCase):

@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from services.exports import const
 from services.hasura import hce
 
@@ -85,3 +87,33 @@ def get_export_data(config, oid, t_from, t_to, fields_to_query):
                     dataset[g].extend(gg)
 
         return dataset
+
+
+def l2u(locust_timestamp:str) -> float:
+    """
+    Convert locust timestamp format to unix milisecond
+    :param locust_timestamp: input timestamp in format: 2019-04-17T06:53:50.475089+00:00
+    :return: float representing input in unix milisecond format
+    """
+    return datetime.strptime(
+        locust_timestamp.replace('+00:00', '+0000'),
+        '%Y-%m-%dT%H:%M:%S.%f%z'
+    ).timestamp() * 1000
+
+
+def fields_to_columns(fields_list):
+    """
+    Return a list of data field names parseable by grafana
+    :param fields_list: ['field_a', 'field_b']
+    :return: [{"text":"Field A","type":"number"},{"text":"Field B","type":"number"},]
+    """
+    def m(x:str):
+        y = x.replace(':', ': ')
+        return y.replace('_', ' ').title()
+
+    def t(x):
+        if x == 'timeserie:timestamp':
+            return 'time'
+        return 'number'
+
+    return [{'text': m(f), 'type': t(f)} for f in fields_list]
