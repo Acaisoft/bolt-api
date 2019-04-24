@@ -1,0 +1,263 @@
+{
+  "data": {
+    "execution": [
+      {
+        "timeserie": [
+          {
+            "timestamp": "2019-04-24T06:30:56.690661+00:00",
+            "number_of_errors": 0
+          },
+          {
+            "timestamp": "2019-04-24T06:30:55.006854+00:00",
+            "number_of_errors": 7
+          },
+          {
+            "timestamp": "2019-04-24T06:30:53.407881+00:00",
+            "number_of_errors": 7
+          },
+          {
+            "timestamp": "2019-04-24T06:30:51.385171+00:00",
+            "number_of_errors": 0
+          }
+        ],
+        "requests": [
+          {
+            "request_result": [
+              {
+                "Min response time": "65",
+                "Average Content Size": "0",
+                "# failures": "385",
+                "Median response time": "130",
+                "Name": "/",
+                "Method": "GET",
+                "Max response time": "533",
+                "Average response time": "160",
+                "Requests/s": "147.22",
+                "# requests": "385"
+              },
+              {
+                "Min response time": "56",
+                "Average Content Size": "0",
+                "# failures": "249",
+                "Median response time": "140",
+                "Name": "/echo/hello",
+                "Method": "GET",
+                "Max response time": "522",
+                "Average response time": "155",
+                "Requests/s": "95.22",
+                "# requests": "249"
+              },
+              {
+                "Min response time": "71",
+                "Average Content Size": "0",
+                "# failures": "116",
+                "Median response time": "130",
+                "Name": "/error/400or500",
+                "Method": "GET",
+                "Max response time": "563",
+                "Average response time": "164",
+                "Requests/s": "44.36",
+                "# requests": "116"
+              },
+              {
+                "Min response time": "61",
+                "Average Content Size": "0",
+                "# failures": "145",
+                "Median response time": "140",
+                "Name": "/error/401",
+                "Method": "GET",
+                "Max response time": "477",
+                "Average response time": "160",
+                "Requests/s": "55.45",
+                "# requests": "145"
+              },
+              {
+                "Min response time": "48",
+                "Average Content Size": "0",
+                "# failures": "259",
+                "Median response time": "140",
+                "Name": "/error/404",
+                "Method": "GET",
+                "Max response time": "455",
+                "Average response time": "159",
+                "Requests/s": "99.04",
+                "# requests": "259"
+              },
+              {
+                "Min response time": "47",
+                "Average Content Size": "0",
+                "# failures": "243",
+                "Median response time": "130",
+                "Name": "/random",
+                "Method": "GET",
+                "Max response time": "448",
+                "Average response time": "147",
+                "Requests/s": "92.92",
+                "# requests": "243"
+              },
+              {
+                "Min response time": "69",
+                "Average Content Size": "0",
+                "# failures": "125",
+                "Median response time": "130",
+                "Name": "/send",
+                "Method": "POST",
+                "Max response time": "449",
+                "Average response time": "144",
+                "Requests/s": "47.80",
+                "# requests": "125"
+              }
+            ]
+          }
+        ],
+        "distributions": [
+          {
+            "distribution_result": [
+              {
+                "90%": "270",
+                "100%": "530",
+                "80%": "200",
+                "99%": "460",
+                "50%": "130",
+                "95%": "330",
+                "98%": "410",
+                "Name": "/",
+                "75%": "170",
+                "Method": "GET",
+                "66%": "150",
+                "# requests": "385"
+              },
+              {
+                "90%": "260",
+                "100%": "520",
+                "80%": "180",
+                "99%": "420",
+                "50%": "140",
+                "95%": "320",
+                "98%": "370",
+                "Name": "/echo/hello",
+                "75%": "170",
+                "Method": "GET",
+                "66%": "160",
+                "# requests": "249"
+              },
+              {
+                "90%": "280",
+                "100%": "560",
+                "80%": "210",
+                "99%": "410",
+                "50%": "140",
+                "95%": "360",
+                "98%": "380",
+                "Name": "/error/400or500",
+                "75%": "180",
+                "Method": "GET",
+                "66%": "160",
+                "# requests": "116"
+              },
+              {
+                "90%": "290",
+                "100%": "480",
+                "80%": "180",
+                "99%": "460",
+                "50%": "140",
+                "95%": "320",
+                "98%": "440",
+                "Name": "/error/401",
+                "75%": "160",
+                "Method": "GET",
+                "66%": "150",
+                "# requests": "145"
+              },
+              {
+                "90%": "260",
+                "100%": "460",
+                "80%": "200",
+                "99%": "440",
+                "50%": "140",
+                "95%": "330",
+                "98%": "380",
+                "Name": "/error/404",
+                "75%": "190",
+                "Method": "GET",
+                "66%": "150",
+                "# requests": "259"
+              },
+              {
+                "90%": "210",
+                "100%": "450",
+                "80%": "170",
+                "99%": "400",
+                "50%": "130",
+                "95%": "310",
+                "98%": "390",
+                "Name": "/random",
+                "75%": "160",
+                "Method": "GET",
+                "66%": "150",
+                "# requests": "243"
+              },
+              {
+                "90%": "190",
+                "100%": "450",
+                "80%": "160",
+                "99%": "440",
+                "50%": "130",
+                "95%": "230",
+                "98%": "370",
+                "Name": "/send",
+                "75%": "160",
+                "Method": "POST",
+                "66%": "150",
+                "# requests": "125"
+              },
+              {
+                "90%": "260",
+                "100%": "560",
+                "80%": "180",
+                "99%": "440",
+                "50%": "130",
+                "95%": "320",
+                "98%": "380",
+                "Name": "Total",
+                "75%": "170",
+                "66%": "150",
+                "# requests": "1522"
+              }
+            ]
+          }
+        ],
+        "errors": [
+          {
+            "name": "/send",
+            "number_of_occurrences": 125
+          },
+          {
+            "name": "/random",
+            "number_of_occurrences": 243
+          },
+          {
+            "name": "/",
+            "number_of_occurrences": 385
+          },
+          {
+            "name": "/error/404",
+            "number_of_occurrences": 259
+          },
+          {
+            "name": "/echo/hello",
+            "number_of_occurrences": 249
+          },
+          {
+            "name": "/error/401",
+            "number_of_occurrences": 145
+          },
+          {
+            "name": "/error/400or500",
+            "number_of_occurrences": 116
+          }
+        ]
+      }
+    ]
+  }
+}

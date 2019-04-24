@@ -26,5 +26,5 @@ class DataExportLink(graphene.Mutation):
 
         return gql_util.OutputValueFromFactory(DataExportLink, {'returning':[{
             'token': str(token),
-            'url': f'/exports/graphana_simple_json/{str(token)}'
+            'url': f'/exports/grafana_simple_json/{str(token)}'
         }]})

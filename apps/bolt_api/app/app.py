@@ -18,7 +18,6 @@ def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
 
     configure(app)
-    validate(app, const.REQUIRED_BOLT_API_CONFIG_VARS)
 
     for handler in ('graphql.execution.executor', 'graphql.execution.utils'):
         ll = logging.getLogger(handler)
@@ -27,6 +26,8 @@ def create_app(test_config=None):
 
     if test_config:
         app.config.from_object(test_config)
+
+    validate(app, const.REQUIRED_BOLT_API_CONFIG_VARS)
 
     ## initialize cache and hasura clients
     get_cache(app.config, app)

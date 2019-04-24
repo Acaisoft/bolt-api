@@ -11,6 +11,8 @@ JWT_ALGORITHM = 'HS256'
 
 HASURA_GQL = "http://localhost:8080/v1alpha1/graphql"
 
+HCE_DEBUG = False
+
 BOLT_DEPLOYER_ADDR = 'localhost:7777'
 
 REDIS_HOST = 'localhost'

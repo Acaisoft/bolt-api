@@ -42,9 +42,7 @@ def verify_token(config, token):
                     }
                 }
             }) {
-                oid
-                project_id
-                execution_id
+                id
             }
         }''', {
             'eid': str(data['execution_id']),

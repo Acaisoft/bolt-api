@@ -10,9 +10,9 @@ from services.exports.data_export_token import issue_export_token
 
 
 @click.command(name='job_token')
-@click.argument('debug', required=False)
+@click.option('--debug', default=False, is_flag=True)
 @with_appcontext
-def job_token(debug=None):
+def job_token(debug=False):
     """
     Obtain and print access token for testrunner. KEYCLOAK_XXX has to be configured.
 

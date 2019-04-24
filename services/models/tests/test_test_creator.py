@@ -2,7 +2,7 @@ import unittest
 
 from schematics import exceptions
 
-from apps.bolt_api.app.models import Action, Assert, Endpoint, TestConfiguration
+from services.models import Action, Assert, Endpoint, TestConfiguration
 
 
 class TestActionModel(unittest.TestCase):

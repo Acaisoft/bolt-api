@@ -1,4 +1,5 @@
-from flask import Flask
+from flask import Flask, request
+from flask_limiter import Limiter
 
 from apps.bolt_metrics_api.app import exports, healthcheck
 from services.configure import configure, validate
@@ -20,6 +21,8 @@ def create_app(test_config=None):
 
     if test_config:
         app.config.from_object(test_config)
+
+    validate(app, const.REQUIRED_METRICS_API_CONFIG_VARS)
 
     ## initialize cache and hasura clients
     get_cache(app.config, app)

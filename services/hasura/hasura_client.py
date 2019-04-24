@@ -70,5 +70,7 @@ def hasura_client(config=None):
 
 def hce(config, query, *args, **kwargs):
     if type(query) is str:
+        if config.get('HCE_DEBUG', False):
+            print(query)
         query = gql(query)
     return hasura_client(config).execute(query, *args, **kwargs)
