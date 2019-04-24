@@ -27,6 +27,7 @@ def teardown(config, project_name, project_id):
     logger.info(f'deleting {len(project_ids_list)} projects')
 
     hce(config, '''mutation ($projIds:[uuid!]!) {
+        delete_configuration_envvars (where:{configuration:{project_id:{_in:$projIds}}}) {affected_rows}
         delete_configuration_parameter (where:{configuration:{project_id:{_in:$projIds}}}) {affected_rows}
         delete_result_error (where:{execution:{configuration:{project_id:{_in:$projIds}}}}) {affected_rows}
         delete_result_distribution (where:{execution:{configuration:{project_id:{_in:$projIds}}}}) {affected_rows}
