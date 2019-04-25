@@ -1,0 +1,15 @@
+- args:
+    sql: CREATE TABLE "public"."execution_distribution"("id" serial NOT NULL UNIQUE,
+      "execution_id" uuid NOT NULL, "timestamp" timestamp with time zone NOT NULL,
+      "identifier" text NOT NULL, "method" text NOT NULL, "name" text NOT NULL, "num_requests"
+      integer NOT NULL DEFAULT 0, "p50" numeric NOT NULL DEFAULT 0, "p66" numeric
+      NOT NULL DEFAULT 0, "p75" numeric NOT NULL DEFAULT 0, "p80" numeric NOT NULL
+      DEFAULT 0, "p90" numeric NOT NULL DEFAULT 0, "p95" numeric NOT NULL DEFAULT
+      0, "p98" numeric NOT NULL DEFAULT 0, "p99" numeric NOT NULL DEFAULT 0, "p100"
+      numeric NOT NULL DEFAULT 0, PRIMARY KEY ("id") , FOREIGN KEY ("execution_id")
+      REFERENCES "public"."execution"("id") ON UPDATE cascade ON DELETE cascade);
+  type: run_sql
+- args:
+    name: execution_distribution
+    schema: public
+  type: add_existing_table_or_view

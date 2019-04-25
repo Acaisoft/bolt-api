@@ -1,0 +1,15 @@
+- args:
+    sql: CREATE TABLE "public"."execution_requests"("id" serial NOT NULL UNIQUE, "execution_id"
+      uuid NOT NULL, "timestamp" timestamp with time zone NOT NULL, "identifier" text
+      NOT NULL, "method" text NOT NULL, "name" text NOT NULL, "num_requests" integer
+      NOT NULL, "num_failures" integer NOT NULL, "median_response_time" numeric NOT
+      NULL, "average_response_time" numeric NOT NULL, "min_response_time" numeric
+      NOT NULL, "max_response_time" numeric NOT NULL, "average_content_size" numeric
+      NOT NULL, "requests_per_second" numeric NOT NULL, PRIMARY KEY ("id") , FOREIGN
+      KEY ("execution_id") REFERENCES "public"."execution"("id") ON UPDATE cascade
+      ON DELETE cascade);
+  type: run_sql
+- args:
+    name: execution_requests
+    schema: public
+  type: add_existing_table_or_view
