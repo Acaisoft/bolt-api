@@ -191,8 +191,6 @@ class Update(UpdateValidate):
     Output = gql_util.OutputTypeFactory(types.ConfigurationType, 'Update')
 
     def mutate(self, info, id, name=None, type_slug=None, test_source_id=None, configuration_parameters=None):
-        gclient = hasura_client(current_app.config)
-
         query_params = UpdateValidate.validate(info, id, name, type_slug, test_source_id, configuration_parameters)
 
         conf_params = query_params.pop('configuration_parameters', None)
@@ -220,7 +218,7 @@ class Update(UpdateValidate):
             }
         }'''
 
-        conf_response = gclient.execute(query, variable_values={'id': str(id), 'data': query_params})
+        conf_response = hce(current_app.config, query, variable_values={'id': str(id), 'data': query_params})
         assert conf_response['update_configuration'], f'cannot update configuration ({str(conf_response)})'
 
         return gql_util.OutputValueFromFactory(Update, conf_response['update_configuration'])
