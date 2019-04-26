@@ -35,7 +35,7 @@ class CreateValidate(graphene.Mutation):
 
         name = validators.validate_text(name)
 
-        query = hce(current_app.config, '''query ($projId:uuid!, $repoName:String!, $repoUrl:String!, $userId:uuid!, $confType:uuid!) {
+        query = hce(current_app.config, '''query ($projId:uuid!, $repoName:String!, $repoUrl:String!, $userId:uuid!, $confType:String!) {
             project(where:{
                 id:{_eq:$projId}, 
                 is_deleted: {_eq:false},
