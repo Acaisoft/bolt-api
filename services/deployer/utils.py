@@ -137,7 +137,7 @@ def get_test_preparation_job_status(execution_id: str, test_preparation_job_id: 
     if commit_sha:
         update_data['data']['commit_hash'] = commit_sha
 
-    update_response = hce(current_app.config, '''mutation ($exec_id:uuid!, $data:execution_insert_input!) {
+    update_response = hce(current_app.config, '''mutation ($exec_id:uuid!, $data:execution_set_input!) {
         update_execution(_set: $data, where:{id:{_eq:$exec_id}}) { returning { id } }
     }''', update_data)
     assert not update_response.get('error'), f'error updating execution: {str(update_response)}'
@@ -173,7 +173,7 @@ def get_test_job_status(execution_id: str, test_job_id: str):
         },
     }
 
-    update_response = hce(current_app.config, '''mutation ($exec_id:uuid!, $data:execution_insert_input!) {
+    update_response = hce(current_app.config, '''mutation ($exec_id:uuid!, $data:execution_set_input!) {
         update_execution(_set:$data, where:{id:{_eq:$exec_id}}) { returning { id } }
     }''', update_data)
     assert not update_response.get('error'), f'error updating execution: {str(update_response)}'
