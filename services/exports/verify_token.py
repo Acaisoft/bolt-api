@@ -33,7 +33,7 @@ def verify_token(config, token):
 
     data = resp['execution_export_token'][0]
     if data['execution_id']:
-        resp = hce(config, '''query ($eid:Int!) {
+        resp = hce(config, '''query ($eid:uuid!) {
             execution(where:{
                 id:{ _eq:$eid }
                 configuration:{

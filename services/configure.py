@@ -23,9 +23,6 @@ def configure(app: Flask):
         logging.info(f'sentry logging to {sentry_dsn.split("@")[-1]}')
         sentry_sdk.init(sentry_dsn, integrations=[FlaskIntegration()])
 
-    if app.config.get('RATELIMIT_STORAGE_URL', None) is None and app.config.get('REDIS_HOST'):
-        app.config['RATELIMIT_STORAGE_URL'] = 'redis://%s:%s' % (app.config.get('REDIS_HOST'), app.config.get('REDIS_PORT'))
-
     config_ver = app.config.get('CONFIG_VERSION', None)
     secrets_ver = app.config.get('SECRETS_VERSION', None)
 

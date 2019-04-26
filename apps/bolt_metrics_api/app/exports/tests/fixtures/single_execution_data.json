@@ -1,263 +1,486 @@
 {
-  "data": {
-    "execution": [
-      {
-        "timeserie": [
-          {
-            "timestamp": "2019-04-24T06:30:56.690661+00:00",
-            "number_of_errors": 0
-          },
-          {
-            "timestamp": "2019-04-24T06:30:55.006854+00:00",
-            "number_of_errors": 7
-          },
-          {
-            "timestamp": "2019-04-24T06:30:53.407881+00:00",
-            "number_of_errors": 7
-          },
-          {
-            "timestamp": "2019-04-24T06:30:51.385171+00:00",
-            "number_of_errors": 0
-          }
-        ],
-        "requests": [
-          {
-            "request_result": [
-              {
-                "Min response time": "65",
-                "Average Content Size": "0",
-                "# failures": "385",
-                "Median response time": "130",
-                "Name": "/",
-                "Method": "GET",
-                "Max response time": "533",
-                "Average response time": "160",
-                "Requests/s": "147.22",
-                "# requests": "385"
-              },
-              {
-                "Min response time": "56",
-                "Average Content Size": "0",
-                "# failures": "249",
-                "Median response time": "140",
-                "Name": "/echo/hello",
-                "Method": "GET",
-                "Max response time": "522",
-                "Average response time": "155",
-                "Requests/s": "95.22",
-                "# requests": "249"
-              },
-              {
-                "Min response time": "71",
-                "Average Content Size": "0",
-                "# failures": "116",
-                "Median response time": "130",
-                "Name": "/error/400or500",
-                "Method": "GET",
-                "Max response time": "563",
-                "Average response time": "164",
-                "Requests/s": "44.36",
-                "# requests": "116"
-              },
-              {
-                "Min response time": "61",
-                "Average Content Size": "0",
-                "# failures": "145",
-                "Median response time": "140",
-                "Name": "/error/401",
-                "Method": "GET",
-                "Max response time": "477",
-                "Average response time": "160",
-                "Requests/s": "55.45",
-                "# requests": "145"
-              },
-              {
-                "Min response time": "48",
-                "Average Content Size": "0",
-                "# failures": "259",
-                "Median response time": "140",
-                "Name": "/error/404",
-                "Method": "GET",
-                "Max response time": "455",
-                "Average response time": "159",
-                "Requests/s": "99.04",
-                "# requests": "259"
-              },
-              {
-                "Min response time": "47",
-                "Average Content Size": "0",
-                "# failures": "243",
-                "Median response time": "130",
-                "Name": "/random",
-                "Method": "GET",
-                "Max response time": "448",
-                "Average response time": "147",
-                "Requests/s": "92.92",
-                "# requests": "243"
-              },
-              {
-                "Min response time": "69",
-                "Average Content Size": "0",
-                "# failures": "125",
-                "Median response time": "130",
-                "Name": "/send",
-                "Method": "POST",
-                "Max response time": "449",
-                "Average response time": "144",
-                "Requests/s": "47.80",
-                "# requests": "125"
-              }
-            ]
-          }
-        ],
-        "distributions": [
-          {
-            "distribution_result": [
-              {
-                "90%": "270",
-                "100%": "530",
-                "80%": "200",
-                "99%": "460",
-                "50%": "130",
-                "95%": "330",
-                "98%": "410",
-                "Name": "/",
-                "75%": "170",
-                "Method": "GET",
-                "66%": "150",
-                "# requests": "385"
-              },
-              {
-                "90%": "260",
-                "100%": "520",
-                "80%": "180",
-                "99%": "420",
-                "50%": "140",
-                "95%": "320",
-                "98%": "370",
-                "Name": "/echo/hello",
-                "75%": "170",
-                "Method": "GET",
-                "66%": "160",
-                "# requests": "249"
-              },
-              {
-                "90%": "280",
-                "100%": "560",
-                "80%": "210",
-                "99%": "410",
-                "50%": "140",
-                "95%": "360",
-                "98%": "380",
-                "Name": "/error/400or500",
-                "75%": "180",
-                "Method": "GET",
-                "66%": "160",
-                "# requests": "116"
-              },
-              {
-                "90%": "290",
-                "100%": "480",
-                "80%": "180",
-                "99%": "460",
-                "50%": "140",
-                "95%": "320",
-                "98%": "440",
-                "Name": "/error/401",
-                "75%": "160",
-                "Method": "GET",
-                "66%": "150",
-                "# requests": "145"
-              },
-              {
-                "90%": "260",
-                "100%": "460",
-                "80%": "200",
-                "99%": "440",
-                "50%": "140",
-                "95%": "330",
-                "98%": "380",
-                "Name": "/error/404",
-                "75%": "190",
-                "Method": "GET",
-                "66%": "150",
-                "# requests": "259"
-              },
-              {
-                "90%": "210",
-                "100%": "450",
-                "80%": "170",
-                "99%": "400",
-                "50%": "130",
-                "95%": "310",
-                "98%": "390",
-                "Name": "/random",
-                "75%": "160",
-                "Method": "GET",
-                "66%": "150",
-                "# requests": "243"
-              },
-              {
-                "90%": "190",
-                "100%": "450",
-                "80%": "160",
-                "99%": "440",
-                "50%": "130",
-                "95%": "230",
-                "98%": "370",
-                "Name": "/send",
-                "75%": "160",
-                "Method": "POST",
-                "66%": "150",
-                "# requests": "125"
-              },
-              {
-                "90%": "260",
-                "100%": "560",
-                "80%": "180",
-                "99%": "440",
-                "50%": "130",
-                "95%": "320",
-                "98%": "380",
-                "Name": "Total",
-                "75%": "170",
-                "66%": "150",
-                "# requests": "1522"
-              }
-            ]
-          }
-        ],
-        "errors": [
-          {
-            "name": "/send",
-            "number_of_occurrences": 125
-          },
-          {
-            "name": "/random",
-            "number_of_occurrences": 243
-          },
-          {
-            "name": "/",
-            "number_of_occurrences": 385
-          },
-          {
-            "name": "/error/404",
-            "number_of_occurrences": 259
-          },
-          {
-            "name": "/echo/hello",
-            "number_of_occurrences": 249
-          },
-          {
-            "name": "/error/401",
-            "number_of_occurrences": 145
-          },
-          {
-            "name": "/error/400or500",
-            "number_of_occurrences": 116
-          }
-        ]
-      }
-    ]
-  }
+  "execution": [
+    {
+      "timeserie": [
+        {
+          "timestamp": "2019-04-25T14:10:34.968694+00:00",
+          "number_of_errors": 0
+        },
+        {
+          "timestamp": "2019-04-25T14:10:33.015708+00:00",
+          "number_of_errors": 7
+        },
+        {
+          "timestamp": "2019-04-25T14:10:31.668616+00:00",
+          "number_of_errors": 7
+        },
+        {
+          "timestamp": "2019-04-25T14:10:29.654137+00:00",
+          "number_of_errors": 0
+        },
+        {
+          "timestamp": "2019-04-25T14:09:31.000593+00:00",
+          "number_of_errors": 7
+        },
+        {
+          "timestamp": "2019-04-25T14:09:27.738269+00:00",
+          "number_of_errors": 0
+        }
+      ],
+      "requests": [
+        {
+          "timestamp": "2019-04-25T14:10:37.060156+00:00",
+          "num_requests": 263,
+          "num_failures": 263
+        },
+        {
+          "timestamp": "2019-04-25T14:10:37.060156+00:00",
+          "num_requests": 89,
+          "num_failures": 89
+        },
+        {
+          "timestamp": "2019-04-25T14:10:37.060156+00:00",
+          "num_requests": 195,
+          "num_failures": 195
+        },
+        {
+          "timestamp": "2019-04-25T14:10:37.060156+00:00",
+          "num_requests": 176,
+          "num_failures": 176
+        },
+        {
+          "timestamp": "2019-04-25T14:10:37.060156+00:00",
+          "num_requests": 98,
+          "num_failures": 98
+        },
+        {
+          "timestamp": "2019-04-25T14:10:37.060156+00:00",
+          "num_requests": 110,
+          "num_failures": 110
+        },
+        {
+          "timestamp": "2019-04-25T14:10:37.060156+00:00",
+          "num_requests": 194,
+          "num_failures": 194
+        },
+        {
+          "timestamp": "2019-04-25T14:10:34.990939+00:00",
+          "num_requests": 135,
+          "num_failures": 135
+        },
+        {
+          "timestamp": "2019-04-25T14:10:34.990939+00:00",
+          "num_requests": 97,
+          "num_failures": 97
+        },
+        {
+          "timestamp": "2019-04-25T14:10:34.990939+00:00",
+          "num_requests": 57,
+          "num_failures": 57
+        },
+        {
+          "timestamp": "2019-04-25T14:10:34.990939+00:00",
+          "num_requests": 51,
+          "num_failures": 51
+        },
+        {
+          "timestamp": "2019-04-25T14:10:34.990939+00:00",
+          "num_requests": 87,
+          "num_failures": 87
+        },
+        {
+          "timestamp": "2019-04-25T14:10:34.990939+00:00",
+          "num_requests": 100,
+          "num_failures": 100
+        },
+        {
+          "timestamp": "2019-04-25T14:10:34.990939+00:00",
+          "num_requests": 49,
+          "num_failures": 49
+        },
+        {
+          "timestamp": "2019-04-25T14:10:34.975561+00:00",
+          "num_requests": 49,
+          "num_failures": 49
+        },
+        {
+          "timestamp": "2019-04-25T14:10:34.975561+00:00",
+          "num_requests": 135,
+          "num_failures": 135
+        },
+        {
+          "timestamp": "2019-04-25T14:10:34.975561+00:00",
+          "num_requests": 97,
+          "num_failures": 97
+        },
+        {
+          "timestamp": "2019-04-25T14:10:34.975561+00:00",
+          "num_requests": 57,
+          "num_failures": 57
+        },
+        {
+          "timestamp": "2019-04-25T14:10:34.975561+00:00",
+          "num_requests": 51,
+          "num_failures": 51
+        },
+        {
+          "timestamp": "2019-04-25T14:10:34.975561+00:00",
+          "num_requests": 87,
+          "num_failures": 87
+        },
+        {
+          "timestamp": "2019-04-25T14:10:34.975561+00:00",
+          "num_requests": 100,
+          "num_failures": 100
+        },
+        {
+          "timestamp": "2019-04-25T14:09:33.09104+00:00",
+          "num_requests": 95,
+          "num_failures": 95
+        },
+        {
+          "timestamp": "2019-04-25T14:09:33.09104+00:00",
+          "num_requests": 35,
+          "num_failures": 35
+        },
+        {
+          "timestamp": "2019-04-25T14:09:33.09104+00:00",
+          "num_requests": 67,
+          "num_failures": 67
+        },
+        {
+          "timestamp": "2019-04-25T14:09:33.09104+00:00",
+          "num_requests": 56,
+          "num_failures": 56
+        },
+        {
+          "timestamp": "2019-04-25T14:09:33.09104+00:00",
+          "num_requests": 35,
+          "num_failures": 35
+        },
+        {
+          "timestamp": "2019-04-25T14:09:33.09104+00:00",
+          "num_requests": 24,
+          "num_failures": 24
+        },
+        {
+          "timestamp": "2019-04-25T14:09:33.09104+00:00",
+          "num_requests": 88,
+          "num_failures": 88
+        }
+      ],
+      "distributions": [
+        {
+          "timestamp": "2019-04-25T14:10:37.060156+00:00",
+          "num_requests": 263,
+          "p100": 500
+        },
+        {
+          "timestamp": "2019-04-25T14:10:37.060156+00:00",
+          "num_requests": 89,
+          "p100": 500
+        },
+        {
+          "timestamp": "2019-04-25T14:10:37.060156+00:00",
+          "num_requests": 195,
+          "p100": 460
+        },
+        {
+          "timestamp": "2019-04-25T14:10:37.060156+00:00",
+          "num_requests": 176,
+          "p100": 540
+        },
+        {
+          "timestamp": "2019-04-25T14:10:37.060156+00:00",
+          "num_requests": 98,
+          "p100": 480
+        },
+        {
+          "timestamp": "2019-04-25T14:10:37.060156+00:00",
+          "num_requests": 110,
+          "p100": 430
+        },
+        {
+          "timestamp": "2019-04-25T14:10:37.060156+00:00",
+          "num_requests": 194,
+          "p100": 540
+        },
+        {
+          "timestamp": "2019-04-25T14:10:34.990939+00:00",
+          "num_requests": 135,
+          "p100": 460
+        },
+        {
+          "timestamp": "2019-04-25T14:10:34.990939+00:00",
+          "num_requests": 97,
+          "p100": 410
+        },
+        {
+          "timestamp": "2019-04-25T14:10:34.990939+00:00",
+          "num_requests": 57,
+          "p100": 400
+        },
+        {
+          "timestamp": "2019-04-25T14:10:34.990939+00:00",
+          "num_requests": 51,
+          "p100": 370
+        },
+        {
+          "timestamp": "2019-04-25T14:10:34.990939+00:00",
+          "num_requests": 87,
+          "p100": 410
+        },
+        {
+          "timestamp": "2019-04-25T14:10:34.990939+00:00",
+          "num_requests": 100,
+          "p100": 460
+        },
+        {
+          "timestamp": "2019-04-25T14:10:34.990939+00:00",
+          "num_requests": 49,
+          "p100": 420
+        },
+        {
+          "timestamp": "2019-04-25T14:10:34.975561+00:00",
+          "num_requests": 49,
+          "p100": 420
+        },
+        {
+          "timestamp": "2019-04-25T14:10:34.975561+00:00",
+          "num_requests": 135,
+          "p100": 460
+        },
+        {
+          "timestamp": "2019-04-25T14:10:34.975561+00:00",
+          "num_requests": 97,
+          "p100": 410
+        },
+        {
+          "timestamp": "2019-04-25T14:10:34.975561+00:00",
+          "num_requests": 57,
+          "p100": 400
+        },
+        {
+          "timestamp": "2019-04-25T14:10:34.975561+00:00",
+          "num_requests": 51,
+          "p100": 370
+        },
+        {
+          "timestamp": "2019-04-25T14:10:34.975561+00:00",
+          "num_requests": 87,
+          "p100": 410
+        },
+        {
+          "timestamp": "2019-04-25T14:10:34.975561+00:00",
+          "num_requests": 100,
+          "p100": 460
+        },
+        {
+          "timestamp": "2019-04-25T14:09:33.09104+00:00",
+          "num_requests": 95,
+          "p100": 1200
+        },
+        {
+          "timestamp": "2019-04-25T14:09:33.09104+00:00",
+          "num_requests": 35,
+          "p100": 1100
+        },
+        {
+          "timestamp": "2019-04-25T14:09:33.09104+00:00",
+          "num_requests": 67,
+          "p100": 1300
+        },
+        {
+          "timestamp": "2019-04-25T14:09:33.09104+00:00",
+          "num_requests": 56,
+          "p100": 1200
+        },
+        {
+          "timestamp": "2019-04-25T14:09:33.09104+00:00",
+          "num_requests": 35,
+          "p100": 1200
+        },
+        {
+          "timestamp": "2019-04-25T14:09:33.09104+00:00",
+          "num_requests": 24,
+          "p100": 1200
+        },
+        {
+          "timestamp": "2019-04-25T14:09:33.09104+00:00",
+          "num_requests": 88,
+          "p100": 1200
+        }
+      ],
+      "errors": [
+        {
+          "name": "/send",
+          "error_type": "POST"
+        },
+        {
+          "name": "/random",
+          "error_type": "GET"
+        },
+        {
+          "name": "/",
+          "error_type": "GET"
+        },
+        {
+          "name": "/error/404",
+          "error_type": "GET"
+        },
+        {
+          "name": "/echo/hello",
+          "error_type": "GET"
+        },
+        {
+          "name": "/error/401",
+          "error_type": "GET"
+        },
+        {
+          "name": "/error/400or500",
+          "error_type": "GET"
+        },
+        {
+          "name": "/send",
+          "error_type": "POST"
+        },
+        {
+          "name": "/random",
+          "error_type": "GET"
+        },
+        {
+          "name": "/echo/hello",
+          "error_type": "GET"
+        },
+        {
+          "name": "/error/401",
+          "error_type": "GET"
+        },
+        {
+          "name": "/",
+          "error_type": "GET"
+        },
+        {
+          "name": "/error/404",
+          "error_type": "GET"
+        },
+        {
+          "name": "/error/400or500",
+          "error_type": "GET"
+        },
+        {
+          "name": "/echo/hello",
+          "error_type": "GET"
+        },
+        {
+          "name": "/error/404",
+          "error_type": "GET"
+        },
+        {
+          "name": "/error/400or500",
+          "error_type": "GET"
+        },
+        {
+          "name": "/random",
+          "error_type": "GET"
+        },
+        {
+          "name": "/error/401",
+          "error_type": "GET"
+        },
+        {
+          "name": "/",
+          "error_type": "GET"
+        },
+        {
+          "name": "/send",
+          "error_type": "POST"
+        },
+        {
+          "name": "/error/404",
+          "error_type": "GET"
+        },
+        {
+          "name": "/random",
+          "error_type": "GET"
+        },
+        {
+          "name": "/echo/hello",
+          "error_type": "GET"
+        },
+        {
+          "name": "/",
+          "error_type": "GET"
+        },
+        {
+          "name": "/error/400or500",
+          "error_type": "GET"
+        },
+        {
+          "name": "/send",
+          "error_type": "POST"
+        },
+        {
+          "name": "/error/401",
+          "error_type": "GET"
+        },
+        {
+          "name": "/",
+          "error_type": "GET"
+        },
+        {
+          "name": "/echo/hello",
+          "error_type": "GET"
+        },
+        {
+          "name": "/send",
+          "error_type": "POST"
+        },
+        {
+          "name": "/error/404",
+          "error_type": "GET"
+        },
+        {
+          "name": "/random",
+          "error_type": "GET"
+        },
+        {
+          "name": "/error/401",
+          "error_type": "GET"
+        },
+        {
+          "name": "/error/400or500",
+          "error_type": "GET"
+        },
+        {
+          "name": "/echo/hello",
+          "error_type": "GET"
+        },
+        {
+          "name": "/random",
+          "error_type": "GET"
+        },
+        {
+          "name": "/error/401",
+          "error_type": "GET"
+        },
+        {
+          "name": "/error/404",
+          "error_type": "GET"
+        },
+        {
+          "name": "/error/400or500",
+          "error_type": "GET"
+        },
+        {
+          "name": "/",
+          "error_type": "GET"
+        },
+        {
+          "name": "/send",
+          "error_type": "POST"
+        }
+      ]
+    }
+  ]
 }

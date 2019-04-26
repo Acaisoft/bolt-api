@@ -1,21 +1,40 @@
+import json
 from datetime import datetime
 
 from services.exports import const
 from services.hasura import hce
 
 
-def fields_to_gql_aggregate(fields_list) -> str:
+GQL_TIMESTAMP = 'order_by:{ timestamp:desc } where:{ timestamp:{_lte:$t_to _gt:$t_from } }'
+
+
+def targets_to_fields(targets_list, metric) -> str:
     # timeserie:timestamp must always be present, even if not returned
-    fields = filter(lambda x: x.startswith('timeserie:') and x != 'timeserie:timestamp', fields_list)
+    fields = filter(lambda x: x.startswith(metric + ':') and ':timestamp' not in x, targets_list)
     return ' '.join(map(lambda x: x.split(':')[1], fields))
 
 
-def fields_to_gql_distribution(fields):
+def fields_to_gql(fields):
     out = []
+
+    if list(filter(lambda x: x.startswith('timeserie:'), fields)):
+        out.append('timeserie: result_aggregate ( %(GQL_TIMESTAMP)s ) { timestamp %(fields)s }' % {
+            'GQL_TIMESTAMP': GQL_TIMESTAMP,
+            'fields': targets_to_fields(fields, 'timeserie'),
+        })
+
     if list(filter(lambda x: x.startswith('requests:'), fields)):
-        out.append('requests: result_distributions { request_result }')
+        out.append('requests: execution_requests ( %(GQL_TIMESTAMP)s ) { timestamp identifier %(fields)s }' % {
+            'GQL_TIMESTAMP': GQL_TIMESTAMP,
+            'fields': targets_to_fields(fields, 'requests'),
+        })
+
     if list(filter(lambda x: x.startswith('distributions:'), fields)):
-        out.append('distributions: result_distributions { distribution_result }')
+        out.append('distributions: execution_distributions ( %(GQL_TIMESTAMP)s ) { timestamp identifier %(fields)s }' % {
+            'GQL_TIMESTAMP': GQL_TIMESTAMP,
+            'fields': targets_to_fields(fields, 'distributions'),
+        })
+
     return ' '.join(out)
 
 
@@ -32,24 +51,18 @@ def get_export_data(config, oid, t_from, t_to, fields_to_query):
         # single execution
         resp = hce(config, '''query ($eid:uuid!, $t_from:timestamptz!, $t_to:timestamptz!) {
             execution (where:{id:{_eq:$eid}}) {
-                timeserie: result_aggregate (
-                    order_by:{ timestamp:desc }
-                    where:{ timestamp:{_lte:$t_to _gt:$t_from } }
-                ) {
-                    timestamp %(result_aggregate_fields)s
-                }
-                %(distribution_fields)s
+                %(timeserie_fields)s
                 %(errors_fields)s
             }
         }''' % {
-            'result_aggregate_fields': fields_to_gql_aggregate(fields_to_query),
-            'distribution_fields': fields_to_gql_distribution(fields_to_query),
+            'timeserie_fields': fields_to_gql(fields_to_query),
             'errors_fields': fields_to_gql_errors(fields_to_query),
         }, {
             't_from': t_from,
             't_to': t_to,
             'eid': oid[1],
         })
+        print(json.dumps(resp))
         return resp['execution'][0]
     else:
         # entire project
@@ -59,18 +72,11 @@ def get_export_data(config, oid, t_from, t_to, fields_to_query):
                     project_id:{_eq:$pid}
                 }
             }) {
-                timeserie: result_aggregate (
-                    order_by:{ timestamp:desc }
-                    where:{ timestamp:{_lte:$t_to _gt:$t_from } }
-                ) {
-                    timestamp %(result_aggregate_fields)s
-                }
-                %(distribution_fields)s
+                %(timeserie_fields)s
                 %(errors_fields)s
             }
         }''' % {
-            'result_aggregate_fields': fields_to_gql_aggregate(fields_to_query),
-            'distribution_fields': fields_to_gql_distribution(fields_to_query),
+            'timeserie_fields': fields_to_gql(fields_to_query),
             'errors_fields': fields_to_gql_errors(fields_to_query),
         }, {
             't_from': t_from,
@@ -95,10 +101,22 @@ def l2u(locust_timestamp:str) -> float:
     :param locust_timestamp: input timestamp in format: 2019-04-17T06:53:50.475089+00:00
     :return: float representing input in unix milisecond format
     """
-    return datetime.strptime(
-        locust_timestamp.replace('+00:00', '+0000'),
-        '%Y-%m-%dT%H:%M:%S.%f%z'
-    ).timestamp() * 1000
+    try:
+        return datetime.strptime(
+            locust_timestamp.replace('+00:00', '+0000'),
+            '%Y-%m-%dT%H:%M:%S%z'
+        ).timestamp() * 1000
+    except:
+        try:
+            return datetime.strptime(
+                locust_timestamp.replace('+00:00', '+0000'),
+                '%Y-%m-%dT%H:%M:%S.%f%z'
+            ).timestamp() * 1000
+        except:
+            return datetime.strptime(
+                locust_timestamp,
+                '%Y-%m-%dT%H:%M:%S%z'
+            ).timestamp() * 1000
 
 
 def fields_to_columns(fields_list):
@@ -111,8 +129,8 @@ def fields_to_columns(fields_list):
         y = x.replace(':', ': ')
         return y.replace('_', ' ').title()
 
-    def t(x):
-        if x == 'timeserie:timestamp':
+    def t(x:str):
+        if x.endswith(':timestamp'):
             return 'time'
         return 'number'
 

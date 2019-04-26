@@ -20,28 +20,33 @@ errors_fields = [
 ]
 
 distributions_fields = [
-    # these map to json fields in execution.result_distributions.request_result column
-    'requests:Min response time',
-    'requests:# failures',
-    'requests:Max response time',
-    'requests:Name',
-    'requests:Median response time',
-    'requests:Average Content Size',
-    'requests:Average response time',
-    'requests:Method',
-    'requests:Requests/s',
-    'requests:# requests',
+    'distributions:timestamp',
+    'distributions:identifier',
+    'distributions:method',
+    'distributions:name',
+    'distributions:num_requests',
+    'distributions:p50',
+    'distributions:p66',
+    'distributions:p75',
+    'distributions:p80',
+    'distributions:p90',
+    'distributions:p95',
+    'distributions:p98',
+    'distributions:p99',
+    'distributions:p100',
+]
 
-    # these map to json fields in execution.result_distributions.distribution_result column
-    'distributions:Name',
-    'distributions:# requests',
-    'distributions:99%',
-    'distributions:75%',
-    'distributions:66%',
-    'distributions:98%',
-    'distributions:100%',
-    'distributions:50%',
-    'distributions:80%',
-    'distributions:90%',
-    'distributions:95%'
+requests_fields = [
+    'requests:timestamp',
+    'requests:identifier',
+    'requests:method',
+    'requests:name',
+    'requests:num_requests',
+    'requests:num_failures',
+    'requests:median_response_time',
+    'requests:average_response_time',
+    'requests:min_response_time',
+    'requests:max_response_time',
+    'requests:average_content_size',
+    'requests:requests_per_second',
 ]

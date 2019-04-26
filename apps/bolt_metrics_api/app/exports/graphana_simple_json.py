@@ -6,12 +6,11 @@ from services.exports.data_extractor import l2u, fields_to_columns
 from services.logger import setup_custom_logger
 from services.exports import verify_token
 
-
 logger = setup_custom_logger(__file__)
 
 bp = Blueprint('grafana_simple_json', __name__)
 
-queryable_fields = exports.aggregate_fields + exports.errors_fields + exports.distributions_fields
+queryable_fields = exports.aggregate_fields + exports.errors_fields + exports.distributions_fields + exports.requests_fields
 
 
 def _verify(token):
@@ -78,6 +77,7 @@ def query(request_token):
         f = i.get('target')
         if f:
             if f not in queryable_fields:
+                logger.warn(f'invalid field in requested targets: "{f}"')
                 abort(403)
             result_format = i.get('type', 'timeserie')
             results_per_target[f] = []
@@ -119,7 +119,7 @@ def tag_values(request_token):
     return jsonify({})
 
 
-def dataset_to_timeserie(dataset:dict, targets):
+def dataset_to_timeserie(dataset: dict, targets):
     """
     Convert locust testrun data to grafana/annotated timeserie format.
     Non-timeserie targets in @targets are ignored bc. locust limitations.
@@ -130,22 +130,38 @@ def dataset_to_timeserie(dataset:dict, targets):
     results_per_target = {}
     results = []
 
-    for row in dataset.get('timeserie'):
-        _ts = row.get('timestamp', None)
-        if _ts is None:
-            # get_export_data must include the timestamp column regardless of user spec
-            raise RuntimeError('input data does not contain timestamp, unsuitable for timeserie')
-        ts = l2u(_ts)
-        for target in targets:
-            metric, field = target.split(':')
-            if target == 'timeserie:timestamp':
-                continue
-            if metric != 'timeserie':
-                # Non-timeserie targets in @targets are ignored bc. locust limitations.
-                continue
-            if target not in results_per_target:
-                results_per_target[target] = []
-            results_per_target[target].append((float(row.get(field, 0)), ts))
+    for target in targets:
+        metric, field = target.split(':')
+        if metric == 'errors':
+            # silently skip errors in timeserie output bc. it doesn't have timestamps yet
+            continue
+        result_target = None
+        ts = None
+
+        for row in dataset.get(metric):
+            # get the timestamp
+            _ts = row.get('timestamp', None)
+            if _ts is None:
+                # get_export_data must include the timestamp column regardless of user spec
+                raise RuntimeError('input data does not contain timestamp, unsuitable for timeserie')
+            ts = l2u(_ts)
+
+            # get identifier for a sub-target, if present
+            result_target = target
+            if metric in ('distributions', 'requests'):
+                subtarget = row.get('identifier', None)
+                if subtarget:
+                    result_target = f'{metric}:{subtarget}:{field}'
+
+            if result_target not in results_per_target:
+                results_per_target[result_target] = []
+
+            value = row.get(field, '')
+            try:
+                value = float(value)
+            except:
+                pass
+            results_per_target[result_target].append((value, ts))
 
     for k, v in results_per_target.items():
         results.append({
@@ -155,7 +171,7 @@ def dataset_to_timeserie(dataset:dict, targets):
     return results
 
 
-def dataset_to_table(dataset:dict, targets):
+def dataset_to_table(dataset: dict, targets):
     """
     Example dataset combining different categories of metrics
     {'timeserie': [],
@@ -166,29 +182,18 @@ def dataset_to_table(dataset:dict, targets):
         {'name': '/echo/hello'}, {'name': '/'}, {'name': '/send'}, {'name': '/error/404'},
     ]}
     """
+
     def empty_row():
         return [0 for i in range(len(targets))]
+
     result_rows = []
     for t_index, target in enumerate(targets):
         metric, field = target.split(':')
-
-        if metric in ('timeserie', 'errors'):
-            # field is a raw column
-            enumerable = enumerate(dataset[metric])
-        elif metric == 'requests':
-            # field is a json of lists of dicts and needs to be parsed deeper for actual fields
-            enumerable = enumerate(dataset[metric][0]['request_result'])
-        elif metric == 'distributions':
-            # field is a json of lists of dicts and needs to be parsed deeper for actual fields
-            enumerable = enumerate(dataset[metric][0]['distribution_result'])
-        else:
-            raise Exception(f'invalid metric category: {metric} in target {target}')
-
-        for d_index, data_row in enumerable:
+        for d_index, data_row in enumerate(dataset[metric]):
             if len(result_rows) <= d_index:
                 result_rows.append(empty_row())
             value = data_row.get(field, None)
-            if target == 'timeserie:timestamp':
+            if target.endswith(':timestamp'):
                 value = l2u(value)
             result_rows[d_index][t_index] = value
 
