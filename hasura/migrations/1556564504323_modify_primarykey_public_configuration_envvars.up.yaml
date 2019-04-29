@@ -1,0 +1,9 @@
+- args:
+    sql: "\n          alter table \"public\".\"configuration_envvars\" drop constraint
+      \"configuration_envvars_pkey\";\n        "
+  type: run_sql
+- args:
+    sql: "\n            alter table \"public\".\"configuration_envvars\"\n            add
+      constraint \"configuration_envvars_pkey\" primary key ( configuration_id, name
+      );\n          "
+  type: run_sql

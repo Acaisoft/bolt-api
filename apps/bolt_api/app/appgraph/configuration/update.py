@@ -30,13 +30,19 @@ class UpdateValidate(graphene.Mutation):
             types.ConfigurationParameterInput,
             required=False,
             description='Default parameter types overrides.')
+        runner_parameters = graphene.List(
+            types.ConfigurationParameterInput,
+            required=False,
+            description='Parameters passed as environment variables to testrunner.')
 
     Output = gql_util.ValidationInterface
 
     @staticmethod
-    def validate(info, id, name=None, type_slug=None, test_source_id=None, configuration_parameters=None):
+    def validate(info, id, name=None, type_slug=None, test_source_id=None, configuration_parameters=None,
+                 runner_parameters=None):
 
-        role, user_id = gql_util.get_request_role_userid(info, (const.ROLE_ADMIN, const.ROLE_MANAGER, const.ROLE_TESTER))
+        role, user_id = gql_util.get_request_role_userid(info,
+                                                         (const.ROLE_ADMIN, const.ROLE_MANAGER, const.ROLE_TESTER))
 
         original = hce(current_app.config, '''query ($confId:uuid!, $userId:uuid!) {
             configuration (where:{
@@ -178,10 +184,23 @@ class UpdateValidate(graphene.Mutation):
                     if parameter_slug == const.TESTPARAM_USERS:
                         query_data['instances'] = math.ceil(int(param_value) / const.TESTRUN_MAX_USERS_PER_INSTANCE)
 
+        if runner_parameters:
+            for rp in runner_parameters:
+                assert rp['parameter_slug'].replace('_', '').isalnum(), \
+                    f'configuration runner_parameter "{rp["parameter_slug"]}" is not alphanumeric'
+            query_data['configuration_envvars'] = {
+                'data': [{
+                    'name': x['parameter_slug'],
+                    'value': x['value'],
+                    'configuration_id': str(id),
+                } for x in runner_parameters]
+            }
+
         return query_data
 
-    def mutate(self, info, id, name=None, type_slug=None, test_source_id=None, configuration_parameters=None):
-        UpdateValidate.validate(info, id, name, type_slug, test_source_id, configuration_parameters)
+    def mutate(self, info, id, name=None, type_slug=None, test_source_id=None, configuration_parameters=None,
+               runner_parameters=None):
+        UpdateValidate.validate(info, id, name, type_slug, test_source_id, configuration_parameters, runner_parameters)
         return gql_util.ValidationResponse(ok=True)
 
 
@@ -190,24 +209,50 @@ class Update(UpdateValidate):
 
     Output = gql_util.OutputTypeFactory(types.ConfigurationType, 'Update')
 
-    def mutate(self, info, id, name=None, type_slug=None, test_source_id=None, configuration_parameters=None):
-        query_params = UpdateValidate.validate(info, id, name, type_slug, test_source_id, configuration_parameters)
+    @staticmethod
+    def mutate_configuration_parameters(conf_id, configuration_parameters):
+        for cp in configuration_parameters:
+            hce(current_app.config, '''mutation ($confId:uuid!, $slug:String!, $value:String!) {
+                update_configuration_parameter(
+                    where:{ configuration_id:{_eq:$confId}, parameter_slug:{_eq:$slug} },
+                    _set:{ value: $value }
+                ) {
+                    affected_rows
+                }
+            }''', variable_values={
+                'confId': conf_id,
+                'slug': cp['parameter_slug'],
+                'value': cp['value']
+            })
 
-        conf_params = query_params.pop('configuration_parameters', None)
-        if conf_params:
-            for cp in conf_params['data']:
-                hce(current_app.config, '''mutation ($confId:uuid!, $slug:String!, $value:String!) {
-                    update_configuration_parameter(
-                        where:{ configuration_id:{_eq:$confId}, parameter_slug:{_eq:$slug} },
-                        _set:{ value: $value }
-                    ) {
-                        affected_rows
-                    }
-                }''', variable_values={
-                    'confId': str(id),
-                    'slug': cp['parameter_slug'],
-                    'value': cp['value']
-                })
+    @staticmethod
+    def mutate_runner_parameters(conf_id, configuration_parameters):
+        resp = hce(current_app.config, '''mutation ($data:[configuration_envvars_insert_input!]!) {
+            insert_configuration_envvars (
+                objects: $data
+                on_conflict: {
+                    constraint: configuration_envvars_pkey
+                    update_columns: [ value ]
+                }
+            ) {
+                affected_rows
+            }
+        }''', variable_values={'data': configuration_parameters})
+
+    def mutate(self, info, id, name=None, type_slug=None, test_source_id=None, configuration_parameters=None,
+               runner_parameters=None):
+        query_params = UpdateValidate.validate(info, id, name, type_slug, test_source_id, configuration_parameters,
+                                               runner_parameters)
+
+        Update.mutate_configuration_parameters(
+            str(id),
+            query_params.pop('configuration_parameters', {'data': []})['data']
+        )
+
+        Update.mutate_runner_parameters(
+            str(id),
+            query_params.pop('configuration_envvars', {'data': []})['data']
+        )
 
         query = '''mutation ($id:uuid!, $data:configuration_set_input!) {
             update_configuration(

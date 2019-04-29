@@ -139,7 +139,10 @@ class CreateValidate(graphene.Mutation):
                 assert rp['parameter_slug'].replace('_', '').isalnum(), \
                     f'configuration runner_parameter "{rp["parameter_slug"]}" is not alphanumeric'
             query_data['configuration_envvars'] = {
-                'data': [{'name': x['parameter_slug'], 'value': x['value']} for x in runner_parameters]
+                'data': [{
+                    'name': x['parameter_slug'],
+                    'value': x['value'],
+                } for x in runner_parameters]
             }
 
         patched_params = validators.validate_test_params(configuration_parameters, defaults=repo['parameter'])

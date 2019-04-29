@@ -1,6 +1,63 @@
 Changelog
 =========
 
+## 0.2.7 (2019-04-29)
+
+### Changes
+
+* Add envvars manipulations to testrun_configuration_update mutation. [Piotr Mońko]
+
+* Add requests and distributions details. [Piotr Mońko]
+
+* Add testrunner env variables to configuration create mutation. [Piotr Mońko]
+
+* Add testrunner env variables to configuration create mutation. [Piotr Mońko]
+
+* Add support for table extractors for data export/grafana and enable mixed-mode (series+table) output. [Piotr Mońko]
+
+### Fix
+
+* Configuration update error. [Piotr Mońko]
+
+### Other
+
+* Add backend webhook to calculate totals for requests. [Piotr Mońko]
+
+* Decrease throttling on data export; bump test runner version. [Piotr Mońko]
+
+* Fix input type changed in hasura beta44. [Piotr Mońko]
+
+* Fix validated type. [Piotr Mońko]
+
+* Adjust exporter to match new requests distributions. [Piotr Mońko]
+
+* Merge branch 'master' of bitbucket.org:acaisoft/bolt-api. [Piotr Mońko]
+
+* Fix bolt-metrics-api chart. [jroslaniec-acaisoft]
+
+* Add volumne for grafana. [Piotr Mońko]
+
+* Add command and debugging flask app: [Piotr Mońko]
+
+* Merge branch 'master' of bitbucket.org:acaisoft/bolt-api. [Piotr Mońko]
+
+* Mount config voluems for bolt-metrics-api chart. [jroslaniec-acaisoft]
+
+* Add bolt-metrics-api chart. [jroslaniec-acaisoft]
+
+* Add metrics-api building process to Jenkinsfile. [jroslaniec-acaisoft]
+
+* Migrations. [Piotr Mońko]
+
+* Fix gunicorn params. [Piotr Mońko]
+
+* Fix gunicorn params. [Piotr Mońko]
+
+* Update Jenkinsfile. [Piotr Mońko]
+
+* Update changelog. [Piotr Mońko]
+
+
 ## 0.2.6 (2019-04-19)
 
 ### Changes
