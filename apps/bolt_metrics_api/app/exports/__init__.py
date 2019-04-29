@@ -12,7 +12,7 @@ def register_app(app):
     # ratelimiting blueprint per url means each functionality's availability is equally distributed
     # among (token, method) where 1 token ~ 1 user, consider limiting per just the token
     limiter = Limiter(app, key_func=request_limiter)
-    limiter.limit('10 per second')(bp)
+    limiter.limit('100 per second')(bp)
     app.register_blueprint(bp, url_prefix='/exports/grafana_simple_json')
 
 
