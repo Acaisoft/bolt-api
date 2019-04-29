@@ -1,0 +1,3 @@
+- args:
+    sql: DROP TABLE "public"."execution_request_totals"
+  type: run_sql

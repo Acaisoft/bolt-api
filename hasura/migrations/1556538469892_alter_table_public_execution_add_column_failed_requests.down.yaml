@@ -1,0 +1,3 @@
+- args:
+    sql: ALTER TABLE "public"."execution" DROP COLUMN "failed_requests"
+  type: run_sql
