@@ -21,7 +21,7 @@ def validate_extensions(confs:list):
 def validate_nfs(conf:list):
     nfs_params = ('server', 'path')
     out = {
-        'type': const.EXTENSION_NFS,
+        'name': const.EXTENSION_NFS,
     }
     m_opts = []
     for i in conf:
