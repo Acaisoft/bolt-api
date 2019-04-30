@@ -2,6 +2,9 @@ import math
 from flask import Blueprint, request, jsonify, current_app
 
 from services.hasura import hce
+from services.logger import setup_custom_logger
+
+logger = setup_custom_logger(__file__)
 
 bp = Blueprint('webhooks_execution_requests', __name__)
 
@@ -30,7 +33,9 @@ def update_execution_requests_stats_totals():
         }''', variable_values={
             'data': new,
         })
-        assert not response.get('errors', None)
+        err = response.get('errors', None)
+        if err is not None:
+            logger.warn(f'error inserting execution request totals on execution: {str(err)}')
     elif event.get('op') == 'DELETE':
         execution_id = event['data']['old']['execution_id']
 
@@ -48,26 +53,32 @@ def update_execution_requests_stats_totals():
     }''', variable_values={
         'execution_id': execution_id,
     })
-    assert not response.get('errors', None)
+    err = response.get('errors', None)
+    if err is not None:
+        logger.warn(f'error calculating request totals on execution: {str(err)}')
+
     aggs = response['execution_request_totals_aggregate']['aggregate']
     total = aggs['sum']['num_requests']
     fails = aggs['sum']['num_failures']
 
-    response = hce(current_app.config, '''mutation ($execution_id:uuid!, $total_requests:Int!, $passed_requests:Int!, $failed_requests:Int!) {
-        update_execution(
-            where:{id:{_eq:$execution_id}}
-            _set:{
-                total_requests: $total_requests
-                passed_requests: $passed_requests
-                failed_requests: $failed_requests
-            }
-        ) { affected_rows }
-    }''', variable_values={
-        'execution_id': execution_id,
-        'total_requests': total,
-        'failed_requests': fails,
-        'passed_requests': int(total) - int(fails),
-    })
-    assert not response.get('errors', None)
+    if total is not None and fails is not None:
+        response = hce(current_app.config, '''mutation ($execution_id:uuid!, $total_requests:Int!, $passed_requests:Int!, $failed_requests:Int!) {
+            update_execution(
+                where:{id:{_eq:$execution_id}}
+                _set:{
+                    total_requests: $total_requests
+                    passed_requests: $passed_requests
+                    failed_requests: $failed_requests
+                }
+            ) { affected_rows }
+        }''', variable_values={
+            'execution_id': execution_id,
+            'total_requests': total,
+            'failed_requests': fails,
+            'passed_requests': int(total) - int(fails),
+        })
+        err = response.get('errors', None)
+        if err is not None:
+            logger.warn(f'error updating request totals on execution: {str(err)}')
 
     return jsonify({})
