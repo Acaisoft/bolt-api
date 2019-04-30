@@ -1,0 +1,5 @@
+- args:
+    sql: alter table "public"."extension_params" add constraint "extension_params_configuration_extension_id_fkey"
+      foreign key ("configuration_extension_id") references "public"."configuration_extension"("id")
+      on update cascade on delete cascade;
+  type: run_sql

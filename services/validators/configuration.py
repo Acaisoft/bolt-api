@@ -2,6 +2,7 @@ from flask import current_app
 
 from services import const
 from services.validators import validate_test_creator
+from .extensions import validate_extensions
 from services.validators import repository
 from services.validators.validators import VALIDATORS
 from services.hasura import hce
@@ -52,6 +53,14 @@ def validate_test_configuration_by_id(test_conf_id):
                 value
                 parameter_slug
             }
+                
+            configuration_extensions {
+                type
+                extension_params {
+                    name
+                    value
+                }
+            }
         }
     }''', {'conf_id': test_conf_id})
     assert conf['configuration_by_pk'], f'configuration not found ({str(conf)})'
@@ -80,6 +89,8 @@ def validate_test_configuration(conf: dict, defaultParams:list):
     assert len(conf['name']), 'configuration name is required'
 
     validate_test_params(conf['configuration_parameters'], defaults=defaultParams)
+
+    validate_extensions(conf['configuration_extensions'])
 
     test_source = conf['test_source']
     assert test_source, f'undefined configuration test_source'

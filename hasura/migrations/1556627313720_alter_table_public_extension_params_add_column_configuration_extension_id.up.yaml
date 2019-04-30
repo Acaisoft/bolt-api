@@ -1,0 +1,4 @@
+- args:
+    sql: ALTER TABLE "public"."extension_params" ADD COLUMN "configuration_extension_id"
+      uuid NOT NULL
+  type: run_sql

@@ -5,6 +5,7 @@ from flask import current_app
 
 from services import const, gql_util
 from services.deployer.utils import start_job, start_image
+from services.validators import validate_extensions
 from services.validators.configuration import validate_test_configuration_by_id
 from services.hasura import hce
 
@@ -47,6 +48,14 @@ class TestrunStart(graphene.Mutation):
                 project_id
                 instances
                 
+                configuration_extensions {
+                    type
+                    extension_params {
+                        name
+                        value
+                    }
+                }
+                
                 test_source {
                     source_type
                     project {
@@ -79,6 +88,8 @@ class TestrunStart(graphene.Mutation):
         test_config = test_config_response['configuration'][0]
         code_source = test_config['test_source']['source_type']
 
+        test_extensions = validate_extensions(test_config['configuration_extensions'])
+
         initial_state = {
             'configuration_id': str(conf_id),
             'start': str(datetime.now()),
@@ -93,6 +104,7 @@ class TestrunStart(graphene.Mutation):
                 repo_url=test_config['test_source']['repository']['url'],
                 no_cache_redis=no_cache or no_cache_redis,
                 no_cache_kaniko=no_cache or no_cache_kaniko,
+                extensions=test_extensions,
             )
             initial_state['test_preparation_job_id'] = deployer_response.id
             initial_state['test_preparation_job_status'] = deployer_response.status
@@ -101,6 +113,7 @@ class TestrunStart(graphene.Mutation):
                 app_config=current_app.config,
                 project_id=test_config['project_id'],
                 workers=test_config['instances'],
+                extensions=test_extensions,
             )
             initial_state['status'] = const.TESTRUN_STARTED
             initial_state['test_job_id'] = deployer_response.name

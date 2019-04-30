@@ -1,9 +1,9 @@
-from cmd import users
-from cmd.projects import project_setup_demo, project_teardown
-from cmd.repositories import validate_repo
-from cmd.sentry import sentry_check
-from cmd.testrun_status import testrun_status
-from cmd.tokens import job_token, execution_data_export_token, project_data_export_token
+from . import users
+from .projects import project_setup_demo, project_teardown
+from .repositories import validate_repo
+from .sentry import sentry_check
+from .testrun_status import testrun_status
+from .tokens import job_token, execution_data_export_token, project_data_export_token
 
 
 def register_commands(app):

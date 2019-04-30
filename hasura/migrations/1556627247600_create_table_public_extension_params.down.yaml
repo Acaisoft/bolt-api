@@ -1,0 +1,3 @@
+- args:
+    sql: DROP TABLE "public"."extension_params"
+  type: run_sql

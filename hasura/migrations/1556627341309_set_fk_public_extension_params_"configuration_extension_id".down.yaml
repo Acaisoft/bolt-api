@@ -1,0 +1,3 @@
+- args:
+    sql: alter table "public"."extension_params" drop constraint "extension_params_configuration_extension_id_fkey";
+  type: run_sql

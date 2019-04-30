@@ -1,0 +1,8 @@
+- args:
+    name: configuration
+    table:
+      name: configuration_extension
+      schema: public
+    using:
+      foreign_key_constraint_on: configuration_id
+  type: create_object_relationship
