@@ -1,0 +1,22 @@
+- args:
+    permission:
+      allow_aggregations: true
+      columns:
+      - id
+      - execution_id
+      - request_result
+      - distribution_result
+      - start
+      - end
+      filter:
+        execution:
+          configuration:
+            project:
+              userProjects:
+                user_id:
+                  _eq: X-Hasura-User-Id
+    role: manager
+    table:
+      name: result_distribution
+      schema: public
+  type: create_select_permission

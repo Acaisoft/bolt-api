@@ -1,0 +1,12 @@
+- args:
+    permission:
+      allow_aggregations: false
+      columns:
+      - code
+      - name
+      filter: {}
+    role: manager
+    table:
+      name: job_status_dict
+      schema: public
+  type: create_select_permission

@@ -9,27 +9,30 @@ bp = Blueprint('webhooks_execution_requests', __name__)
 @bp.route('/insert', methods=['POST'])
 def update_execution_requests_stats_totals():
     event = request.get_json().get('event')
-    assert event and event.get('op') == 'INSERT', f'invalid event input: {str(event)}'
+    execution_id = None
 
-    new = event.get('data', {}).get('new')
-    del new['id']
-    execution_id = new['execution_id']
+    if event.get('op') == 'INSERT':
+        new = event.get('data', {}).get('new')
+        del new['id']
+        execution_id = new['execution_id']
 
-    response = hce(current_app.config, '''mutation ($data:[execution_request_totals_insert_input!]!) {
-        insert_execution_request_totals(
-            objects: $data,
-            on_conflict: {
-                constraint: execution_request_totals_pkey
-                update_columns: [
-                    average_content_size, average_response_time, max_response_time, median_response_time, 
-                    min_response_time, num_failures, num_requests, requests_per_second, timestamp
-                ]
-            }
-        ) { affected_rows }
-    }''', variable_values={
-        'data': new,
-    })
-    assert not response.get('errors', None)
+        response = hce(current_app.config, '''mutation ($data:[execution_request_totals_insert_input!]!) {
+            insert_execution_request_totals(
+                objects: $data,
+                on_conflict: {
+                    constraint: execution_request_totals_pkey
+                    update_columns: [
+                        average_content_size, average_response_time, max_response_time, median_response_time, 
+                        min_response_time, num_failures, num_requests, requests_per_second, timestamp
+                    ]
+                }
+            ) { affected_rows }
+        }''', variable_values={
+            'data': new,
+        })
+        assert not response.get('errors', None)
+    elif event.get('op') == 'DELETE':
+        execution_id = event['data']['old']['execution_id']
 
     response = hce(current_app.config, '''query ($execution_id:uuid!) {
         execution_request_totals_aggregate(where:{execution_id:{_eq:$execution_id}}){

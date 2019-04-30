@@ -138,6 +138,7 @@ class CreateValidate(graphene.Mutation):
             for rp in runner_parameters:
                 assert rp['parameter_slug'].replace('_', '').isalnum(), \
                     f'configuration runner_parameter "{rp["parameter_slug"]}" is not alphanumeric'
+                assert not rp['parameter_slug'].startswith('BOLT_'), f'runner_parameter cannot start with BOLT_'
             query_data['configuration_envvars'] = {
                 'data': [{
                     'name': x['parameter_slug'],
