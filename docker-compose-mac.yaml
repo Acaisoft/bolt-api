@@ -12,8 +12,8 @@ services:
     ports:
       - "6379:6379"
   hasura:
-#    image: hasura/graphql-engine:v1.0.0-alpha38
-    image: hasura/graphql-engine:v1.0.0-alpha38.cli-migrations
+#    image: hasura/graphql-engine:v1.0.0-alpha44
+    image: hasura/graphql-engine:v1.0.0-alpha44.cli-migrations
     ports:
       - "8080:8080"
     depends_on:
@@ -30,14 +30,16 @@ services:
       BOLT_API_GRAPHQL: http://api:5000/graphql
       BOLT_API_EXECUTION_STATE_CHANGE: http://api:5000/webhooks/execution/update
       BOLT_API_CONFIGURATION_PARAM_CHANGE: http://api:5000/webhooks/configuration_param/update
+      BOLT_API_EXECUTION_REQUESTS_INSERT: http://api:5000/webhooks/execution_requests/insert
     volumes:
       - ./hasura/migrations:/hasura-migrations
   api:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: apps/bolt_api/Dockerfile
     volumes:
-      - .:/app
+      - ./apps:/apps
+      - ./services:/services
     ports:
       - "5000:5000"
     depends_on:
@@ -45,7 +47,8 @@ services:
     restart: always
     environment:
       CONFIG_FILE_PATH: docker-compose-config.py
-    entrypoint: ["flask", "run", "--host", "0.0.0.0"]
+      FLASK_ENV: development
+    entrypoint: ["flask", "run", "--eager-loading", "--host", "0.0.0.0", "--port", "5000"]
 volumes:
   hasura_migrations:
   db_data:
