@@ -26,7 +26,17 @@ def OutputInterfaceFactory(cls:Type[graphene.Interface], postfix=""):
 
 def OutputValueFromFactory(cls, returning_response):
     output = []
+    out_klass = cls.Output.returning._of_type
     for item in returning_response['returning']:
+        for k, v in item.items():
+            if type(v) is list and k in out_klass._meta.fields:
+                sub_field = out_klass._meta.fields[k]
+                sub_klass = sub_field._type._of_type
+                if sub_klass:
+                    ska = []
+                    for i in v:
+                        ska.append(sub_klass(**i))
+                    item[k] = ska
         ck = cls.Output.returning._of_type(**item)
         output.append(ck)
     affected_rows = returning_response.get('affected_rows', 0) or len(output)

@@ -28,6 +28,8 @@ class TestrunMutations(graphene.ObjectType):
     # configuration extension
     testrun_extension_create = to_field(extension.Create)
     testrun_extension_create_validate = to_field(extension.CreateValidate)
+    testrun_extension_update = to_field(extension.Update)
+    testrun_extension_update_validate = to_field(extension.UpdateValidate)
 
     # projects
     testrun_project_create = to_field(project.Create)
