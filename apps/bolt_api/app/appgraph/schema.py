@@ -1,6 +1,7 @@
 import graphene
 
-from apps.bolt_api.app.appgraph import configuration, project, repository, test_creator, uploads, users, test_runs, data_export
+from apps.bolt_api.app.appgraph import configuration, project, repository, test_creator, uploads, users, test_runs, \
+    data_export, extension
 from apps.bolt_api.app.appgraph.project import demo
 from services import gql_util
 
@@ -23,6 +24,10 @@ class TestrunMutations(graphene.ObjectType):
     testrun_configuration_update = to_field(configuration.Update)
     testrun_configuration_update_validate = to_field(configuration.UpdateValidate)
     testrun_configuration_delete = to_field(configuration.Delete)
+
+    # configuration extension
+    testrun_extension_create = to_field(extension.Create)
+    testrun_extension_create_validate = to_field(extension.CreateValidate)
 
     # projects
     testrun_project_create = to_field(project.Create)
@@ -64,6 +69,7 @@ AppSchema = graphene.Schema(
     mutation=TestrunMutations,
     types=[
         configuration.ConfigurationType,
+        extension.ExtensionType,
         test_creator.TestCreatorType,
         test_runs.TestrunStartObject,
         test_runs.StatusResponse,
