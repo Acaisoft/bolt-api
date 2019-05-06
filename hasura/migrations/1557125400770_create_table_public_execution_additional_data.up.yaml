@@ -1,0 +1,10 @@
+- args:
+    sql: CREATE TABLE "public"."execution_additional_data"("execution_id" uuid NOT
+      NULL, "name" text NOT NULL, "data" json NOT NULL, "id" serial NOT NULL UNIQUE,
+      PRIMARY KEY ("id") , FOREIGN KEY ("execution_id") REFERENCES "public"."execution"("id")
+      ON UPDATE restrict ON DELETE cascade);
+  type: run_sql
+- args:
+    name: execution_additional_data
+    schema: public
+  type: add_existing_table_or_view
