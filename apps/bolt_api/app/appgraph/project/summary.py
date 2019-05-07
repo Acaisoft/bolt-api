@@ -2,11 +2,12 @@ import graphene
 from flask import current_app
 
 from services import const, gql_util
-from services.hasura.hasura_client import hce
 from services.projects.summary import get_project_summary
 
 
-class SummaryInterface(graphene.Interface):
+class SummaryItem(graphene.ObjectType):
+    project_id = graphene.String()
+    name = graphene.String()
     num_scenarios = graphene.Int()
     num_sources = graphene.Int()
     num_tests_passed = graphene.Int()
@@ -14,14 +15,13 @@ class SummaryInterface(graphene.Interface):
 
 
 class SummaryResponse(graphene.ObjectType):
-    class Meta:
-        interfaces = (SummaryInterface,)
+    projects = graphene.List(SummaryItem)
 
 
 class TestrunQueries(graphene.ObjectType):
 
     testrun_project_summary = graphene.Field(
-        SummaryInterface,
+        SummaryResponse,
         description='Summary of all projects.',
     )
 
@@ -30,4 +30,6 @@ class TestrunQueries(graphene.ObjectType):
 
         stats = get_project_summary(current_app.config, user_id)
 
-        return SummaryResponse(**stats)
+        out = [SummaryItem(**i) for i in stats]
+
+        return SummaryResponse(projects=out)
