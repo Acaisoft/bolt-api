@@ -40,3 +40,6 @@ class ConfigurationType(graphene.ObjectType):
     configuration_parameters = graphene.List(
         ConfigurationParameterType,
         description='Default parameter types overrides.')
+    runner_parameters = graphene.List(
+        ConfigurationParameterType,
+        description='Testrunner environment variables.')

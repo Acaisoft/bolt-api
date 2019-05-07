@@ -91,10 +91,8 @@ class Create(CreateValidate):
                     type_slug:type
                     configuration_id
                     params:extension_params {
-                        id
                         name
                         value
-                        configuration_extension_id
                     }
                 }
             }

@@ -22,20 +22,12 @@ class TestrunQueries(graphene.ObjectType):
 
     testrun_project_summary = graphene.Field(
         SummaryInterface,
-        description='Check tests status, requires connection to bolt-deployer. Writes error details to execution table.',
-        project_id=graphene.UUID(description='Project id.')
+        description='Summary of all projects.',
     )
 
-    def resolve_testrun_project_summary(self, info, project_id):
+    def resolve_testrun_project_summary(self, info):
         _, user_id = gql_util.get_request_role_userid(info, const.ROLE_CHOICE)
 
-        projects = hce(current_app.config, '''query ($pid:uuid!, $uid:uuid!) {
-            user_project(where:{user_id:{_eq:$uid}, project_id:{_eq:$pid}}) {
-            id
-            }
-        }''', {'pid': str(project_id), 'uid': user_id})
-        assert projects['user_project'], f'unauthorized request'
-
-        stats = get_project_summary(current_app.config, project_id)
+        stats = get_project_summary(current_app.config, user_id)
 
         return SummaryResponse(**stats)

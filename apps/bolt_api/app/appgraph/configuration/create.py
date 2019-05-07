@@ -200,7 +200,19 @@ class Create(CreateValidate):
                 objects: $data
             ) {
                 returning { 
-                    id name type_slug project_id test_source_id 
+                    id 
+                    name 
+                    type_slug 
+                    project_id 
+                    test_source_id 
+                    configuration_parameters {
+                        parameter_slug
+                        value
+                    }
+                    runner_parameters:configuration_envvars {
+                        parameter_slug:name
+                        value
+                    }
                 } 
             }
         }'''
