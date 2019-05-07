@@ -135,8 +135,6 @@ def dataset_to_timeserie(dataset: dict, targets):
         if metric == 'errors':
             # silently skip errors in timeserie output bc. it doesn't have timestamps yet
             continue
-        result_target = None
-        ts = None
 
         for row in dataset.get(metric):
             # get the timestamp
@@ -149,9 +147,9 @@ def dataset_to_timeserie(dataset: dict, targets):
             # get identifier for a sub-target, if present
             result_target = target
             if metric in ('distributions', 'requests'):
-                subtarget = row.get('identifier', None)
+                subtarget = row.get('name', None)
                 if subtarget:
-                    result_target = f'{metric}:{subtarget}:{field}'
+                    result_target = f'{field}:{subtarget}'
 
             if result_target not in results_per_target:
                 results_per_target[result_target] = []
