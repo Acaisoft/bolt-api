@@ -1,0 +1,25 @@
+- args:
+    permission:
+      allow_upsert: true
+      check: {}
+      columns:
+      - id
+      - execution_id
+      - timestamp
+      - identifier
+      - method
+      - name
+      - exception_data
+      - number_of_occurrences
+      localPresets:
+      - key: execution_id
+        value: x-hasura-Testruner-Id
+      - key: ""
+        value: ""
+      set:
+        execution_id: x-hasura-Testruner-Id
+    role: testrunner
+    table:
+      name: execution_errors
+      schema: public
+  type: create_insert_permission
