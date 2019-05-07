@@ -24,15 +24,21 @@ def fields_to_gql(fields):
         })
 
     if list(filter(lambda x: x.startswith('requests:'), fields)):
-        out.append('requests: execution_requests ( %(GQL_TIMESTAMP)s ) { timestamp identifier %(fields)s }' % {
+        out.append('requests: execution_requests ( %(GQL_TIMESTAMP)s ) { timestamp identifier name %(fields)s }' % {
             'GQL_TIMESTAMP': GQL_TIMESTAMP,
             'fields': targets_to_fields(fields, 'requests'),
         })
 
     if list(filter(lambda x: x.startswith('distributions:'), fields)):
-        out.append('distributions: execution_distributions ( %(GQL_TIMESTAMP)s ) { timestamp identifier %(fields)s }' % {
+        out.append('distributions: execution_distributions ( %(GQL_TIMESTAMP)s ) { timestamp identifier name %(fields)s }' % {
             'GQL_TIMESTAMP': GQL_TIMESTAMP,
             'fields': targets_to_fields(fields, 'distributions'),
+        })
+
+    if list(filter(lambda x: x.startswith('errors:'), fields)):
+        out.append('errors: execution_errors ( %(GQL_TIMESTAMP)s ) { timestamp identifier name %(fields)s }' % {
+            'GQL_TIMESTAMP': GQL_TIMESTAMP,
+            'fields': targets_to_fields(fields, 'errors'),
         })
 
     return ' '.join(out)
@@ -52,11 +58,9 @@ def get_export_data(config, oid, t_from, t_to, fields_to_query):
         resp = hce(config, '''query ($eid:uuid!, $t_from:timestamptz!, $t_to:timestamptz!) {
             execution (where:{id:{_eq:$eid}}) {
                 %(timeserie_fields)s
-                %(errors_fields)s
             }
         }''' % {
             'timeserie_fields': fields_to_gql(fields_to_query),
-            'errors_fields': fields_to_gql_errors(fields_to_query),
         }, {
             't_from': t_from,
             't_to': t_to,
@@ -73,11 +77,9 @@ def get_export_data(config, oid, t_from, t_to, fields_to_query):
                 }
             }) {
                 %(timeserie_fields)s
-                %(errors_fields)s
             }
         }''' % {
             'timeserie_fields': fields_to_gql(fields_to_query),
-            'errors_fields': fields_to_gql_errors(fields_to_query),
         }, {
             't_from': t_from,
             't_to': t_to,

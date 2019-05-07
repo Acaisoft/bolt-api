@@ -13,7 +13,9 @@ aggregate_fields = [
 ]
 
 errors_fields = [
-    'errors:error_type',
+    'errors:timestamp',
+    'errors:identifier',
+    'errors:method',
     'errors:name',
     'errors:exception_data',
     'errors:number_of_occurrences'
