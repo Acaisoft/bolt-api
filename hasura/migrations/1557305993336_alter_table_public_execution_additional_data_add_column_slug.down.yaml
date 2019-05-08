@@ -1,0 +1,3 @@
+- args:
+    sql: ALTER TABLE "public"."execution_additional_data" DROP COLUMN "slug"
+  type: run_sql
