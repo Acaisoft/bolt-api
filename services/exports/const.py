@@ -52,3 +52,16 @@ requests_fields = [
     'requests:average_content_size',
     'requests:requests_per_second',
 ]
+
+field_types = {
+    'errors:timestamp': 'time',
+    'errors:method': 'string',
+    'errors:name': 'string',
+    'errors:exception_data': 'string',
+    'distributions:timestamp': 'time',
+    'distributions:method': 'string',
+    'distributions:name': 'string',
+    'requests:timestamp': 'time',
+    'requests:method': 'string',
+    'requests:name': 'string',
+}

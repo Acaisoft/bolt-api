@@ -4,7 +4,6 @@ from datetime import datetime
 from services.exports import const
 from services.hasura import hce
 
-
 GQL_TIMESTAMP = 'order_by:{ timestamp:desc } where:{ timestamp:{_lte:$t_to _gt:$t_from } }'
 
 
@@ -30,10 +29,11 @@ def fields_to_gql(fields):
         })
 
     if list(filter(lambda x: x.startswith('distributions:'), fields)):
-        out.append('distributions: execution_distributions ( %(GQL_TIMESTAMP)s ) { timestamp identifier name %(fields)s }' % {
-            'GQL_TIMESTAMP': GQL_TIMESTAMP,
-            'fields': targets_to_fields(fields, 'distributions'),
-        })
+        out.append(
+            'distributions: execution_distributions ( %(GQL_TIMESTAMP)s ) { timestamp identifier name %(fields)s }' % {
+                'GQL_TIMESTAMP': GQL_TIMESTAMP,
+                'fields': targets_to_fields(fields, 'distributions'),
+            })
 
     if list(filter(lambda x: x.startswith('errors:'), fields)):
         out.append('errors: execution_errors ( %(GQL_TIMESTAMP)s ) { timestamp identifier name %(fields)s }' % {
@@ -62,10 +62,10 @@ def get_export_data(config, oid, t_from, t_to, fields_to_query):
         }''' % {
             'timeserie_fields': fields_to_gql(fields_to_query),
         }, {
-            't_from': t_from,
-            't_to': t_to,
-            'eid': oid[1],
-        })
+                       't_from': t_from,
+                       't_to': t_to,
+                       'eid': oid[1],
+                   })
         print(json.dumps(resp))
         return resp['execution'][0]
     else:
@@ -81,10 +81,10 @@ def get_export_data(config, oid, t_from, t_to, fields_to_query):
         }''' % {
             'timeserie_fields': fields_to_gql(fields_to_query),
         }, {
-            't_from': t_from,
-            't_to': t_to,
-            'pid': oid[0],
-        })
+                       't_from': t_from,
+                       't_to': t_to,
+                       'pid': oid[0],
+                   })
 
         # concatenate each execution's results
         dataset = dict((g, []) for g in const.groups)
@@ -97,7 +97,7 @@ def get_export_data(config, oid, t_from, t_to, fields_to_query):
         return dataset
 
 
-def l2u(locust_timestamp:str) -> float:
+def l2u(locust_timestamp: str) -> float:
     """
     Convert locust timestamp format to unix milisecond
     :param locust_timestamp: input timestamp in format: 2019-04-17T06:53:50.475089+00:00
@@ -127,13 +127,12 @@ def fields_to_columns(fields_list):
     :param fields_list: ['field_a', 'field_b']
     :return: [{"text":"Field A","type":"number"},{"text":"Field B","type":"number"},]
     """
-    def m(x:str):
+
+    def m(x: str):
         y = x.replace(':', ': ')
         return y.replace('_', ' ').title()
 
-    def t(x:str):
-        if x.endswith(':timestamp'):
-            return 'time'
-        return 'number'
+    def t(x: str):
+        return const.field_types.get(x, 'number')
 
     return [{'text': m(f), 'type': t(f)} for f in fields_list]
