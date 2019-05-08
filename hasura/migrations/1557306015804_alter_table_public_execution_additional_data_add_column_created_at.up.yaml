@@ -1,4 +1,4 @@
 - args:
     sql: ALTER TABLE "public"."execution_additional_data" ADD COLUMN "created_at"
-      timestamp with time zone NOT NULL DEFAULT now()
+      timestamp with time zone NULL DEFAULT now()
   type: run_sql
