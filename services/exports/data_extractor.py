@@ -128,6 +128,7 @@ def convert_data(group, rows, t_from=None, t_to=None):
                     continue
                 data['timestamp'] = ts * 1000
                 out.append(data)
+    out.sort(key=lambda x: x['timestamp'])
     return out
 
 
