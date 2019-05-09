@@ -1,6 +1,6 @@
 # summary of available metrics and associated fields
 
-groups = ['timeserie', 'requests', 'distributions', 'errors']
+groups = ['timeserie', 'requests', 'distributions', 'errors', 'nfs']
 
 aggregate_fields = [
     'timeserie:timestamp',
@@ -53,7 +53,23 @@ requests_fields = [
     'requests:requests_per_second',
 ]
 
+# fields populated through extensions, currently only NFS is supported
+# example db format: {"1557306759.9596684":{"total_savings":99.94,"write_throughput":64.87,"compression":0.13,"read_throughput":0,"current_bytes":226013151232,"dedupe":99.94,"current_files":22694},}
+nfs_fields = [
+    'nfs:timestamp',
+    'nfs:total_savings',
+    'nfs:write_throughput',
+    'nfs:read_throughput',
+    'nfs:compression',
+    'nfs:current_bytes',
+    'nfs:dedupe',
+    'nfs:current_files',
+]
+
+ALL_FIELDS = aggregate_fields + errors_fields + distributions_fields + requests_fields + nfs_fields
+
 field_types = {
+    'nfs:timestamp': 'time',
     'errors:timestamp': 'time',
     'errors:method': 'string',
     'errors:name': 'string',

@@ -10,8 +10,6 @@ logger = setup_custom_logger(__file__)
 
 bp = Blueprint('grafana_simple_json', __name__)
 
-queryable_fields = exports.aggregate_fields + exports.errors_fields + exports.distributions_fields + exports.requests_fields
-
 
 def _verify(token):
     try:
@@ -36,7 +34,7 @@ def datasource_test(request_token):
 @bp.route('/<string:request_token>/search', methods=['POST'])
 def search(request_token):
     _verify(request_token)
-    return jsonify(queryable_fields)
+    return jsonify(exports.ALL_FIELDS)
 
 
 @bp.route('/<string:request_token>/query', methods=['POST'])
@@ -76,7 +74,7 @@ def query(request_token):
     for i in req.get('targets'):
         f = i.get('target')
         if f:
-            if f not in queryable_fields:
+            if f not in exports.ALL_FIELDS:
                 logger.warn(f'invalid field in requested targets: "{f}"')
                 abort(403)
             result_format = i.get('type', 'timeserie')

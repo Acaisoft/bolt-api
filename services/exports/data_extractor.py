@@ -5,6 +5,7 @@ from services.exports import const
 from services.hasura import hce
 
 GQL_TIMESTAMP = 'order_by:{ timestamp:desc } where:{ timestamp:{_lte:$t_to _gt:$t_from } }'
+GQL_CREATED_AT = 'order_by:{ created_at:desc } where:{ slug:{_eq:"dynamically-stats"} }'
 
 
 def targets_to_fields(targets_list, metric) -> str:
@@ -39,6 +40,12 @@ def fields_to_gql(fields):
         out.append('errors: execution_errors ( %(GQL_TIMESTAMP)s ) { timestamp identifier name %(fields)s }' % {
             'GQL_TIMESTAMP': GQL_TIMESTAMP,
             'fields': targets_to_fields(fields, 'errors'),
+        })
+
+    if list(filter(lambda x: x.startswith('nfs:'), fields)):
+        # extensions hold their timestamps and details in a single json which has to be manually decoded later
+        out.append('nfs: execution_additional_data ( %(GQL_CREATED_AT)s ) { data }' % {
+            'GQL_CREATED_AT': GQL_CREATED_AT,
         })
 
     return ' '.join(out)
@@ -92,9 +99,15 @@ def get_export_data(config, oid, t_from, t_to, fields_to_query):
             for g in const.groups:
                 gg = e.get(g)
                 if gg:
+                    if g == 'nfs':
+                        gg = convert_data(g, gg)
                     dataset[g].extend(gg)
 
         return dataset
+
+
+def convert_data(group, rows):
+    return rows
 
 
 def l2u(locust_timestamp: str) -> float:

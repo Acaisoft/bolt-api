@@ -7,6 +7,8 @@ def get_project_summary(config, user_id):
       project(where: {is_deleted: {_eq: false}, userProjects: {user_id: {_eq: $uid}}}) {
         id
         name
+        description
+        image_url
         scenarios: configurations_aggregate(where: {is_deleted: {_eq: false}, project: {is_deleted: {_eq: false}, userProjects: {user_id: {_eq: $uid}}}}) {
           aggregate {
             count
@@ -45,6 +47,8 @@ def get_project_summary(config, user_id):
         out[p['id']] = {
             'project_id': p['id'],
             'name': p['name'],
+            'description': p['description'],
+            'image_url': p['image_url'],
             'num_scenarios': p['scenarios']['aggregate']['count'],
             'num_sources': p['sources']['aggregate']['count'],
             'num_tests_passed': 0,

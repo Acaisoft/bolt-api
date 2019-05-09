@@ -71,8 +71,8 @@ def update_execution_requests_stats_totals():
         return jsonify({})
 
     aggs = response['execution_request_totals_aggregate']['aggregate']
-    total = aggs['sum']['num_requests']
-    fails = aggs['sum']['num_failures']
+    total = int(aggs['sum']['num_requests']) + int(new['num_requests'])
+    fails = int(aggs['sum']['num_failures']) + int(new['num_failures'])
     max_content_size = response['execution_requests_aggregate']['aggregate']['max']['average_content_size']
     min_content_size = response['execution_requests_aggregate']['aggregate']['min']['average_content_size']
 
