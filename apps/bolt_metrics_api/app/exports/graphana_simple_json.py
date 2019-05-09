@@ -188,7 +188,8 @@ def dataset_to_table(dataset: dict, targets):
                 result_rows.append(empty_row())
             value = data_row.get(field, None)
             if target.endswith(':timestamp'):
-                value = l2u(value)
+                if type(value) != float:
+                    value = l2u(value)
             result_rows[d_index][t_index] = value
 
     return [{
