@@ -69,12 +69,15 @@ def get_export_data(config, oid, t_from, t_to, fields_to_query):
         }''' % {
             'timeserie_fields': fields_to_gql(fields_to_query),
         }, {
-                       't_from': t_from,
-                       't_to': t_to,
-                       'eid': oid[1],
-                   })
-        print(json.dumps(resp))
-        return resp['execution'][0]
+            't_from': t_from,
+            't_to': t_to,
+            'eid': oid[1],
+        })
+        out = resp['execution'][0]
+        if 'nfs' in out.keys():
+            out['nfs'] = convert_data('nfs', out['nfs'], t_from, t_to)
+
+        return out
     else:
         # entire project
         resp = hce(config, '''query ($pid:uuid!, $t_from:timestamptz!, $t_to:timestamptz!) {
@@ -88,10 +91,10 @@ def get_export_data(config, oid, t_from, t_to, fields_to_query):
         }''' % {
             'timeserie_fields': fields_to_gql(fields_to_query),
         }, {
-                       't_from': t_from,
-                       't_to': t_to,
-                       'pid': oid[0],
-                   })
+            't_from': t_from,
+            't_to': t_to,
+            'pid': oid[0],
+        })
 
         # concatenate each execution's results
         dataset = dict((g, []) for g in const.groups)
@@ -100,14 +103,32 @@ def get_export_data(config, oid, t_from, t_to, fields_to_query):
                 gg = e.get(g)
                 if gg:
                     if g == 'nfs':
-                        gg = convert_data(g, gg)
+                        gg = convert_data(g, gg, t_from, t_to)
                     dataset[g].extend(gg)
 
         return dataset
 
 
-def convert_data(group, rows):
-    return rows
+def convert_data(group, rows, t_from=None, t_to=None):
+    f_from = None
+    f_to = None
+    if t_from:
+        f_from = datetime.strptime(t_from, '%Y-%m-%dT%H:%M:%S.%fz').timestamp()
+    if t_to:
+        f_to = datetime.strptime(t_to, '%Y-%m-%dT%H:%M:%S.%fz').timestamp()
+    out = []
+    if group == 'nfs':
+        for r in rows:
+            raw_rows = r.get('data')
+            for ts, data in raw_rows.items():
+                ts = float(ts)
+                if f_to and ts > f_to:
+                    continue
+                if f_from and ts < f_from:
+                    continue
+                data['timestamp'] = ts * 1000
+                out.append(data)
+    return out
 
 
 def l2u(locust_timestamp: str) -> float:

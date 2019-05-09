@@ -132,11 +132,13 @@ def dataset_to_timeserie(dataset: dict, targets):
         metric, field = target.split(':')
         for row in dataset.get(metric):
             # get the timestamp
-            _ts = row.get('timestamp', None)
-            if _ts is None:
+            ts = row.get('timestamp', None)
+            if ts is None:
                 # get_export_data must include the timestamp column regardless of user spec
                 raise RuntimeError('input data does not contain timestamp, unsuitable for timeserie')
-            ts = l2u(_ts)
+
+            if type(ts) != float:
+                ts = l2u(ts)
 
             # get identifier for a sub-target, if present
             result_target = target
