@@ -6,8 +6,9 @@ from services.exports.data_export_token import issue_export_token
 
 
 class LinkReturnInterface(graphene.Interface):
-    url = graphene.String()
     token = graphene.String()
+    grafana_url = graphene.String()
+    raw_json = graphene.String()
 
 
 class DataExportLink(graphene.Mutation):
@@ -27,5 +28,6 @@ class DataExportLink(graphene.Mutation):
         # TODO: fix host
         return gql_util.OutputValueFromFactory(DataExportLink, {'returning': [{
             'token': str(token),
-            'url': f'https://api-metrics.dev.bolt.acaisoft.io/exports/grafana_simple_json/{str(token)}'
+            'raw_json': f'https://api-metrics.dev.bolt.acaisoft.io/exports/{str(token)}/json',
+            'grafana_url': f'https://api-metrics.dev.bolt.acaisoft.io/exports/{str(token)}/grafana',
         }]})

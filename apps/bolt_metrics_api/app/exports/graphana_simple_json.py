@@ -1,25 +1,17 @@
 from flask import Blueprint, jsonify, request, current_app
 from flask import abort
 
+from apps.bolt_metrics_api.app import token
 from services import exports
 from services.exports.data_extractor import l2u, fields_to_columns
 from services.logger import setup_custom_logger
-from services.exports import verify_token
 
 logger = setup_custom_logger(__file__)
 
-bp = Blueprint('grafana_simple_json', __name__)
+grafana_bp = Blueprint('exports.grafana_simple_json', __name__)
 
 
-def _verify(token):
-    try:
-        return verify_token(current_app.config, token)
-    except Exception as e:
-        logger.info('data export token validation failure: %s' % str(e))
-        abort(404)
-
-
-@bp.route('/<string:request_token>', methods=['GET'])
+@grafana_bp.route('/<string:request_token>/grafana', methods=['GET'])
 def datasource_test(request_token):
     """
     Present only to validate connection in Grafana config form.
@@ -27,17 +19,17 @@ def datasource_test(request_token):
     :return:
     """
     logger.info('Testing data export endpoint')
-    _verify(request_token)
+    token.verify(request_token)
     return jsonify({})
 
 
-@bp.route('/<string:request_token>/search', methods=['POST'])
+@grafana_bp.route('/<string:request_token>/grafana/search', methods=['POST'])
 def search(request_token):
-    _verify(request_token)
+    token.verify(request_token)
     return jsonify(exports.ALL_FIELDS)
 
 
-@bp.route('/<string:request_token>/query', methods=['POST'])
+@grafana_bp.route('/<string:request_token>/grafana/query', methods=['POST'])
 def query(request_token):
     """
     Example request body:
@@ -64,7 +56,7 @@ def query(request_token):
     :return: graphable
     """
 
-    oid = _verify(request_token)
+    oid = token.verify(request_token)
     req = request.get_json()
     results_per_target = {}
     targets = []
@@ -96,24 +88,24 @@ def query(request_token):
     return jsonify(results)
 
 
-@bp.route('/<string:request_token>/annotations', methods=['POST'])
+@grafana_bp.route('/<string:request_token>/grafana/annotations', methods=['POST'])
 def annotations(request_token):
-    eid = _verify(request_token)
+    eid = token.verify(request_token)
     # TODO: click through to get actual example query
     return jsonify({})
 
 
-@bp.route('/<string:request_token>/tag-keys', methods=['POST'])
+@grafana_bp.route('/<string:request_token>/grafana/tag-keys', methods=['POST'])
 def tag_keys(request_token):
     # appears not used
-    eid = _verify(request_token)
+    eid = token.verify(request_token)
     return jsonify({})
 
 
-@bp.route('/<string:request_token>/tag-values', methods=['POST'])
+@grafana_bp.route('/<string:request_token>/grafana/tag-values', methods=['POST'])
 def tag_values(request_token):
     # appears not used
-    eid = _verify(request_token)
+    eid = token.verify(request_token)
     return jsonify({})
 
 
