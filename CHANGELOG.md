@@ -1,6 +1,93 @@
 Changelog
 =========
 
+## 0.2.8 (2019-05-10)
+
+### Changes
+
+* Change TESTRUN_MAX_USERS_PER_INSTANCE to 690. [Piotr Mońko]
+
+* Add envvars manipulations to testrun_configuration_update mutation. [Piotr Mońko]
+
+### Other
+
+* Add domain to export link. [Piotr Mońko]
+
+* Fix timestamp conversion error. [Piotr Mońko]
+
+* O Merge branch 'extensions_data_exports' [Piotr Mońko]
+
+* Fix lost order. [Piotr Mońko]
+
+* Merged in extensions_data_exports (pull request #14) [Piotr Mońko]
+
+  wip nfs extension data in exports
+
+* Wip nfs extension data in exports. [Piotr Mońko]
+
+* Add nfs additional data series support to exporter. [Piotr Mońko]
+
+* Merged in add-slug-and-created-at-to-additional-data (pull request #13) [Artiom Borysiewicz]
+
+  Add slug/created_at to additional data
+
+* Fix migrations. [art.barysevich]
+
+* Add slug/created_at to additional data. [art.barysevich]
+
+* Fix return invalid column type in tabular data export. [Piotr Mońko]
+
+* Fix data exporter to use new execution_errors table. [Piotr Mońko]
+
+* Change identifier to query name in exported data. [Piotr Mońko]
+
+* Fix output of testrun_project_summary. [Piotr Mońko]
+
+* Update test runner version. [Piotr Mońko]
+
+* Add min_/max_ from avg resp size to request_totals. [Piotr Mońko]
+
+* Fix minor issues. [Piotr Mońko]
+
+* Merged in add-execution-id-for-testrunner-permissions (pull request #12) [Artiom Borysiewicz]
+
+  Add permissions for execution_id for testrunner
+
+* Add permissions for execution_id for testrunner. [art.barysevich]
+
+* Add update and update_validate extension mutations. [Piotr Mońko]
+
+* Update testrunner version, add create and create_validate mutations to extensions. [Piotr Mońko]
+
+* Merged in add-table-with-additional-data (pull request #11) [Artiom Borysiewicz]
+
+  Add table with additional data
+
+* Add table with additional data. [art.barysevich]
+
+* Update version. Update docker-compose file for mac. [art.barysevich]
+
+* Update image version 0.1.17 -> 0.1.18. [art.barysevich]
+
+* Fix error. [Piotr Mońko]
+
+* Bump test runner version. [Piotr Mońko]
+
+* Add nfs extension support to db and deployer. [Piotr Mońko]
+
+* Remove total calculations on delete. [Piotr Mońko]
+
+* Increase worker timeout. [Piotr Mońko]
+
+* Increase worker timeout. [Piotr Mońko]
+
+* Fix asserts in hasura webhooks. [Piotr Mońko]
+
+* Bump test runner version. [Piotr Mońko]
+
+* Cleanup unused tables, fix crash. [Piotr Mońko]
+
+
 ## 0.2.7 (2019-04-29)
 
 ### Changes
