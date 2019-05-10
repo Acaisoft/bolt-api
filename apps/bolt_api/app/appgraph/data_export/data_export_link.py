@@ -24,7 +24,8 @@ class DataExportLink(graphene.Mutation):
 
         token = issue_export_token(current_app.config, const.EXPORT_SCOPE_EXECUTION, str(execution_id), user_id, valid_hours)
 
-        return gql_util.OutputValueFromFactory(DataExportLink, {'returning':[{
+        # TODO: fix host
+        return gql_util.OutputValueFromFactory(DataExportLink, {'returning': [{
             'token': str(token),
-            'url': f'/exports/grafana_simple_json/{str(token)}'
+            'url': f'https://api-metrics.dev.bolt.acaisoft.io/exports/grafana_simple_json/{str(token)}'
         }]})
