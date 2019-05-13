@@ -11,7 +11,7 @@ from services.deployer import clients
 from services.hasura import hce
 
 
-DEPLOYER_TIMEOUT = 6
+DEPLOYER_TIMEOUT = 10
 
 
 def start_image(app_config, project_id, workers, extensions=None):
