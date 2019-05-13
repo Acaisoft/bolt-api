@@ -45,6 +45,7 @@ def validate_nfs(conf: list):
     types.IPAddressType().validate(out.get('server', ''))
     assert out.get('path', '').startswith('/'), f'missing or invalid NFS resource path'
     out['mount_options'] = m_opts
-    assert int(out.get('mounts_per_worker', 1)) < const.EXTENSION_NFS_MAX_MOUNTS_PER_WORKER, \
+    out['mounts_per_worker'] = int(out.get('mounts_per_worker', '1'))
+    assert out.get('mounts_per_worker') < const.EXTENSION_NFS_MAX_MOUNTS_PER_WORKER, \
         f'mounts_per_worker must not exceed {const.EXTENSION_NFS_MAX_MOUNTS_PER_WORKER}'
     return out
