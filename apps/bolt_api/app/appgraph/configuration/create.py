@@ -25,24 +25,46 @@ class CreateValidate(graphene.Mutation):
             description='Test source to fetch test definition from.')
         configuration_parameters = graphene.List(
             types.ConfigurationParameterInput,
-            required=True,
+            required=False,
             description='Default parameter types overrides.')
         runner_parameters = graphene.List(
             types.ConfigurationParameterInput,
             required=False,
             description='Parameters passed as environment variables to testrunner.')
+        has_pre_test = graphene.Boolean(
+            required=False,
+            description='Test has pre_test hooks.')
+        has_post_test = graphene.Boolean(
+            required=False,
+            description='Test has post_test hooks.')
+        has_load_tests = graphene.Boolean(
+            required=False,
+            description='Test has load_tests hooks.')
+        has_monitoring = graphene.Boolean(
+            required=False,
+            description='Test has monitoring hooks.')
 
     Output = gql_util.ValidationInterface
 
     @staticmethod
-    def validate(info, name, type_slug, project_id, test_source_id=None, configuration_parameters=None, runner_parameters=None):
+    def validate(
+            info, name, type_slug, project_id,
+            test_source_id=None, configuration_parameters=None, runner_parameters=None,
+            has_pre_test=False, has_post_test=False, has_load_tests=False, has_monitoring=False):
         project_id = str(project_id)
 
-        assert type_slug in const.TESTTYPE_CHOICE, f'invalid choice of type_slug (valid choices: {const.TESTTYPE_CHOICE})'
+        assert type_slug in const.TESTTYPE_CHOICE, \
+            f'invalid choice of type_slug (valid choices: {const.TESTTYPE_CHOICE})'
 
         name = validators.validate_text(name)
 
-        role, user_id = gql_util.get_request_role_userid(info, (const.ROLE_ADMIN, const.ROLE_MANAGER, const.ROLE_TESTER))
+        role, user_id = gql_util.get_request_role_userid(
+            info,
+            (const.ROLE_ADMIN, const.ROLE_MANAGER, const.ROLE_TESTER)
+        )
+
+        assert any((has_pre_test, has_post_test, has_load_tests, has_monitoring)), \
+            f'At least one section is required'
 
         repo_query = {
             'type_slug': type_slug,
@@ -126,6 +148,10 @@ class CreateValidate(graphene.Mutation):
         query_data = {
             'name': name,
             'project_id': project_id,
+            'has_pre_test': has_pre_test,
+            'has_post_test': has_post_test,
+            'has_load_tests': has_load_tests,
+            'has_monitoring': has_monitoring,
         }
 
         if user_id:
@@ -146,7 +172,7 @@ class CreateValidate(graphene.Mutation):
                 } for x in runner_parameters]
             }
 
-        patched_params = validators.validate_test_params(configuration_parameters, defaults=repo['parameter'])
+        patched_params = validators.validate_test_params(configuration_parameters or [], defaults=repo['parameter'])
         if patched_params:
             query_data['configuration_parameters'] = {'data': []}
             for parameter_slug, param_value in patched_params.items():
@@ -181,8 +207,14 @@ class CreateValidate(graphene.Mutation):
 
         return query_data
 
-    def mutate(self, info, name, type_slug, project_id, test_source_id=None, configuration_parameters=None, runner_parameters=None):
-        CreateValidate.validate(info, name, type_slug, project_id, test_source_id, configuration_parameters, runner_parameters)
+    def mutate(
+            self, info, name, type_slug, project_id, test_source_id=None, configuration_parameters=None,
+            runner_parameters=None, has_pre_test=False, has_post_test=False, has_load_tests=False,
+            has_monitoring=False):
+        CreateValidate.validate(
+            info, name, type_slug, project_id, test_source_id, configuration_parameters,
+            runner_parameters, has_pre_test, has_post_test, has_load_tests, has_monitoring
+        )
         return gql_util.ValidationResponse(ok=True)
 
 
@@ -191,9 +223,13 @@ class Create(CreateValidate):
 
     Output = gql_util.OutputTypeFactory(types.ConfigurationType, 'Create')
 
-    def mutate(self, info, name, type_slug, project_id, test_source_id=None, configuration_parameters=None, runner_parameters=None):
-
-        query_params = CreateValidate.validate(info, name, type_slug, project_id, test_source_id, configuration_parameters, runner_parameters)
+    def mutate(
+            self, info, name, type_slug, project_id, test_source_id=None, configuration_parameters=None,
+            runner_parameters=None, has_pre_test=False, has_post_test=False, has_load_tests=False, has_monitoring=False):
+        query_params = CreateValidate.validate(
+            info, name, type_slug, project_id, test_source_id, configuration_parameters, runner_parameters,
+            has_pre_test, has_post_test, has_load_tests, has_monitoring
+        )
 
         query = '''mutation ($data:[configuration_insert_input!]!) {
             insert_configuration(
@@ -204,7 +240,11 @@ class Create(CreateValidate):
                     name 
                     type_slug 
                     project_id 
-                    test_source_id 
+                    test_source_id
+                    has_pre_test
+                    has_post_test
+                    has_load_tests
+                    has_monitoring
                     configuration_parameters {
                         parameter_slug
                         value

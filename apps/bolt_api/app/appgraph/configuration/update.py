@@ -5,7 +5,7 @@ from flask import current_app
 from apps.bolt_api.app.appgraph.configuration import types
 from services import const, gql_util
 from services import validators
-from services.hasura import hasura_client, hce
+from services.hasura import hce
 
 
 class UpdateValidate(graphene.Mutation):
@@ -34,15 +34,34 @@ class UpdateValidate(graphene.Mutation):
             types.ConfigurationParameterInput,
             required=False,
             description='Parameters passed as environment variables to testrunner.')
+        has_pre_test = graphene.Boolean(
+            required=False,
+            description='Test has pre_test hooks.')
+        has_post_test = graphene.Boolean(
+            required=False,
+            description='Test has post_test hooks.')
+        has_load_tests = graphene.Boolean(
+            required=False,
+            description='Test has load_tests hooks.')
+        has_monitoring = graphene.Boolean(
+            required=False,
+            description='Test has monitoring hooks.')
 
     Output = gql_util.ValidationInterface
 
     @staticmethod
-    def validate(info, id, name=None, type_slug=None, test_source_id=None, configuration_parameters=None,
-                 runner_parameters=None):
+    def validate(
+            info, id, name=None, type_slug=None, test_source_id=None, configuration_parameters=None,
+            runner_parameters=None, has_pre_test=None, has_post_test=None, has_load_tests=None, has_monitoring=None):
 
-        role, user_id = gql_util.get_request_role_userid(info,
-                                                         (const.ROLE_ADMIN, const.ROLE_MANAGER, const.ROLE_TESTER))
+        role, user_id = gql_util.get_request_role_userid(
+            info,
+            (const.ROLE_ADMIN, const.ROLE_MANAGER, const.ROLE_TESTER)
+        )
+
+        sections = [x for x in (has_pre_test, has_post_test, has_load_tests, has_monitoring) if x is not None]
+        assert len(sections), \
+            f'At least one section is required'
 
         original = hce(current_app.config, '''query ($confId:uuid!, $userId:uuid!) {
             configuration (where:{
@@ -142,6 +161,15 @@ class UpdateValidate(graphene.Mutation):
 
         query_data = {}
 
+        if has_pre_test is not None:
+            query_data['has_pre_test'] = has_pre_test
+        if has_post_test is not None:
+            query_data['has_post_test'] = has_post_test
+        if has_load_tests is not None:
+            query_data['has_load_tests'] = has_load_tests
+        if has_monitoring is not None:
+            query_data['has_monitoring'] = has_monitoring
+
         if name and name != original['configuration'][0]['name']:
             name = validators.validate_text(name)
             assert len(repo.get('isNameUnique', [])) == 0, f'configuration named "{name}" already exists'
@@ -200,8 +228,11 @@ class UpdateValidate(graphene.Mutation):
         return query_data
 
     def mutate(self, info, id, name=None, type_slug=None, test_source_id=None, configuration_parameters=None,
-               runner_parameters=None):
-        UpdateValidate.validate(info, id, name, type_slug, test_source_id, configuration_parameters, runner_parameters)
+               runner_parameters=None, has_pre_test=None, has_post_test=None, has_load_tests=None, has_monitoring=None):
+        UpdateValidate.validate(
+            info, id, name, type_slug, test_source_id, configuration_parameters, runner_parameters,
+            has_pre_test, has_post_test, has_load_tests, has_monitoring
+        )
         return gql_util.ValidationResponse(ok=True)
 
 
@@ -240,10 +271,13 @@ class Update(UpdateValidate):
             }
         }''', variable_values={'data': configuration_parameters})
 
-    def mutate(self, info, id, name=None, type_slug=None, test_source_id=None, configuration_parameters=None,
-               runner_parameters=None):
-        query_params = UpdateValidate.validate(info, id, name, type_slug, test_source_id, configuration_parameters,
-                                               runner_parameters)
+    def mutate(
+            self, info, id, name=None, type_slug=None, test_source_id=None, configuration_parameters=None,
+            runner_parameters=None, has_pre_test=None, has_post_test=None, has_load_tests=None, has_monitoring=None):
+        query_params = UpdateValidate.validate(
+            info, id, name, type_slug, test_source_id, configuration_parameters, runner_parameters,
+            has_pre_test, has_post_test, has_load_tests, has_monitoring
+        )
 
         Update.mutate_configuration_parameters(
             str(id),
@@ -260,7 +294,17 @@ class Update(UpdateValidate):
                 where:{id:{_eq:$id}},
                 _set: $data
             ) {
-                returning { id name type_slug project_id test_source_id } 
+                returning { 
+                    id 
+                    name 
+                    type_slug 
+                    project_id 
+                    test_source_id 
+                    has_pre_test
+                    has_post_test
+                    has_load_tests
+                    has_monitoring
+                } 
             }
         }'''
 
