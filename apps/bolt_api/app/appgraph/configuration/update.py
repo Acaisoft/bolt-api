@@ -30,8 +30,8 @@ class UpdateValidate(graphene.Mutation):
             types.ConfigurationParameterInput,
             required=False,
             description='Default parameter types overrides.')
-        runner_parameters = graphene.List(
-            types.ConfigurationParameterInput,
+        configuration_envvars = graphene.List(
+            types.ConfigurationEnvVarInput,
             required=False,
             description='Parameters passed as environment variables to testrunner.')
         has_pre_test = graphene.Boolean(
@@ -52,7 +52,7 @@ class UpdateValidate(graphene.Mutation):
     @staticmethod
     def validate(
             info, id, name=None, type_slug=None, test_source_id=None, configuration_parameters=None,
-            runner_parameters=None, has_pre_test=None, has_post_test=None, has_load_tests=None, has_monitoring=None):
+            configuration_envvars=None, has_pre_test=None, has_post_test=None, has_load_tests=None, has_monitoring=None):
 
         role, user_id = gql_util.get_request_role_userid(
             info,
@@ -212,8 +212,8 @@ class UpdateValidate(graphene.Mutation):
                     if parameter_slug == const.TESTPARAM_USERS:
                         query_data['instances'] = math.ceil(int(param_value) / const.TESTRUN_MAX_USERS_PER_INSTANCE)
 
-        if runner_parameters:
-            for rp in runner_parameters:
+        if configuration_envvars:
+            for rp in configuration_envvars:
                 assert rp['parameter_slug'].replace('_', '').isalnum(), \
                     f'configuration runner_parameter "{rp["parameter_slug"]}" is not alphanumeric'
                 assert not rp['parameter_slug'].startswith('BOLT_'), f'runner_parameter cannot start with BOLT_'
@@ -222,15 +222,15 @@ class UpdateValidate(graphene.Mutation):
                     'name': x['parameter_slug'],
                     'value': x['value'],
                     'configuration_id': str(id),
-                } for x in runner_parameters]
+                } for x in configuration_envvars]
             }
 
         return query_data
 
     def mutate(self, info, id, name=None, type_slug=None, test_source_id=None, configuration_parameters=None,
-               runner_parameters=None, has_pre_test=None, has_post_test=None, has_load_tests=None, has_monitoring=None):
+               configuration_envvars=None, has_pre_test=None, has_post_test=None, has_load_tests=None, has_monitoring=None):
         UpdateValidate.validate(
-            info, id, name, type_slug, test_source_id, configuration_parameters, runner_parameters,
+            info, id, name, type_slug, test_source_id, configuration_parameters, configuration_envvars,
             has_pre_test, has_post_test, has_load_tests, has_monitoring
         )
         return gql_util.ValidationResponse(ok=True)
@@ -258,7 +258,7 @@ class Update(UpdateValidate):
             })
 
     @staticmethod
-    def mutate_runner_parameters(conf_id, configuration_parameters):
+    def mutate_configuration_envvars(conf_id, configuration_parameters):
         resp = hce(current_app.config, '''mutation ($data:[configuration_envvars_insert_input!]!) {
             insert_configuration_envvars (
                 objects: $data
@@ -273,9 +273,9 @@ class Update(UpdateValidate):
 
     def mutate(
             self, info, id, name=None, type_slug=None, test_source_id=None, configuration_parameters=None,
-            runner_parameters=None, has_pre_test=None, has_post_test=None, has_load_tests=None, has_monitoring=None):
+            configuration_envvars=None, has_pre_test=None, has_post_test=None, has_load_tests=None, has_monitoring=None):
         query_params = UpdateValidate.validate(
-            info, id, name, type_slug, test_source_id, configuration_parameters, runner_parameters,
+            info, id, name, type_slug, test_source_id, configuration_parameters, configuration_envvars,
             has_pre_test, has_post_test, has_load_tests, has_monitoring
         )
 
@@ -284,7 +284,7 @@ class Update(UpdateValidate):
             query_params.pop('configuration_parameters', {'data': []})['data']
         )
 
-        Update.mutate_runner_parameters(
+        Update.mutate_configuration_envvars(
             str(id),
             query_params.pop('configuration_envvars', {'data': []})['data']
         )

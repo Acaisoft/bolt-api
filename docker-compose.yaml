@@ -11,6 +11,33 @@ services:
     image: redis:5-alpine
     ports:
       - "6379:6379"
+  prom:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    network_mode: "host"
+    volumes:
+      - ./subsystems/prometheus/:/etc/prometheus/
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    depends_on:
+      - "cadvisor"
+      - "grafana"
+  cadvisor:
+    image: google/cadvisor
+    command: -port=9998
+    ports:
+      - "9998:9998"
+    network_mode: "host"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
   hasura:
 #    image: hasura/graphql-engine:v1.0.0-alpha44
     image: hasura/graphql-engine:v1.0.0-alpha44.cli-migrations
@@ -18,6 +45,8 @@ services:
       - "8080:8080"
     depends_on:
       - "postgres"
+      - "redis"
+      - "prom"
     restart: always
     environment:
       HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:@localhost:5432/postgres
@@ -32,7 +61,7 @@ services:
       BOLT_API_CONFIGURATION_PARAM_CHANGE: http://api:5000/webhooks/configuration_param/update
       BOLT_API_EXECUTION_REQUESTS_INSERT: http://api:5000/webhooks/execution_requests/insert
     volumes:
-      - ./hasura/migrations:/hasura-migrations
+      - ./subsystems/hasura/migrations:/hasura-migrations
     network_mode: "host"
   api:
     build:
@@ -86,3 +115,4 @@ volumes:
   hasura_migrations:
   db_data:
   grafana_data:
+  prometheus_data:

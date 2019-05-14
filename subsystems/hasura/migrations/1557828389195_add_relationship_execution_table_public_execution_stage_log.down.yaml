@@ -1,0 +1,6 @@
+- args:
+    relationship: execution
+    table:
+      name: execution_stage_log
+      schema: public
+  type: drop_relationship

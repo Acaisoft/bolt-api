@@ -1,0 +1,11 @@
+- args:
+    sql: CREATE TABLE "public"."execution_stage_log"("id" serial NOT NULL UNIQUE,
+      "timestamp" timestamp with time zone NOT NULL, "stage" text NOT NULL, "level"
+      text NOT NULL, "msg" json NOT NULL, "execution_id" uuid NOT NULL, PRIMARY KEY
+      ("id") , FOREIGN KEY ("execution_id") REFERENCES "public"."execution"("id")
+      ON UPDATE cascade ON DELETE cascade);
+  type: run_sql
+- args:
+    name: execution_stage_log
+    schema: public
+  type: add_existing_table_or_view

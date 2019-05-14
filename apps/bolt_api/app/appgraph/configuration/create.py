@@ -27,8 +27,8 @@ class CreateValidate(graphene.Mutation):
             types.ConfigurationParameterInput,
             required=False,
             description='Default parameter types overrides.')
-        runner_parameters = graphene.List(
-            types.ConfigurationParameterInput,
+        configuration_envvars = graphene.List(
+            types.ConfigurationEnvVarInput,
             required=False,
             description='Parameters passed as environment variables to testrunner.')
         has_pre_test = graphene.Boolean(
@@ -49,7 +49,7 @@ class CreateValidate(graphene.Mutation):
     @staticmethod
     def validate(
             info, name, type_slug, project_id,
-            test_source_id=None, configuration_parameters=None, runner_parameters=None,
+            test_source_id=None, configuration_parameters=None, configuration_envvars=None,
             has_pre_test=False, has_post_test=False, has_load_tests=False, has_monitoring=False):
         project_id = str(project_id)
 
@@ -160,16 +160,16 @@ class CreateValidate(graphene.Mutation):
         if type_slug:
             query_data['type_slug'] = type_slug
 
-        if runner_parameters:
-            for rp in runner_parameters:
-                assert rp['parameter_slug'].replace('_', '').isalnum(), \
-                    f'configuration runner_parameter "{rp["parameter_slug"]}" is not alphanumeric'
-                assert not rp['parameter_slug'].startswith('BOLT_'), f'runner_parameter cannot start with BOLT_'
+        if configuration_envvars:
+            for rp in configuration_envvars:
+                assert rp['name'].replace('_', '').isalnum(), \
+                    f'configuration runner_parameter "{rp["name"]}" is not alphanumeric'
+                assert not rp['name'].startswith('BOLT_'), f'environment variable cannot start with BOLT_'
             query_data['configuration_envvars'] = {
                 'data': [{
-                    'name': x['parameter_slug'],
+                    'name': x['name'],
                     'value': x['value'],
-                } for x in runner_parameters]
+                } for x in configuration_envvars]
             }
 
         patched_params = validators.validate_test_params(configuration_parameters or [], defaults=repo['parameter'])
@@ -209,11 +209,11 @@ class CreateValidate(graphene.Mutation):
 
     def mutate(
             self, info, name, type_slug, project_id, test_source_id=None, configuration_parameters=None,
-            runner_parameters=None, has_pre_test=False, has_post_test=False, has_load_tests=False,
+            configuration_envvars=None, has_pre_test=False, has_post_test=False, has_load_tests=False,
             has_monitoring=False):
         CreateValidate.validate(
             info, name, type_slug, project_id, test_source_id, configuration_parameters,
-            runner_parameters, has_pre_test, has_post_test, has_load_tests, has_monitoring
+            configuration_envvars, has_pre_test, has_post_test, has_load_tests, has_monitoring
         )
         return gql_util.ValidationResponse(ok=True)
 
@@ -225,9 +225,9 @@ class Create(CreateValidate):
 
     def mutate(
             self, info, name, type_slug, project_id, test_source_id=None, configuration_parameters=None,
-            runner_parameters=None, has_pre_test=False, has_post_test=False, has_load_tests=False, has_monitoring=False):
+            configuration_envvars=None, has_pre_test=False, has_post_test=False, has_load_tests=False, has_monitoring=False):
         query_params = CreateValidate.validate(
-            info, name, type_slug, project_id, test_source_id, configuration_parameters, runner_parameters,
+            info, name, type_slug, project_id, test_source_id, configuration_parameters, configuration_envvars,
             has_pre_test, has_post_test, has_load_tests, has_monitoring
         )
 
@@ -249,8 +249,8 @@ class Create(CreateValidate):
                         parameter_slug
                         value
                     }
-                    runner_parameters:configuration_envvars {
-                        parameter_slug:name
+                    configuration_envvars {
+                        name
                         value
                     }
                 } 

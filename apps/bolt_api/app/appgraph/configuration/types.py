@@ -20,6 +20,24 @@ class ConfigurationParameterType(graphene.ObjectType):
         interfaces = (ConfigurationParameterInterface,)
 
 
+class ConfigurationEnvVarAbstractType(graphene.AbstractType):
+    name = graphene.String()
+    value = graphene.String()
+
+
+class ConfigurationEnvVarInterface(ConfigurationEnvVarAbstractType, graphene.Interface):
+    pass
+
+
+class ConfigurationEnvVarInput(ConfigurationEnvVarAbstractType, graphene.InputObjectType):
+    pass
+
+
+class ConfigurationEnvVarType(graphene.ObjectType):
+    class Meta:
+        interfaces = (ConfigurationEnvVarInterface,)
+
+
 class ConfigurationInterface(graphene.Interface):
     id = graphene.UUID()
     name = graphene.String()
@@ -52,6 +70,6 @@ class ConfigurationType(graphene.ObjectType):
     configuration_parameters = graphene.List(
         ConfigurationParameterType,
         description='Default parameter types overrides.')
-    runner_parameters = graphene.List(
-        ConfigurationParameterType,
+    configuration_envvars = graphene.List(
+        ConfigurationEnvVarType,
         description='Testrunner environment variables.')
