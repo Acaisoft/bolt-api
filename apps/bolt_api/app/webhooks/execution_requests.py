@@ -35,14 +35,18 @@ def update_execution_requests_stats_totals():
     if err is not None:
         logger.error(f'error updating request totals on execution: {str(err)}')
 
+    return jsonify({})
+
 
 def should_upsert(data: dict) -> bool:
     key = f'{data["execution_id"]}_{data["identifier"]}'
     cache = get_cache(current_app)
     entry = cache.get(key)
     if not entry or data['id'] > int(entry):
+        logger.info(f'should_upsert execution request totals is TRUE, {data["id"]} > {str(entry)}')
         cache.set(key, data['id'], ex=60 * 60)
         return True
+    logger.info(f'should_upsert execution request totals is False, {data["id"]} < {str(entry)}')
     return False
 
 
