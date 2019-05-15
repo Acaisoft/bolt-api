@@ -214,12 +214,12 @@ class UpdateValidate(graphene.Mutation):
 
         if configuration_envvars:
             for rp in configuration_envvars:
-                assert rp['parameter_slug'].replace('_', '').isalnum(), \
-                    f'configuration runner_parameter "{rp["parameter_slug"]}" is not alphanumeric'
-                assert not rp['parameter_slug'].startswith('BOLT_'), f'runner_parameter cannot start with BOLT_'
+                assert rp['name'].replace('_', '').isalnum(), \
+                    f'configuration runner_parameter "{rp["name"]}" is not alphanumeric'
+                assert not rp['name'].startswith('BOLT_'), f'configuration_envvars.name cannot start with BOLT_'
             query_data['configuration_envvars'] = {
                 'data': [{
-                    'name': x['parameter_slug'],
+                    'name': x['name'],
                     'value': x['value'],
                     'configuration_id': str(id),
                 } for x in configuration_envvars]
