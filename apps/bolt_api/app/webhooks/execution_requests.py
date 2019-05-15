@@ -19,7 +19,7 @@ def update_execution_requests_stats_totals():
     logger.info('computing execution request totals')
 
     new = event.get('data', {}).get('new')
-    logger.info('new entry', new)
+    logger.info(f'new entry {new}')
     del new['id']
     execution_id = new['execution_id']
     req_identifier = new['identifier']
