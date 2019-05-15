@@ -40,7 +40,7 @@ def should_upsert(data: dict) -> bool:
     key = f'{data["execution_id"]}_{data["identifier"]}'
     cache = get_cache(current_app)
     entry = cache.get(key)
-    if not entry or data['id'] > entry:
+    if not entry or data['id'] > int(entry):
         cache.set(key, data['id'], ex=60 * 60)
         return True
     return False
@@ -48,7 +48,7 @@ def should_upsert(data: dict) -> bool:
 
 def upsert(data: dict):
     del data['id']
-    
+
     totals_response = hce(current_app.config, '''mutation ($data:[execution_request_totals_insert_input!]!) {
         insert_execution_request_totals(
             objects: $data,
