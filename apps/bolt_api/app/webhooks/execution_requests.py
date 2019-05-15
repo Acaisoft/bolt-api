@@ -16,7 +16,10 @@ def update_execution_requests_stats_totals():
         # do not calculate on DELETE as hasura will send an event for each row of a deleted table
         return jsonify({})
 
+    logger.info('computing execution request totals')
+
     new = event.get('data', {}).get('new')
+    logger.info('new entry', new)
     del new['id']
     execution_id = new['execution_id']
     req_identifier = new['identifier']
