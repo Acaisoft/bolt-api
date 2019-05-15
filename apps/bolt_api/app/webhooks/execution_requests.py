@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify, current_app
 
+from services.cache import get_cache
 from services.hasura import hce
 from services.logger import setup_custom_logger
 
@@ -20,10 +21,34 @@ def update_execution_requests_stats_totals():
 
     new = event.get('data', {}).get('new')
     logger.info(f'new entry {new}')
-    del new['id']
-    execution_id = new['execution_id']
-    req_identifier = new['identifier']
 
+    if not should_upsert(new):
+        logger.info('not upserting execution request totals, key is older')
+        return jsonify({})
+
+    err = upsert(new)
+    if err is not None:
+        logger.error(f'error inserting execution request totals on execution: {str(err)}')
+        return jsonify({})
+
+    err = update_totals(new)
+    if err is not None:
+        logger.error(f'error updating request totals on execution: {str(err)}')
+
+
+def should_upsert(data: dict) -> bool:
+    key = f'{data["execution_id"]}_{data["identifier"]}'
+    cache = get_cache(current_app)
+    entry = cache.get(key)
+    if not entry or data['id'] > entry:
+        cache.set(key, data['id'], ex=60 * 60)
+        return True
+    return False
+
+
+def upsert(data: dict):
+    del data['id']
+    
     totals_response = hce(current_app.config, '''mutation ($data:[execution_request_totals_insert_input!]!) {
         insert_execution_request_totals(
             objects: $data,
@@ -36,12 +61,15 @@ def update_execution_requests_stats_totals():
             }
         ) { affected_rows }
     }''', variable_values={
-        'data': new,
+        'data': data,
     })
-    err = totals_response.get('errors', None)
-    if err is not None:
-        logger.warn(f'error inserting execution request totals on execution: {str(err)}')
-        return jsonify({})
+
+    return totals_response.get('errors', None)
+
+
+def update_totals(new: dict):
+    execution_id = new['execution_id']
+    req_identifier = new['identifier']
 
     response = hce(current_app.config, '''query ($execution_id:uuid!, $identifier:String!) {
         execution_request_totals_aggregate(where:{execution_id:{_eq:$execution_id}}){
@@ -70,8 +98,8 @@ def update_execution_requests_stats_totals():
     })
     err = response.get('errors', None)
     if err is not None:
-        logger.warn(f'error calculating request totals on execution: {str(err)}')
-        return jsonify({})
+        logger.error(f'error calculating request totals on execution: {str(err)}')
+        return err
 
     aggs = response['execution_request_totals_aggregate']['aggregate']
     total = int(aggs['sum']['num_requests']) + int(new['num_requests'])
@@ -118,8 +146,4 @@ def update_execution_requests_stats_totals():
             'max_content_size': max_content_size,
             'min_content_size': min_content_size,
         })
-        err = response.get('errors', None)
-        if err is not None:
-            logger.warn(f'error updating request totals on execution: {str(err)}')
-
-    return jsonify({})
+        return response.get('errors', None)
