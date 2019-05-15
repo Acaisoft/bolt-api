@@ -111,7 +111,7 @@ def update_totals(new: dict):
     max_content_size = response['execution_requests_aggregate']['aggregate']['max']['average_content_size']
     min_content_size = response['execution_requests_aggregate']['aggregate']['min']['average_content_size']
 
-    if total is not None and fails is not None:
+    if total is not None or fails is not None:
         response = hce(current_app.config, '''mutation (
             $identifier:String!,
             $execution_id:uuid!, 
