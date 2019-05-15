@@ -49,5 +49,5 @@ scrape_configs:
       port: 9998
 
     static_configs:
-    - targets: ['localhost:9998']
+    - targets: ['cadvisor:9998']
 #

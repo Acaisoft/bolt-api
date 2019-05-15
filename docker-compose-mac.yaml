@@ -26,6 +26,8 @@ services:
     depends_on:
       - "cadvisor"
       - "grafana"
+    links:
+      - cadvisor
   cadvisor:
     image: google/cadvisor
     command: -port=9998
