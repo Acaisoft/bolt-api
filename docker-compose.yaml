@@ -105,8 +105,6 @@ services:
       - grafana_data:/var/lib/grafana
     ports:
       - "3000:3000"
-    depends_on:
-      - "metrics"
     environment:
       GF_SECURITY_ADMIN_PASSWORD: 123
       GF_INSTALL_PLUGINS: grafana-simple-json-datasource

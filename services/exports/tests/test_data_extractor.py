@@ -33,6 +33,6 @@ class TestDataExtractor(unittest.TestCase):
             assert prev_ts > ts, f'expected output to be ordered by timestamp'
             prev_ts = ts
 
-            
-
-        print(out)
+            for k, v in i.items():
+                assert type(k) is str, f'expected a string key, got {k}'
+                assert type(v) in (int, float), f'expected a numeric value, got {type(v)} == {v}'
