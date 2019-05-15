@@ -28,6 +28,7 @@ services:
       - "grafana"
     links:
       - cadvisor
+      - api
   cadvisor:
     image: google/cadvisor
     command: -port=9998

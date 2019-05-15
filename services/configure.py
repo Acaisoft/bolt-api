@@ -3,9 +3,8 @@ import os
 
 from flask import Flask
 import sentry_sdk
+from prometheus_flask_exporter import PrometheusMetrics
 from sentry_sdk.integrations.flask import FlaskIntegration
-
-from services import const
 
 
 def configure(app: Flask):
@@ -17,6 +16,10 @@ def configure(app: Flask):
 
     secrets_file_path = os.environ.get('SECRETS_FILE_PATH', 'localhost-secrets.py')
     app.config.from_pyfile(secrets_file_path)
+
+    os.environ['DEBUG_METRICS'] = '1'
+    metrics = PrometheusMetrics(app)
+    app.extensions['metrics'] = metrics
 
     sentry_dsn = app.config.get('SENTRY_DSN', None)
     if sentry_dsn and not app.debug:

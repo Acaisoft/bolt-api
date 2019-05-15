@@ -9,7 +9,7 @@ OAUTH_REDIRECT = 'http://localhost:5000'
 
 JWT_ALGORITHM = 'HS256'
 
-HASURA_GQL = "http://localhost:8080/v1alpha1/graphql"
+HASURA_GQL = "http://hasura:8080/v1alpha1/graphql"
 # HASURA_GQL = "https://hasura.dev.bolt.acaisoft.io/v1alpha1/graphql"
 
 HCE_DEBUG = True

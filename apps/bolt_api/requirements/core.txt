@@ -21,3 +21,4 @@ graphene-file-upload==1.2.2
 google-cloud-core==0.29.1
 google-cloud-storage==1.14.0
 python-keycloak==0.16.0
+prometheus-flask-exporter==0.7.2

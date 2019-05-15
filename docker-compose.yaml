@@ -15,7 +15,7 @@ services:
     image: prom/prometheus
     ports:
       - "9090:9090"
-    network_mode: "host"
+#    network_mode: "host"
     volumes:
       - ./subsystems/prometheus/:/etc/prometheus/
       - prometheus_data:/prometheus
@@ -27,12 +27,15 @@ services:
     depends_on:
       - "cadvisor"
       - "grafana"
+    links:
+      - cadvisor
+      - api
+      - metrics
   cadvisor:
     image: google/cadvisor
     command: -port=9998
     ports:
       - "9998:9998"
-    network_mode: "host"
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:rw
@@ -46,10 +49,9 @@ services:
     depends_on:
       - "postgres"
       - "redis"
-      - "prom"
     restart: always
     environment:
-      HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:@localhost:5432/postgres
+      HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:@postgres:5432/postgres
       HASURA_GRAPHQL_ENABLE_CONSOLE: "true" # set to "false" to disable console
       HASURA_GRAPHQL_MIGRATIONS_DIR:
       ## execute ./toos/encode_jwt_secret.py to obtain HASURA_GRAPHQL_JWT_SECRET from Flask config
@@ -62,7 +64,8 @@ services:
       BOLT_API_EXECUTION_REQUESTS_INSERT: http://api:5000/webhooks/execution_requests/insert
     volumes:
       - ./subsystems/hasura/migrations:/hasura-migrations
-    network_mode: "host"
+    links:
+      - postgres
   api:
     build:
       context: .
@@ -79,8 +82,9 @@ services:
     environment:
       CONFIG_FILE_PATH: docker-compose-config.py
       FLASK_ENV: development
+    links:
+      - hasura
     entrypoint: ["flask", "run", "--eager-loading", "--host", "0.0.0.0", "--port", "5000"]
-    network_mode: "host"
   metrics:
     build:
       context: .
@@ -97,8 +101,9 @@ services:
     environment:
       CONFIG_FILE_PATH: docker-compose-config.py
       FLASK_ENV: development
+    links:
+      - hasura
     entrypoint: ["flask", "run", "--eager-loading", "--host", "0.0.0.0", "--port", "5005"]
-    network_mode: "host"
   grafana:
     image: grafana/grafana
     volumes:
