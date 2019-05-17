@@ -29,7 +29,7 @@ class CreateValidate(graphene.Mutation):
 
     @staticmethod
     def validate(info, name, repository_url, project_id, type_slug):
-        role, user_id = gql_util.get_request_role_userid(info, (const.ROLE_ADMIN, const.ROLE_MANAGER, const.ROLE_TESTER))
+        role, user_id = gql_util.get_request_role_userid(info, (const.ROLE_ADMIN, const.ROLE_TENANT_ADMIN, const.ROLE_MANAGER, const.ROLE_TESTER))
 
         project_id = str(project_id)
 

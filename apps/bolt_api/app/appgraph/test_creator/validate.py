@@ -37,7 +37,7 @@ class Validate(graphene.Mutation):
     def validate(info, name, data, project_id, max_wait, min_wait, type_slug, validate_unique_name=True):
         assert type_slug in const.TESTTYPE_CHOICE, f'invalid type_slug {type_slug}'
         project_id = str(project_id)
-        role, user_id = gql_util.get_request_role_userid(info, (const.ROLE_ADMIN, const.ROLE_MANAGER, const.ROLE_TESTER))
+        role, user_id = gql_util.get_request_role_userid(info, (const.ROLE_ADMIN, const.ROLE_TENANT_ADMIN, const.ROLE_MANAGER, const.ROLE_TESTER))
 
         name = validators.validate_text(name)
 

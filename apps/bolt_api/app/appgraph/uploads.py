@@ -34,7 +34,7 @@ class UploadUrl(graphene.Mutation):
 
     @staticmethod
     def validate(info, content_type, content_md5, content_length, object_id=None):
-        role, user_id = gql_util.get_request_role_userid(info, (const.ROLE_ADMIN, const.ROLE_MANAGER))
+        role, user_id = gql_util.get_request_role_userid(info, (const.ROLE_ADMIN, const.ROLE_TENANT_ADMIN, const.ROLE_MANAGER))
 
         assert content_type in const.IMAGE_CONTENT_TYPES, f'illegal content_type "{content_type}", valid choices are: {const.IMAGE_CONTENT_TYPES}'
 

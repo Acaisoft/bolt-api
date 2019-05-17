@@ -60,7 +60,7 @@ class CreateValidate(graphene.Mutation):
 
         role, user_id = gql_util.get_request_role_userid(
             info,
-            (const.ROLE_ADMIN, const.ROLE_MANAGER, const.ROLE_TESTER)
+            (const.ROLE_ADMIN, const.ROLE_TENANT_ADMIN, const.ROLE_MANAGER, const.ROLE_TESTER)
         )
 
         assert any((has_pre_test, has_post_test, has_load_tests, has_monitoring)), \
@@ -137,7 +137,7 @@ class CreateValidate(graphene.Mutation):
             }
         }''', repo_query)
 
-        if role != const.ROLE_ADMIN:
+        if role not in (const.ROLE_ADMIN, const.ROLE_TENANT_ADMIN):
             assert repo.get('user_project', None), \
                 f'non-admin ({role}) user {user_id} does not have access to project {project_id}'
 

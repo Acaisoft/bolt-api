@@ -21,7 +21,7 @@ class DataExportLink(graphene.Mutation):
     Output = gql_util.OutputInterfaceFactory(LinkReturnInterface, 'Delete')
 
     def mutate(self, info, execution_id, valid_hours):
-        _, user_id = gql_util.get_request_role_userid(info, (const.ROLE_ADMIN, const.ROLE_MANAGER))
+        _, user_id = gql_util.get_request_role_userid(info, (const.ROLE_ADMIN, const.ROLE_TENANT_ADMIN, const.ROLE_MANAGER))
 
         token = issue_export_token(current_app.config, const.EXPORT_SCOPE_EXECUTION, str(execution_id), user_id, valid_hours)
 

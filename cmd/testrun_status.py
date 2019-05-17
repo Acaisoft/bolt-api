@@ -3,7 +3,7 @@ from flask import current_app
 from flask.cli import with_appcontext
 
 from services import const
-from services.deployer.utils import get_test_run_status
+from services.testruns.status import get_test_run_status
 from services.hasura import hce
 
 

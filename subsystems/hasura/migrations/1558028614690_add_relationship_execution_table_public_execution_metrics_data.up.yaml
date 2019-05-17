@@ -1,0 +1,8 @@
+- args:
+    name: execution
+    table:
+      name: execution_metrics_data
+      schema: public
+    using:
+      foreign_key_constraint_on: execution_id
+  type: create_object_relationship

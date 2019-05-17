@@ -17,7 +17,7 @@ class UserAddRole(graphene.Mutation):
     Output = gql_util.OutputInterfaceFactory(types.UserInterface, 'Roles')
 
     def mutate(self, info, user_id, roles):
-        req_role, req_user_id = gql_util.get_request_role_userid(info, (const.ROLE_ADMIN,))
+        req_role, req_user_id = gql_util.get_request_role_userid(info, (const.ROLE_ADMIN, const.ROLE_TENANT_ADMIN))
 
         for r in roles:
             assert r in const.ROLE_CHOICE, f'invalid role: {r}'

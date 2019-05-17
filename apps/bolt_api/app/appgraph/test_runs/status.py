@@ -2,7 +2,7 @@ import graphene
 from flask import current_app
 
 from services.deployer import clients
-from services.deployer.utils import get_test_run_status
+from services.testruns.status import get_test_run_status
 
 
 class StatusResponseInterface(graphene.Interface):

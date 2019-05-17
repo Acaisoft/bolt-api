@@ -17,7 +17,7 @@ class UserList(graphene.ObjectType):
     )
 
     def resolve_testrun_user_list(self, info, project_id):
-        req_role, req_user_id = gql_util.get_request_role_userid(info, (const.ROLE_ADMIN, const.ROLE_MANAGER))
+        req_role, req_user_id = gql_util.get_request_role_userid(info, (const.ROLE_ADMIN, const.ROLE_TENANT_ADMIN, const.ROLE_MANAGER))
 
         project_id = str(project_id)
         c = get_cache(current_app.config)

@@ -22,7 +22,7 @@ class UserAssignToProject(graphene.Mutation):
     Output = gql_util.OutputInterfaceFactory(types.UserInterface, 'Assign')
 
     def mutate(self, info, email, project_id, role):
-        req_role, req_user_id = gql_util.get_request_role_userid(info, (const.ROLE_ADMIN, const.ROLE_MANAGER))
+        req_role, req_user_id = gql_util.get_request_role_userid(info, (const.ROLE_ADMIN, const.ROLE_TENANT_ADMIN, const.ROLE_MANAGER))
 
         user_id = user_management.user_create(email, str(project_id), role)
 

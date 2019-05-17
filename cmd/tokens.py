@@ -1,4 +1,6 @@
 import json
+import os
+
 import click
 import jwt
 from flask import current_app
@@ -7,6 +9,20 @@ from flask.cli import with_appcontext
 from services.const import EXPORT_SCOPE_EXECUTION, EXPORT_SCOPE_PROJECT
 from services.hasura.hasura import hasura_token_for_testrunner, hasura_selfsignedtoken_for_testrunner
 from services.exports.data_export_token import issue_export_token
+
+if os.getenv('HTTP_DEBUG', False):
+    # helpful for debugging client communication
+    import logging
+    import http.client as http_client
+
+    http_client.HTTPConnection.debuglevel = 1
+
+    # You must initialize logging, otherwise you'll not see debug output.
+    logging.basicConfig()
+    logging.getLogger().setLevel(logging.DEBUG)
+    requests_log = logging.getLogger("requests.packages.urllib3")
+    requests_log.setLevel(logging.DEBUG)
+    requests_log.propagate = True
 
 
 @click.command(name='job_token')

@@ -56,7 +56,7 @@ class UpdateValidate(graphene.Mutation):
 
         role, user_id = gql_util.get_request_role_userid(
             info,
-            (const.ROLE_ADMIN, const.ROLE_MANAGER, const.ROLE_TESTER)
+            (const.ROLE_ADMIN, const.ROLE_TENANT_ADMIN, const.ROLE_MANAGER, const.ROLE_TESTER)
         )
 
         sections = [x for x in (has_pre_test, has_post_test, has_load_tests, has_monitoring) if x is not None]
@@ -155,7 +155,7 @@ class UpdateValidate(graphene.Mutation):
             }
         }''', repo_query)
 
-        if role != const.ROLE_ADMIN:
+        if role not in (const.ROLE_ADMIN, const.ROLE_TENANT_ADMIN):
             assert repo.get('hasUserAccess', None), \
                 f'non-admin ({role}) user {user_id} does not have access to configuration {str(id)}'
 
