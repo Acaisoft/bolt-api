@@ -18,7 +18,7 @@ def configure(app: Flask):
     app.config.from_pyfile(secrets_file_path)
 
     os.environ['DEBUG_METRICS'] = '1'
-    metrics = PrometheusMetrics(app)
+    metrics = PrometheusMetrics(app, defaults_prefix='bolt_api')
     app.extensions['metrics'] = metrics
 
     sentry_dsn = app.config.get('SENTRY_DSN', None)
