@@ -29,7 +29,5 @@ def execution_update():
             update_repository(where:{test_sources:{configurations:{id:{_eq:$confId}}}}, _set:{performed:true}) { affected_rows }
         }''', {'confId': new.get('configuration_id')})
         assert resp['update_configuration'].get('affected_rows') is not None, f'unexpected error: {str(resp)}'
-        # update execution totals
-        update_execution_request_totals(new.get('id'))
 
     return jsonify({})
