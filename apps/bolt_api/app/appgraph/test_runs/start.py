@@ -39,7 +39,9 @@ class TestrunStart(graphene.Mutation):
         out = TestrunStartObject(execution_id=execution_id)
 
         if debug and role == const.ROLE_ADMIN:
-            out.hasura_token = hasura_token
             os.unsetenv('SELFSIGNED_TOKEN_FOR_TESTRUNNER')
+
+        if role == const.ROLE_ADMIN:
+            out.hasura_token = hasura_token
 
         return out
