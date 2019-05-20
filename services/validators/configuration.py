@@ -21,6 +21,8 @@ def validate_test_configuration_by_id(test_conf_id):
         configuration_by_pk (id:$conf_id) {
             id
             name
+            has_load_tests
+            has_monitoring
             
             test_source {
                 source_type
@@ -91,7 +93,11 @@ def validate_test_configuration(conf: dict, defaultParams: list):
 
     assert len(conf['name']), 'configuration name is required'
 
-    validate_load_test_params(conf['configuration_parameters'], defaults=defaultParams)
+    if conf['has_load_tests']:
+        validate_load_test_params(conf['configuration_parameters'], defaults=defaultParams)
+
+    if conf['has_monitoring']:
+        validate_monitoring_params(conf['configuration_parameters'], defaults=defaultParams)
 
     validate_extensions(conf.get('configuration_extensions', []))
 
@@ -133,7 +139,7 @@ def validate_load_test_params(params: list, defaults: list) -> dict:
         if p['slug_name'] not in params_by_id or not params_by_id[p['slug_name']]:
             params_by_id[p['slug_name']] = p['default_value']
 
-    param_names_by_id = dict(((x['slug_name'], x['param_name']) for x in defaults))
+    param_names_by_id = dict(((x['slug_name'], x['param_name']) for x in load_test_defaults))
     for parameter_slug, value in params_by_id.items():
         param_name = param_names_by_id.get(parameter_slug, None)
         assert param_name, f'invalid parameter slug "{parameter_slug}"'
@@ -156,15 +162,16 @@ def validate_monitoring_params(params: list, defaults: list) -> dict:
     {'monitoring_duration': '100'}
     """
     params_by_id = dict(((str(x['parameter_slug']), x['value']) for x in params if x['parameter_slug'].startswith('monitoring_')))
-    load_test_defaults = list(filter(lambda x: x['slug_name'].startswith('monitoring_'), defaults))
-    for p in load_test_defaults:
+    monitoring_defaults = list(filter(lambda x: x['slug_name'].startswith('monitoring_'), defaults))
+    for p in monitoring_defaults:
         if p['slug_name'] not in params_by_id or not params_by_id[p['slug_name']]:
             params_by_id[p['slug_name']] = p['default_value']
 
-    param_names_by_id = dict(((x['slug_name'], x['param_name']) for x in defaults))
+    param_names_by_id = dict(((x['slug_name'], x['param_name']) for x in monitoring_defaults))
     for parameter_slug, value in params_by_id.items():
         param_name = param_names_by_id.get(parameter_slug, None)
         assert param_name, f'invalid parameter slug "{parameter_slug}"'
+        VALIDATORS[param_name](value)
 
     return params_by_id
 

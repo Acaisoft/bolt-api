@@ -50,4 +50,5 @@ VALIDATORS = {
     '-c': validate_users,
     '-r': validate_rampup,
     '-H': validate_url,
+    '-md': validate_time,
 }

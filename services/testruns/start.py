@@ -6,12 +6,12 @@ from services.hasura.hasura import hasura_token_for_testrunner
 from services.deployer import clients
 from services.hasura import hce
 from services.validators import validate_extensions
-from services.validators.configuration import validate_test_configuration_by_id
+from services.validators.configuration import validate_test_configuration_by_id, validate_monitoring_params
 
 DEPLOYER_TIMEOUT = 10
 
 
-def start_image(app_config, project_id, workers, extensions, run_monitoring, run_load_test):
+def start_image(app_config, project_id, workers, extensions, run_monitoring, run_load_test, monitoring_deadline_secs):
     # request a testrun is started with parameters in execution's configuration
     image = app_config.get('BOLT_TEST_RUNNER_IMAGE', const.DEFAULT_TEST_RUNNER_IMAGE)
     assert image, '*_TEST_RUNNER_IMAGE is undefined'
@@ -27,6 +27,7 @@ def start_image(app_config, project_id, workers, extensions, run_monitoring, run
         job_auth_token=str(job_token),
         extensions=extensions,
         run_monitoring=run_monitoring,
+        monitoring_deadline_secs=monitoring_deadline_secs,
         run_load_test=run_load_test,
     )
     return clients.jobs(app_config).jobs_post(
@@ -35,7 +36,7 @@ def start_image(app_config, project_id, workers, extensions, run_monitoring, run
     ), execution_id, job_token
 
 
-def start_job(app_config, project_id, repo_url, workers, no_cache, extensions, run_monitoring, run_load_test):
+def start_job(app_config, project_id, repo_url, workers, no_cache, extensions, run_monitoring, run_load_test, monitoring_deadline_secs):
     # request an image is built from repository sources and executed as testrun
 
     job_token, execution_id = hasura_token_for_testrunner(app_config)
@@ -52,6 +53,7 @@ def start_job(app_config, project_id, repo_url, workers, no_cache, extensions, r
         no_cache_kaniko=no_cache,
         extensions=extensions,
         run_monitoring=run_monitoring,
+        monitoring_deadline_secs=monitoring_deadline_secs,
         run_load_test=run_load_test,
     )
     return clients.images(app_config).image_builds_post(
@@ -64,6 +66,14 @@ def start(app_config, conf_id, user_id, no_cache):
     validate_test_configuration_by_id(str(conf_id))
 
     test_config_response = hce(app_config, '''query ($confId:uuid!, $userId:uuid!) {
+        parameter {
+            id
+            default_value
+            param_name
+            name
+            slug_name
+        }
+        
         configuration (where:{
             id:{_eq:$confId},
             project:{
@@ -75,6 +85,11 @@ def start(app_config, conf_id, user_id, no_cache):
             instances
             has_load_tests
             has_monitoring
+
+            configuration_parameters {
+                parameter_slug
+                value
+            }
 
             configuration_extensions {
                 type
@@ -117,6 +132,12 @@ def start(app_config, conf_id, user_id, no_cache):
     code_source = test_config['test_source']['source_type']
 
     test_extensions = validate_extensions(test_config['configuration_extensions'])
+    monitoring_deadline_secs = 0
+    if test_config['has_monitoring']:
+        monitoring_params = validate_monitoring_params(test_config['configuration_parameters'], test_config_response['parameter'])
+        monitoring_deadline_secs = monitoring_params.get('monitoring_duration', None)
+        assert monitoring_deadline_secs is not None, \
+            f'monitoring_duration/monitoring_deadline_secs must be a numeric value'
 
     initial_state = {
         'configuration_id': str(conf_id),
@@ -132,6 +153,7 @@ def start(app_config, conf_id, user_id, no_cache):
             repo_url=test_config['test_source']['repository']['url'],
             no_cache=no_cache,
             extensions=test_extensions,
+            monitoring_deadline_secs=monitoring_deadline_secs,
             run_monitoring=test_config['has_monitoring'],
             run_load_test=test_config['has_load_tests'],
         )
@@ -143,6 +165,7 @@ def start(app_config, conf_id, user_id, no_cache):
             project_id=test_config['project_id'],
             workers=test_config['instances'],
             extensions=test_extensions,
+            monitoring_deadline_secs=monitoring_deadline_secs,
             run_monitoring=test_config['has_monitoring'],
             run_load_test=test_config['has_load_tests'],
         )
