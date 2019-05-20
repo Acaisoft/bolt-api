@@ -99,6 +99,9 @@ def validate_test_configuration(conf: dict, defaultParams: list):
     if conf['has_monitoring']:
         validate_monitoring_params(conf['configuration_parameters'], defaults=defaultParams)
 
+    if not conf['has_monitoring'] and not conf['has_load_tests']:
+        raise AssertionError(f'cannot start test without either load_tests or monitoring defined')
+
     validate_extensions(conf.get('configuration_extensions', []))
 
     test_source = conf['test_source']
