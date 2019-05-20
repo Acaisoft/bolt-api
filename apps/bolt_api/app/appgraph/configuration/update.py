@@ -159,7 +159,9 @@ class UpdateValidate(graphene.Mutation):
             assert repo.get('hasUserAccess', None), \
                 f'non-admin ({role}) user {user_id} does not have access to configuration {str(id)}'
 
-        query_data = {}
+        query_data = {
+            'configuration_parameters': {'data': []}
+        }
 
         if has_pre_test is not None:
             query_data['has_pre_test'] = has_pre_test
@@ -202,11 +204,11 @@ class UpdateValidate(graphene.Mutation):
         if configuration_parameters:
             patched_params = validators.validate_load_test_params(configuration_parameters, defaults=repo['parameter'])
             if patched_params:
-                query_data['configuration_parameters'] = {'data': []}
                 for parameter_slug, param_value in patched_params.items():
                     query_data['configuration_parameters']['data'].append({
                         'parameter_slug': parameter_slug,
                         'value': param_value,
+                        'configuration_id': str(id),
                     })
                     # calculate instances number based on num of users
                     if parameter_slug == const.TESTPARAM_USERS:
@@ -215,12 +217,11 @@ class UpdateValidate(graphene.Mutation):
         if has_monitoring:
             monitoring_parameters = validators.validate_monitoring_params(configuration_parameters or [], defaults=repo['parameter'])
             if monitoring_parameters:
-                if 'configuration_parameters' not in query_data:
-                    query_data['configuration_parameters'] = {'data': []}
                 for slug, value in monitoring_parameters.items():
                     query_data['configuration_parameters']['data'].append({
                         'parameter_slug': slug,
                         'value': value,
+                        'configuration_id': str(id),
                     })
 
         if configuration_envvars:
@@ -252,27 +253,37 @@ class Update(UpdateValidate):
 
     Output = gql_util.OutputTypeFactory(types.ConfigurationType, 'Update')
 
-    @staticmethod
-    def mutate_configuration_parameters(conf_id, configuration_parameters):
-        for cp in configuration_parameters:
-            hce(current_app.config, '''mutation ($confId:uuid!, $slug:String!, $value:String!) {
-                update_configuration_parameter(
-                    where:{ configuration_id:{_eq:$confId}, parameter_slug:{_eq:$slug} },
-                    _set:{ value: $value }
-                ) {
-                    affected_rows
-                }
-            }''', variable_values={
-                'confId': conf_id,
-                'slug': cp['parameter_slug'],
-                'value': cp['value']
-            })
+    def mutate(
+            self, info, id, name=None, type_slug=None, test_source_id=None, configuration_parameters=None,
+            configuration_envvars=None, has_pre_test=None, has_post_test=None, has_load_tests=None, has_monitoring=None):
 
-    @staticmethod
-    def mutate_configuration_envvars(conf_id, configuration_parameters):
-        resp = hce(current_app.config, '''mutation ($data:[configuration_envvars_insert_input!]!) {
+        query_params = UpdateValidate.validate(
+            info, id, name, type_slug, test_source_id, configuration_parameters, configuration_envvars,
+            has_pre_test, has_post_test, has_load_tests, has_monitoring
+        )
+
+        params = query_params.pop('configuration_parameters', {'data': []})['data']
+        envs = query_params.pop('configuration_envvars', {'data': []})['data']
+
+        query = '''mutation (
+            $id:uuid!, 
+            $data:configuration_set_input!
+            $params:[configuration_parameter_insert_input!]!
+            $envs:[configuration_envvars_insert_input!]!
+        ) {
+            
+            insert_configuration_parameter (
+                objects: $params
+                on_conflict: {
+                    constraint: configuration_parameter_pkey
+                    update_columns: [ value ]
+                }
+            ) {
+                affected_rows
+            }
+        
             insert_configuration_envvars (
-                objects: $data
+                objects: $envs
                 on_conflict: {
                     constraint: configuration_envvars_pkey
                     update_columns: [ value ]
@@ -280,27 +291,7 @@ class Update(UpdateValidate):
             ) {
                 affected_rows
             }
-        }''', variable_values={'data': configuration_parameters})
-
-    def mutate(
-            self, info, id, name=None, type_slug=None, test_source_id=None, configuration_parameters=None,
-            configuration_envvars=None, has_pre_test=None, has_post_test=None, has_load_tests=None, has_monitoring=None):
-        query_params = UpdateValidate.validate(
-            info, id, name, type_slug, test_source_id, configuration_parameters, configuration_envvars,
-            has_pre_test, has_post_test, has_load_tests, has_monitoring
-        )
-
-        Update.mutate_configuration_parameters(
-            str(id),
-            query_params.pop('configuration_parameters', {'data': []})['data']
-        )
-
-        Update.mutate_configuration_envvars(
-            str(id),
-            query_params.pop('configuration_envvars', {'data': []})['data']
-        )
-
-        query = '''mutation ($id:uuid!, $data:configuration_set_input!) {
+            
             update_configuration(
                 where:{id:{_eq:$id}},
                 _set: $data
@@ -315,11 +306,18 @@ class Update(UpdateValidate):
                     has_post_test
                     has_load_tests
                     has_monitoring
+                    configuration_envvars { name value }
+                    configuration_parameters { parameter_slug value }
                 } 
             }
         }'''
 
-        conf_response = hce(current_app.config, query, variable_values={'id': str(id), 'data': query_params})
+        conf_response = hce(current_app.config, query, variable_values={
+            'id': str(id),
+            'data': query_params,
+            'params': params,
+            'envs': envs,
+        })
         assert conf_response['update_configuration'], f'cannot update configuration ({str(conf_response)})'
 
         return gql_util.OutputValueFromFactory(Update, conf_response['update_configuration'])
