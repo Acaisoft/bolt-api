@@ -201,7 +201,7 @@ class UpdateValidate(graphene.Mutation):
             else:
                 raise AssertionError(f'test source {str(test_source_id)} is invalid: {test_source["source_type"]}')
 
-        if configuration_parameters:
+        if has_load_tests:
             patched_params = validators.validate_load_test_params(configuration_parameters, defaults=repo['parameter'])
             if patched_params:
                 for parameter_slug, param_value in patched_params.items():
