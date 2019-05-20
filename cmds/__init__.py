@@ -1,4 +1,4 @@
-from cmd.upload_file import upload_file
+from .upload_file import upload_file
 from . import users
 from .projects import project_setup_demo, project_teardown
 from .repositories import validate_repo

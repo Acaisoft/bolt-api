@@ -173,7 +173,7 @@ class CreateValidate(graphene.Mutation):
             }
 
         if has_load_tests:
-            patched_params = validators.validate_test_params(configuration_parameters or [], defaults=repo['parameter'])
+            patched_params = validators.validate_load_test_params(configuration_parameters or [], defaults=repo['parameter'])
             if patched_params:
                 query_data['configuration_parameters'] = {'data': []}
                 for parameter_slug, param_value in patched_params.items():
@@ -184,6 +184,17 @@ class CreateValidate(graphene.Mutation):
                     # calculate instances number based on num of users
                     if parameter_slug == const.TESTPARAM_USERS:
                         query_data['instances'] = math.ceil(int(param_value) / const.TESTRUN_MAX_USERS_PER_INSTANCE)
+
+        if has_monitoring:
+            monitoring_parameters = validators.validate_monitoring_params(configuration_parameters or [], defaults=repo['parameter'])
+            if monitoring_parameters:
+                if 'configuration_parameters' not in query_data:
+                    query_data['configuration_parameters'] = {'data': []}
+                for slug, value in monitoring_parameters.items():
+                    query_data['configuration_parameters']['data'].append({
+                        'parameter_slug': slug,
+                        'value': value,
+                    })
 
         if test_source_id:
             test_source = repo.get('test_source')
