@@ -21,5 +21,6 @@ REDIS_PORT = 6379
 REDIS_DB = 0
 
 BUCKET_PUBLIC_UPLOADS = 'media.bolt.acaisoft.io'
+UPLOADS_PUBSUB_SUBSCRIPTION = 'gcf-read-bolt-media-request-uploads-bolt-acaisoft'
 
 CONFIG_VERSION = '01beta'

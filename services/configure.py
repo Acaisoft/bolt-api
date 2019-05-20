@@ -37,5 +37,8 @@ def validate(app, required_config_vars):
     for var_name in required_config_vars:
         if app.config.get(var_name, None) is None:
             missing.append(var_name)
-    assert not missing, f'{len(missing)} undefined config variables: {", ".join(missing)}'
+    if missing:
+        raise EnvironmentError(
+            f'{len(missing)} undefined config variable{"s" if len(missing) > 1 else ""}: {", ".join(missing)}'
+        )
     app.logger.info('config valid')

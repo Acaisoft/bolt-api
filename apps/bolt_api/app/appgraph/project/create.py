@@ -47,8 +47,7 @@ class CreateValidate(graphene.Mutation):
             description = validators.validate_text(description, key='description', required=False)
 
         if image_url:
-            validators.validate_url(image_url, key='image_url', required=False)
-            image_url = image_url.strip()
+            image_url = validators.validate_url(image_url, key='image_url', required=False)
 
         return {
             'name': name,
