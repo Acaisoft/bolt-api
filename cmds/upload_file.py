@@ -31,12 +31,12 @@ def upload_file(path):
     upload_url = request_upload_token(current_app.config, path)
 
     cmd = f'curl -v -X PUT -H "Content-Type: {mime_type}" -H "Content-MD5: {base64md5}" -T - "{upload_url}" < {path}'
-    # print(cmd)
+    print(cmd)
     r = getoutput(cmd)
-    print(r)
+    # print(r)
 
     while True:
-        print('sleeping for 60')
+        print('sleeping')
         time.sleep(1)
 
 

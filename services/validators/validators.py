@@ -17,6 +17,15 @@ def validate_duration(value: str):
     return value
 
 
+def validate_interval(value: str):
+    assert value is not None, 'monitoring interval parameter is required'
+    value = value.strip()
+    assert value, 'monitoring interval parameter is required'
+    assert value.isdigit(), f'expected numeric value of seconds for monitoring interval, got {value}'
+    assert int(value) >= const.MONITORING_MIN_INTERVAL, f'monitoring interval must be larger than {const.MONITORING_MIN_INTERVAL}'
+    return value
+
+
 def validate_users(value: str):
     value = value.strip()
     assert value, 'number of users is required'
@@ -59,4 +68,5 @@ VALIDATORS = {
     '-r': validate_rampup,
     '-H': validate_url,
     '-md': validate_duration,
+    '-mi': validate_interval,
 }

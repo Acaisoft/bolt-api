@@ -1,5 +1,6 @@
 from google.cloud import storage
 from google.cloud import pubsub_v1
+from google.cloud.pubsub_v1.subscriber.message import Message
 
 
 def register_upload_processor(config):
@@ -12,5 +13,5 @@ def register_upload_processor(config):
     print(sub_future)
 
 
-def upload_processor(pub_msg):
+def upload_processor(pub_msg: Message):
     print(pub_msg)

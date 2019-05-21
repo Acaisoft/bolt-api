@@ -75,6 +75,8 @@ def validate_test_configuration(conf: dict, defaultParams: list):
     check parameter sanity
     >>> validate_test_configuration({
     ...    "name": "conf 1",
+    ...    "has_load_tests": True,
+    ...    "has_monitoring": True,
     ...    "test_source": {
     ...        "source_type": "repository",
     ...        "repository": {
@@ -161,8 +163,9 @@ def validate_monitoring_params(params: list, defaults: list) -> dict:
     ...      {"slug_name": "load_tests_rampup", "name": "users/second", "default_value": "100", "param_name": "-r", "param_type": "int"},
     ...      {"slug_name": "load_tests_host", "name": "host", "default_value": "", "param_name": "-H", "param_type": "str"},
     ...      {"slug_name": "monitoring_duration", "name": "monitoring_duration", "default_value": "", "param_name": "-md", "param_type": "int"},
+    ...      {"slug_name": "monitoring_interval", "name": "monitoring_interval", "default_value": "5", "param_name": "-mi", "param_type": "int"},
     ... ])
-    {'monitoring_duration': '100'}
+    {'monitoring_duration': '100', 'monitoring_interval': '5'}
     """
     params_by_id = dict(((str(x['parameter_slug']), x['value']) for x in params if x['parameter_slug'].startswith('monitoring_')))
     monitoring_defaults = list(filter(lambda x: x['slug_name'].startswith('monitoring_'), defaults))
