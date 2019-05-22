@@ -9,20 +9,32 @@ def get_project_summary(config, user_id):
         name
         description
         image_url
-        scenarios: configurations_aggregate(where: {is_deleted: {_eq: false}, project: {is_deleted: {_eq: false}, userProjects: {user_id: {_eq: $uid}}}}) {
+        
+        scenarios: configurations_aggregate(where: {
+            is_deleted: {_eq: false}, 
+            project: {is_deleted: {_eq: false}, userProjects: {user_id: {_eq: $uid}}}
+        }) {
           aggregate {
             count
           }
         }
-        sources: test_sources_aggregate(where: {is_deleted: {_eq: false}, project: {is_deleted: {_eq: false}, userProjects: {user_id: {_eq: $uid}}}}) {
+        
+        sources: test_sources_aggregate(where: {
+            is_deleted: {_eq: false}, 
+            project: {is_deleted: {_eq: false}, userProjects: {user_id: {_eq: $uid}}}
+        }) {
           aggregate {
             count
           }
         }
       }
+      
       tests: execution_aggregate(
         distinct_on: configuration_id, 
-        where: {configuration: {is_deleted: {_eq: false}, project: {is_deleted: {_eq: false}, userProjects: {user_id: {_eq: $uid}}}}}
+        where: {
+            configuration: {is_deleted: {_eq: false}, 
+            project: {is_deleted: {_eq: false}, userProjects: {user_id: {_eq: $uid}}}}
+        }
       ) {
         nodes {
           configuration {
