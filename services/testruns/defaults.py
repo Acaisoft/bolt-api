@@ -43,7 +43,7 @@ DEFAULT_CHART_CONFIGURATION = '''{
       "x_data_key": "timestamp",
       "x_format": "number",
       "y_data_key": "value",
-      "y_format": "number",
+      "y_format": "bytes",
       "y_label": "name"
     },
     {
