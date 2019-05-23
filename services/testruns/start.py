@@ -145,7 +145,7 @@ def start(app_config, conf_id, user_id, no_cache):
 
     chart_config = test_config['monitoring_chart_configuration']
     if not chart_config:
-        chart_config = DEFAULT_CHART_CONFIGURATION
+        chart_config = json.loads(DEFAULT_CHART_CONFIGURATION)
 
     initial_state = {
         'configuration_id': str(conf_id),
@@ -153,7 +153,7 @@ def start(app_config, conf_id, user_id, no_cache):
         'status': const.TESTRUN_PREPARING,
         'execution_metrics_metadata': {
             'data': {
-                'chart_configuration': json.loads(chart_config),
+                'chart_configuration': chart_config,
             },
         },
     }
