@@ -87,6 +87,7 @@ def start(app_config, conf_id, user_id, no_cache):
             instances
             has_load_tests
             has_monitoring
+            monitoring_chart_configuration
 
             configuration_parameters {
                 parameter_slug
@@ -142,13 +143,17 @@ def start(app_config, conf_id, user_id, no_cache):
         assert monitoring_deadline_secs is not None, \
             f'monitoring_duration/monitoring_deadline_secs must be a numeric value'
 
+    chart_config = test_config['monitoring_chart_configuration']
+    if not chart_config:
+        chart_config = DEFAULT_CHART_CONFIGURATION
+
     initial_state = {
         'configuration_id': str(conf_id),
         'start': str(datetime.now()),
         'status': const.TESTRUN_PREPARING,
         'execution_metrics_metadata': {
             'data': {
-                'chart_configuration': json.loads(DEFAULT_CHART_CONFIGURATION),
+                'chart_configuration': json.loads(chart_config),
             },
         },
     }

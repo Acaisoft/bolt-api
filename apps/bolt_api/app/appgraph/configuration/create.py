@@ -5,6 +5,7 @@ from apps.bolt_api.app.appgraph.configuration import types
 from services import const, gql_util
 from services import validators
 from services.hasura import hce
+from services.testruns.defaults import DEFAULT_CHART_CONFIGURATION
 
 
 class CreateValidate(graphene.Mutation):
@@ -152,6 +153,7 @@ class CreateValidate(graphene.Mutation):
             'has_post_test': has_post_test,
             'has_load_tests': has_load_tests,
             'has_monitoring': has_monitoring,
+            'monitoring_chart_configuration': DEFAULT_CHART_CONFIGURATION,
         }
 
         if user_id:
