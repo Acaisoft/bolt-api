@@ -5,10 +5,9 @@ from services import const
 from services.hasura.hasura import hasura_token_for_testrunner
 from services.deployer import clients
 from services.hasura import hce
+from services.testruns.defaults import DEPLOYER_TIMEOUT, DEFAULT_CHART_CONFIGURATION
 from services.validators import validate_extensions
 from services.validators.configuration import validate_test_configuration_by_id, validate_monitoring_params
-
-DEPLOYER_TIMEOUT = 10
 
 
 def start_image(app_config, project_id, workers, extensions, run_monitoring, run_load_test, monitoring_deadline_secs):
@@ -143,6 +142,9 @@ def start(app_config, conf_id, user_id, no_cache):
         'configuration_id': str(conf_id),
         'start': str(datetime.now()),
         'status': const.TESTRUN_PREPARING,
+        'execution_metrics_metadata': {
+            'chart_configuration': DEFAULT_CHART_CONFIGURATION,
+        }
     }
 
     if code_source == const.CONF_SOURCE_REPO:
