@@ -17,6 +17,10 @@ def configure(app: Flask):
     secrets_file_path = os.environ.get('SECRETS_FILE_PATH', 'localhost-secrets.py')
     app.config.from_pyfile(secrets_file_path)
 
+    google_service_account = app.config.get('GOOGLE_APPLICATION_CREDENTIALS', None)
+    if google_service_account:
+        os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = google_service_account
+
     os.environ['DEBUG_METRICS'] = '1'
     metrics = PrometheusMetrics(app, defaults_prefix='bolt_api')
     app.extensions['metrics'] = metrics

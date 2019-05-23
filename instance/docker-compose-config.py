@@ -20,6 +20,8 @@ REDIS_PORT = 6379
 REDIS_DB = 0
 
 BUCKET_PUBLIC_UPLOADS = 'media.bolt.acaisoft.io'
-UPLOADS_PUBSUB_SUBSCRIPTION = 'gcf-read-bolt-media-request-uploads-bolt-acaisoft'
+BUCKET_PRIVATE_STORAGE = 'uploads-bolt-acaisoft'
+UPLOADS_PUBSUB_SUBSCRIPTION = 'uploads-bolt-acaisoft'
+GOOGLE_APPLICATION_CREDENTIALS = 'instance/acai-bolt-356aea83d223.json'
 
 CONFIG_VERSION = '01betaConf'

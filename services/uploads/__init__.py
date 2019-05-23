@@ -1,0 +1,1 @@
+from .upload_processor import register_upload_processor

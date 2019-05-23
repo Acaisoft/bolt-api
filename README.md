@@ -181,7 +181,7 @@ and react to changes. This feature requires a service account with both write an
 and a correctly configured notification, see :[https://cloud.google.com/storage/docs/reporting-changes]
 or simply:
 ```bash
-gsutil notification create -t uploads-bolt-acaisoft -f json gs://media.bolt.acaisoft.io/
+gsutil notification create -t uploads-bolt-acaisoft -f json gs://uploads-bolt-acaisoft
 ```
 
 To test uploads e2e:

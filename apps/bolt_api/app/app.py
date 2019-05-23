@@ -5,7 +5,7 @@ from flask import Flask
 from apps.bolt_api.app import appgraph, healthcheck, webhooks
 from services.configure import configure, validate
 from services.logger import setup_custom_logger
-from services import deployer, const
+from services import deployer, const, uploads
 from services.cache import get_cache
 from services.hasura import hasura_client
 
@@ -44,6 +44,9 @@ def create_app(test_config=None):
 
     ## webhooks
     webhooks.register_app(app)
+
+    ## uploads processor
+    uploads.register_upload_processor(app.config)
 
     logger.info('application ready')
     return app

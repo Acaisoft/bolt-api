@@ -25,13 +25,12 @@ class UploadUrl(graphene.Mutation):
         content_length = graphene.Int(
             description='Uploaded file size, in bytes')
         object_id = graphene.UUID(
-            required=False,
-            description='Optional association object handle')
+            description='Object association handle')
 
     Output = gql_util.OutputTypeFactory(UploadUrlReturnType)
 
     @staticmethod
-    def validate(info, content_type, content_md5, content_length, object_id=None):
+    def validate(info, content_type, content_md5, content_length):
         role, user_id = gql_util.get_request_role_userid(info, (
         const.ROLE_ADMIN, const.ROLE_TENANT_ADMIN, const.ROLE_MANAGER))
 
@@ -41,20 +40,17 @@ class UploadUrl(graphene.Mutation):
 
         assert content_length and content_length < const.UPLOADS_MAX_SIZE_BYTES, f'upload size exceeds allowed maximum of {const.UPLOADS_MAX_SIZE_BYTES}'
 
-    def mutate(self, info, content_type, content_md5, content_length, object_id=None):
+    def mutate(self, info, content_type, content_md5, content_length, object_id):
         # test uploading file.jpg using curl, openssl, and graphql helper cli:
         # export BASE64MD5=`cat file.jpg | openssl dgst -md5 -binary  | openssl enc -base64`
         # export UPLOAD_URL=graphiql_cli.testrun_project_image_upload(content_type="image/jpeg", content_md5=$BASE64MD5, id="123").response.data.upload_url
         # curl -v -X PUT -H "Content-Type: image/jpeg" -H "Content-MD5: $BASE64MD5" -T - $UPLOAD_URL < file.jpg
-        UploadUrl.validate(info, content_type, content_md5, content_length, object_id)
+        UploadUrl.validate(info, content_type, content_md5, content_length)
 
-        if not object_id:
-            object_id = uuid.uuid4()
-
-        upload_url = get_upload_url(current_app.config, content_md5, content_type, object_id)
+        upload_url, download_url = get_upload_url(current_app.config, content_md5, content_type, object_id)
 
         return gql_util.OutputValueFromFactory(UploadUrl, {'returning': [{
             'object_id': str(object_id),
             'upload_url': upload_url,
-            'download_url': upload_url.split('?')[0],
+            'download_url': download_url,
         }]})

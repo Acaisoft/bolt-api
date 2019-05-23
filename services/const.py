@@ -36,7 +36,7 @@ CONF_SOURCE_CHOICE = (CONF_SOURCE_JSON, CONF_SOURCE_REPO)
 
 IMAGE_CONTENT_TYPES = ('image/png', 'image/jpg', 'image/jpeg', 'image/gif')
 UPLOADS_MAX_SIZE_BYTES = 5000000
-UPLOADS_PUBSUB_SUBSCRIPTION = 'projects/acai-bolt/subscriptions/gcf-read-bolt-media-request-uploads-bolt-acaisoft'
+UPLOADS_PUBSUB_SUBSCRIPTION = 'uploads-bolt-acaisoft'
 
 REQUIRED_BOLT_API_CONFIG_VARS = (
     'KEYCLOAK_URL',
