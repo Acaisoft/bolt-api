@@ -1,3 +1,5 @@
+import json
+
 import deployer_cli
 from datetime import datetime
 
@@ -35,7 +37,8 @@ def start_image(app_config, project_id, workers, extensions, run_monitoring, run
     ), execution_id, job_token
 
 
-def start_job(app_config, project_id, repo_url, workers, no_cache, extensions, run_monitoring, run_load_test, monitoring_deadline_secs):
+def start_job(app_config, project_id, repo_url, workers, no_cache, extensions, run_monitoring, run_load_test,
+              monitoring_deadline_secs):
     # request an image is built from repository sources and executed as testrun
 
     job_token, execution_id = hasura_token_for_testrunner(app_config)
@@ -133,7 +136,8 @@ def start(app_config, conf_id, user_id, no_cache):
     test_extensions = validate_extensions(test_config['configuration_extensions'])
     monitoring_deadline_secs = 0
     if test_config['has_monitoring']:
-        monitoring_params = validate_monitoring_params(test_config['configuration_parameters'], test_config_response['parameter'])
+        monitoring_params = validate_monitoring_params(test_config['configuration_parameters'],
+                                                       test_config_response['parameter'])
         monitoring_deadline_secs = monitoring_params.get('monitoring_duration', None)
         assert monitoring_deadline_secs is not None, \
             f'monitoring_duration/monitoring_deadline_secs must be a numeric value'
@@ -143,8 +147,10 @@ def start(app_config, conf_id, user_id, no_cache):
         'start': str(datetime.now()),
         'status': const.TESTRUN_PREPARING,
         'execution_metrics_metadata': {
-            'chart_configuration': DEFAULT_CHART_CONFIGURATION,
-        }
+            'data': {
+                'chart_configuration': json.loads(DEFAULT_CHART_CONFIGURATION),
+            },
+        },
     }
 
     if code_source == const.CONF_SOURCE_REPO:
