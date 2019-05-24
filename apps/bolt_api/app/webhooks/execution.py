@@ -48,7 +48,7 @@ def update_execution_totals_per_request(config, execution_id):
           order_by:{identifier:asc, timestamp:desc}
         ) 
         {
-          identifier, timestamp, method, name,
+          execution_id, identifier, timestamp, method, name,
           average_content_size, average_response_time, 
           max_response_time, median_response_time, 
           min_response_time, num_failures, num_requests, requests_per_second
