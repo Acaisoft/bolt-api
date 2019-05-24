@@ -41,7 +41,7 @@ def execution_update():
 
 def update_execution_totals_per_request(config, execution_id):
     # copy last entry of each execution_request to execution_request_totals (they're incremental data)
-    resp = hce(config, '''query (eid:uuid!) {
+    resp = hce(config, '''query ($eid:uuid!) {
     execution_by_pk(id:$eid) {
         execution_requests (
           distinct_on:identifier
