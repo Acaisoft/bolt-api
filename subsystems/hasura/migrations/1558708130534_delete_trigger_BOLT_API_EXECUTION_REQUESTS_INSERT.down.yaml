@@ -1,0 +1,32 @@
+- args:
+    delete:
+      columns: '*'
+    headers: []
+    insert:
+      columns: '*'
+    name: BOLT_API_EXECUTION_REQUESTS_INSERT
+    retry_conf:
+      interval_sec: 10
+      num_retries: 0
+      timeout_sec: 60
+    table:
+      name: execution_requests
+      schema: public
+    update:
+      columns:
+      - average_content_size
+      - average_response_time
+      - execution_id
+      - id
+      - identifier
+      - max_response_time
+      - median_response_time
+      - method
+      - min_response_time
+      - name
+      - num_failures
+      - num_requests
+      - requests_per_second
+      - timestamp
+    webhook_from_env: BOLT_API_EXECUTION_REQUESTS_INSERT
+  type: create_event_trigger
