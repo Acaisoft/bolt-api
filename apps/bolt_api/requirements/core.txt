@@ -21,3 +21,4 @@ graphene-file-upload==1.2.2
 python-keycloak==0.16.0
 prometheus-flask-exporter==0.7.2
 python-dateutil==2.8.0
+Flask-Limiter==1.0.1
