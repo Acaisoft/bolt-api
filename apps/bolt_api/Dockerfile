@@ -34,4 +34,4 @@ ARG release
 ENV SENTRY_RELEASE $release
 ENV FLASK_APP=apps.bolt_api.wsgi:application
 
-CMD gunicorn apps.bolt_api.wsgi:application -w 8 --timeout 480 --bind 0.0.0.0:80 --worker-tmp-dir /dev/shm
+CMD gunicorn apps.bolt_api.wsgi:application -w 6 --timeout 480 --bind 0.0.0.0:80 --worker-tmp-dir /dev/shm
