@@ -1,6 +1,5 @@
 import os
 import time
-import uuid
 from subprocess import getoutput
 
 import click
@@ -48,5 +47,5 @@ def request_upload_token(config, path):
     # crude but effective, for testing/debugging only
     base64md5 = getoutput(f'cat {path} | openssl dgst -md5 -binary  | openssl enc -base64')
     mime_type = getoutput(f'file --mime-type {path}').rsplit(': ')[1]
-    upload_url, download_url = get_upload_url(config, base64md5, mime_type, uuid.uuid4())
+    upload_url, download_url = get_upload_url(config, base64md5, mime_type)
     return upload_url

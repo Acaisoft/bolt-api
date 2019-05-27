@@ -30,7 +30,7 @@ class TestDataExtractor(unittest.TestCase):
 
             ts = i.get('timestamp', None)
             assert type(ts) in (int, float), f'timestamp missing or invalid type'
-            assert prev_ts > ts, f'expected output to be ordered by timestamp'
+            assert prev_ts < ts, f'expected output to be ordered by timestamp'
             prev_ts = ts
 
             for k, v in i.items():

@@ -5,7 +5,7 @@ from google.cloud import storage
 from google.cloud import pubsub_v1
 from google.cloud.pubsub_v1.subscriber.message import Message
 
-from services.uploads.image_processor import process_image
+from services.uploads.image_processor import process_image_bucket
 
 from services.logger import setup_custom_logger
 from services.uploads.update_project_logo import update_project_logo
@@ -52,9 +52,9 @@ def upload_processor_controller_factory(app_config, dst_bucket, test_payload):
                     logger.error(f'Incomplete object attributes, ignoring upload. Data: {pub_msg.data}')
                     return
                 logger.info(f'processing image upload for {object_id}')
-                process_image(bucket_id, dst_bucket, object_id)
+                process_image_bucket(bucket_id, object_id, dst_bucket, object_id)
                 logger.info(f'processing image done for {object_id}')
-                update_project_logo(app_config, dst_bucket, object_id)
+                update_project_logo(app_config, object_id)
                 logger.info(f'processing project logos done for {object_id}')
         else:
             logger.error(f'unrecognized ')
@@ -70,7 +70,12 @@ def done_callback(message_future):
 
 
 def register_upload_processor(config, test_delivery=False):
-    # call this at start of flask app, pass app.config
+    """
+    Listen to pubsub subscription for bucket file upload notifications and process uploads accordingly.
+    This has the advantage (over processing inside reques handler) that any heavy lifting is done asynchronously in
+    a separate thread.
+    Call this at start of flask app, pass app.config
+    """
 
     pubsub_name = config.get('UPLOADS_PUBSUB_SUBSCRIPTION')
     dst_bucket = config.get('BUCKET_PUBLIC_UPLOADS', None)

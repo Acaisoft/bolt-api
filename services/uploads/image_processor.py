@@ -15,9 +15,15 @@ SIZES = [PROJECT_LOGO_LARGE, PROJECT_LOGO_SMALL, MICRO]
 DEFAULT_SIZE = PROJECT_LOGO_SMALL
 
 
-def process_image(src_bucket_name, dst_bucket_name, object_id):
-    logger.info(f'processing image at {src_bucket_name}/{object_id}')
-    src_file = f'/tmp/{object_id.replace("/", "_")}_original'
+def process_image(app_config, src_object_id, dst_object_id):
+    src_bucket = app_config.get('BUCKET_PRIVATE_STORAGE', None)
+    dst_bucket = app_config.get('BUCKET_PUBLIC_UPLOADS', None)
+    process_image_bucket(src_bucket, src_object_id, dst_bucket, dst_object_id)
+
+
+def process_image_bucket(src_bucket_name, src_object_id, dst_bucket_name, dst_object_id):
+    logger.info(f'processing image at {src_bucket_name}/{src_object_id}')
+    src_file = f'/tmp/{src_object_id.replace("/", "_")}_original'
 
     try:
         gsc = storage.Client()
@@ -27,16 +33,16 @@ def process_image(src_bucket_name, dst_bucket_name, object_id):
 
     dst_bucket = gsc.get_bucket(dst_bucket_name)
     src_bucket = gsc.get_bucket(src_bucket_name)
-    blob = src_bucket.get_blob(object_id)
+    src_blob = src_bucket.get_blob(src_object_id)
 
     try:
-        blob.download_to_filename(src_file)
+        src_blob.download_to_filename(src_file)
     except Exception as e:
-        logger.error(f'cannot download file locally {object_id}: {str(e)}')
+        logger.error(f'cannot download file locally {dst_object_id}: {str(e)}')
 
     for size in SIZES:
-        out_file = f'/tmp/{object_id.replace("/", "_")}_{size[0]}x{size[1]}'
-        dst_blob_name = f'{object_id}/{size[0]}x{size[1]}'
+        out_file = f'/tmp/{dst_object_id.replace("/", "_")}_{size[0]}x{size[1]}'
+        dst_blob_name = f'{dst_object_id}/{size[0]}x{size[1]}'
 
         try:
             img = Image.open(src_file)
@@ -61,23 +67,23 @@ def process_image(src_bucket_name, dst_bucket_name, object_id):
         if size == DEFAULT_SIZE:
             # also copy this size to "root" object
             try:
-                dst_blob = dst_bucket.blob(object_id)
+                dst_blob = dst_bucket.blob(dst_object_id)
                 dst_blob.upload_from_filename(out_file, content_type='image/jpeg')
-                logger.info(f'uploaded {size} thumbnail to {src_bucket_name}/{object_id}')
+                logger.info(f'uploaded {size} thumbnail to {src_bucket_name}/{dst_object_id}')
             except Exception as e:
                 logger.error(f'cannot upload file {out_file} as default: {str(e)}')
                 continue
 
         os.unlink(out_file)
-        logger.info(f'uploaded {size} thumbnail to {src_bucket_name}/{dst_blob_name}')
+        logger.info(f'uploaded {size} thumbnail to {dst_bucket_name}/{dst_blob_name}')
 
-    if blob.size < 10000000:
-        dst_blob_name = f'{object_id}/original'
+    if src_blob.size < 10000000:
+        dst_blob_name = f'{dst_object_id}/original'
         dst_blob = dst_bucket.blob(dst_blob_name)
         logger.info(f'copying original to {dst_bucket_name}/{dst_blob_name}')
         dst_blob.upload_from_filename(src_file, content_type='image/jpeg')
     else:
-        logger.warn(f'not copying original image at {src_bucket_name}/{object_id}: file size too large: {blob.size}')
+        logger.warn(f'not copying original image at {src_bucket_name}/{src_object_id}: file size too large: {src_blob.size}')
     os.unlink(src_file)
 
 

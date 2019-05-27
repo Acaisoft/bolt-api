@@ -1,1 +1,3 @@
 from .upload_processor import register_upload_processor
+from .image_processor import process_image
+from .update_project_logo import update_project_logo, get_object_public_url

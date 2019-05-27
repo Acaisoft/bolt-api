@@ -45,9 +45,6 @@ def create_app(test_config=None):
     ## webhooks
     webhooks.register_app(app)
 
-    ## uploads processor
-    uploads.register_upload_processor(app.config)
-
     logger.info('application ready')
     return app
 
