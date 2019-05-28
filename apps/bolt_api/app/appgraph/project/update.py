@@ -87,7 +87,7 @@ class Update(UpdateValidate):
 
         query_params = UpdateValidate.validate(info, id, name, description, image_url)
 
-        if query_params['image_url']:
+        if query_params.get('image_url'):
             query_params['image_url'] = Update.process_upload(query_params['image_url'])
 
         query = '''mutation ($id:uuid!, $data:project_set_input!) {
