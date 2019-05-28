@@ -92,6 +92,7 @@ def fill_in_project(config, name, project_id):
     resp = hce(config, '''mutation ($name:String!, $id:UUID!, $testsource_repo_id:UUID!) {
     testrun_configuration_create(
         name:$name
+        has_load_tests:true
         project_id:$id
         type_slug:"load_tests"
         test_source_id:$testsource_repo_id

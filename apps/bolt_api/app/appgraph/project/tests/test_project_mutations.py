@@ -2,14 +2,16 @@ from services.testing.testing_util import BoltCase
 
 
 class TestProjectMutations(BoltCase):
+    # TODO: add testing uploads (maybe with mock google storage)
+
     # recorded created project
     o = {
-        'id': '04ce4055-5278-4fd5-aab9-2148faa58cdd',
+        'id': BoltCase.recorded_project_id,
         'name': 'test project 1',
         'description': 'test project description',
     }
     u = {
-        'id': o['id'],
+        'id': BoltCase.recorded_project_id,
         'name': 'new name',
         'description': 'new description',
     }
@@ -22,7 +24,7 @@ class TestProjectMutations(BoltCase):
             ) { returning {id name description} }
         }''', {'name': self.o['name'], 'description': self.o['description']})
         self.assertIsNone(resp.errors(), 'expected no errors')
-        self.assertEqual(self.o, resp.one('testrun_project_create'), 'expected returned data to match')
+        self.assertCountEqual(self.o, resp.one('testrun_project_create'), 'expected returned data to match')
 
     def test_update_project(self):
         resp = self.gql_client('''mutation ($id:UUID!, $name:String!, $description:String!) {
@@ -33,7 +35,7 @@ class TestProjectMutations(BoltCase):
             ) { returning { id name description } }
         }''', self.u)
         self.assertIsNone(resp.errors(), 'expected no errors')
-        self.assertEqual(self.u, resp.one('testrun_project_update'), 'expected data to have been updated')
+        self.assertCountEqual(self.u, resp.one('testrun_project_update'), 'expected data to have been updated')
 
     def test_soft_delete_project(self):
         resp = self.gql_client('''mutation ($id:UUID!) {
@@ -42,14 +44,11 @@ class TestProjectMutations(BoltCase):
             ) { returning { id name description } }
         }''', {'id': self.o['id']})
         self.assertIsNone(resp.errors(), 'expected no errors')
-        self.assertEqual(self.u, resp.one('testrun_project_delete'), 'expected data to have been returned')
+        self.assertCountEqual(self.u, resp.one('testrun_project_delete'), 'expected data to have been returned')
 
-        resp = self.gql_client('''query ($id:UUID!) {
-            project_by_pk(id: $id) { id name description is_deleted }
-        }''', {'id': self.o['id']})
-        exp = self.u.copy()
-        exp['is_deleted'] = True
-        bod = resp.json()
-        print(bod)
+    def test_project_summary(self):
+        resp = self.gql_client('''query {
+            testrun_project_summary { projects { name description } }
+        }''', {})
         self.assertIsNone(resp.errors(), 'expected no errors')
-        self.assertEqual(exp, resp.json()['data']['project_by_pk'], 'expected soft deleted project')
+        self.assertEqual(6, len(resp.json()['data']['testrun_project_summary']['projects']))

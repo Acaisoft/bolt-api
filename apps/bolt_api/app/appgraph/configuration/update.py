@@ -272,6 +272,12 @@ class Update(UpdateValidate):
             $envs:[configuration_envvars_insert_input!]!
         ) {
             
+            delete_configuration_parameter (
+                where: {configuration_id:{_eq:$id}}
+            ) {
+                affected_rows
+            } 
+            
             insert_configuration_parameter (
                 objects: $params
                 on_conflict: {
@@ -281,6 +287,12 @@ class Update(UpdateValidate):
             ) {
                 affected_rows
             }
+            
+            delete_configuration_envvars (
+                where: {configuration_id:{_eq:$id}}
+            ) {
+                affected_rows
+            } 
         
             insert_configuration_envvars (
                 objects: $envs

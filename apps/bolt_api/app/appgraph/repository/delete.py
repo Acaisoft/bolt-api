@@ -29,6 +29,12 @@ class Delete(graphene.Mutation):
                 affected_rows
                 returning { id name repository_url:url project_id type_slug } 
             }
+            update_test_source(
+                where:{
+                    id:{_eq:$pk}
+                },
+                _set: {is_deleted:true}
+            ) { affected_rows }
         }'''
 
         query_response = hce(current_app.config, query, {
