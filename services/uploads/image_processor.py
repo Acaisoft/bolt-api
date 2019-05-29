@@ -4,15 +4,9 @@ from PIL import Image
 from google.cloud import storage
 
 from services.logger import setup_custom_logger
+from services.uploads.thumbnails import SIZES, DEFAULT_SIZE, MAX_ORIGINAL_BYTES
 
 logger = setup_custom_logger(__name__)
-
-
-PROJECT_LOGO_LARGE = (810, 445)
-PROJECT_LOGO_SMALL = (400, 250)
-MICRO = (100, 80)
-SIZES = [PROJECT_LOGO_LARGE, PROJECT_LOGO_SMALL, MICRO]
-DEFAULT_SIZE = PROJECT_LOGO_SMALL
 
 
 def process_image(app_config, src_object_id, dst_object_id):
@@ -78,7 +72,7 @@ def process_image_bucket(src_bucket_name, src_object_id, dst_bucket_name, dst_ob
         os.unlink(out_file)
         logger.info(f'uploaded {size} thumbnail to {dst_bucket_name}/{dst_blob_name}')
 
-    if src_blob.size < 10000000:
+    if src_blob.size < MAX_ORIGINAL_BYTES:
         dst_blob_name = f'{dst_object_id}/original'
         dst_blob = dst_bucket.blob(dst_blob_name)
         logger.info(f'copying original to {dst_bucket_name}/{dst_blob_name}')
