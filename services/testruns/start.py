@@ -7,7 +7,7 @@ from services import const
 from services.hasura.hasura import hasura_token_for_testrunner
 from services.deployer import clients
 from services.hasura import hce
-from services.testruns.defaults import DEPLOYER_TIMEOUT, DEFAULT_CHART_CONFIGURATION
+from services.testruns.defaults import DEPLOYER_TIMEOUT, DEFAULT_CHART_CONFIGURATION, NFS_CHART_CONFIGURATION
 from services.validators import validate_extensions
 from services.validators.configuration import validate_test_configuration_by_id, validate_monitoring_params
 
@@ -143,9 +143,13 @@ def start(app_config, conf_id, user_id, no_cache):
         assert monitoring_deadline_secs is not None, \
             f'monitoring_duration/monitoring_deadline_secs must be a numeric value'
 
+    # monitoring chart javascript configuration
     chart_config = test_config['monitoring_chart_configuration']
     if not chart_config:
         chart_config = json.loads(DEFAULT_CHART_CONFIGURATION)
+    # override if NFS extension is defined
+    if test_extensions[0]['type'] == const.EXTENSION_NFS:
+        chart_config = json.loads(NFS_CHART_CONFIGURATION)
 
     initial_state = {
         'configuration_id': str(conf_id),

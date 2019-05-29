@@ -98,3 +98,69 @@ DEFAULT_CHART_CONFIGURATION = '''{
     }
   ]
 }'''
+
+# chart conf for configuration with NFS extension
+NFS_CHART_CONFIGURATION = '''{
+  "charts": [
+    {
+      "x_format": "number",
+      "node_name": "current_files",
+      "x_data_key": "timestamp",
+      "y_format": "number",
+      "y_label": "name",
+      "title": "Current files",
+      "type": "line",
+      "y_data_key": "value"
+    },
+    {
+      "x_format": "number",
+      "node_name": "current_bytes",
+      "x_data_key": "timestamp",
+      "y_format": "bytes",
+      "y_label": "name",
+      "title": "Current bytes",
+      "type": "line",
+      "y_data_key": "value"
+    },
+    {
+      "x_format": "number",
+      "node_name": "throughput",
+      "x_data_key": "timestamp",
+      "y_format": "number",
+      "y_label": "name",
+      "title": "Throughput",
+      "type": "line",
+      "y_data_key": "value"
+    },
+    {
+      "x_format": "number",
+      "node_name": "dedupe",
+      "x_data_key": "timestamp",
+      "y_format": "percent",
+      "y_label": "name",
+      "title": "Dedupe",
+      "type": "line",
+      "y_data_key": "value"
+    },
+    {
+      "x_format": "number",
+      "node_name": "compression",
+      "x_data_key": "timestamp",
+      "y_format": "number",
+      "y_label": "name",
+      "title": "Compression",
+      "type": "line",
+      "y_data_key": "value"
+    },
+    {
+      "x_format": "number",
+      "node_name": "total_savings",
+      "x_data_key": "timestamp",
+      "y_format": "percent",
+      "y_label": "name",
+      "title": "Total Savings",
+      "type": "line",
+      "y_data_key": "value"
+    }
+  ]
+}'''
