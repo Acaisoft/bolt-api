@@ -34,6 +34,7 @@ def process_image_bucket(src_bucket_name, src_object_id, dst_bucket_name, dst_ob
     dst_bucket = gsc.get_bucket(dst_bucket_name)
     src_bucket = gsc.get_bucket(src_bucket_name)
     src_blob = src_bucket.get_blob(src_object_id)
+    assert src_blob is not None, f'uploaded image does not exist'
 
     try:
         src_blob.download_to_filename(src_file)
