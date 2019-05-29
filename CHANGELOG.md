@@ -1,6 +1,131 @@
 Changelog
 =========
 
+## 0.2.9 (2019-05-29)
+
+### Changes
+
+* Switch from notification-based to handler-based image processing. [Piotr Mońko]
+
+* Add default metrics charts configuration. [Piotr Mońko]
+
+* Add monitoring interval parameter. [Piotr Mońko]
+
+* Return token from testrun_start if role is ADMIN. [Piotr Mońko]
+
+* Add tenant_admin role support, add scenario params deployer support, bump deployer version, add debug token output from testrun_start. [Piotr Mońko]
+
+* Make conf params required only when load_tests scenario is enabled. [Piotr Mońko]
+
+### Other
+
+* Add tests. [Piotr Mońko]
+
+* Add more vcr tests. [Piotr Mońko]
+
+* Add testutil and projec tests. [Piotr Mońko]
+
+* Add exec_id to insert of totals. [Piotr Mońko]
+
+* Fix requests totals query. [Piotr Mońko]
+
+* Optimize and reduce heavy callbacks. [Piotr Mońko]
+
+* Optimize and reduce heavy callbacks. [Piotr Mońko]
+
+* Remove retalimiting from webhooks. [Piotr Mońko]
+
+* Add missing requirement. [Piotr Mońko]
+
+* Merge branch 'master' into bup. [Piotr Mońko]
+
+* Fix typo in hasura permissions, add ratelimiting to webhooks. [Piotr Mońko]
+
+* Remove worker-tmp-dir. [Piotr Mońko]
+
+* Merge branch 'master' into bup. [Piotr Mońko]
+
+* Fix another type. [Piotr Mońko]
+
+* Fix type. [Piotr Mońko]
+
+* Add configuration chart metadata. [Piotr Mońko]
+
+* Change gunicorn worker-tmp-dir. [Piotr Mońko]
+
+* Fix missing input wrapper. [Piotr Mońko]
+
+* Merge branch 'master' into bup. [Piotr Mońko]
+
+* Implement bolt uploads processor. [Piotr Mońko]
+
+* Fix bad code. [Piotr Mońko]
+
+* Fix pip requirements. [Piotr Mońko]
+
+* Fix project summary additional fields. [Piotr Mońko]
+
+* Add migrations for monitoring_interval. [Piotr Mońko]
+
+* Fix validation configuration updataion. [Piotr Mońko]
+
+* Fix quiet update error. [Piotr Mońko]
+
+* Validate testrun has_something. [Piotr Mońko]
+
+* Remove temporarily new constant. [Piotr Mońko]
+
+* Update bolt-deployer. [Piotr Mońko]
+
+* Add new param. [Piotr Mońko]
+
+* Fix perms. [Piotr Mońko]
+
+* Fix build. [Piotr Mońko]
+
+* Change perms in metadata. [Piotr Mońko]
+
+* Remove invalid update. [Piotr Mońko]
+
+* Fix missing return. [Piotr Mońko]
+
+* Fix missing return. [Piotr Mońko]
+
+* Increase worker timeout, add workers, fix bytes>int comparison. [Piotr Mońko]
+
+* Track upserts. [Piotr Mońko]
+
+* Add logs. [Piotr Mońko]
+
+* Add logs. [Piotr Mońko]
+
+* Merged in refactoring-requirements (pull request #16) [Artiom Borysiewicz]
+
+  Refactoring
+
+* Refactoring. [art.barysevich]
+
+* Merged in refactoring-requirements (pull request #15) [Artiom Borysiewicz]
+
+  Fix pip. Refactoring
+
+* Fix pip. Refactoring. [art.barysevich]
+
+* Update bolt-deployer sdk, add charts conf data storage table. [Piotr Mońko]
+
+* Rename types in configuration create/update. [Piotr Mońko]
+
+* Convert mounts_per_worker to int. [Piotr Mońko]
+
+* Fix type mismatch. [Piotr Mońko]
+
+* Add configuration sections support. [Piotr Mońko]
+
+* Increase deployer connection timeout. [Piotr Mońko]
+
+* Refactor export endpoints. add raw json output. [Piotr Mońko]
+
+
 ## 0.2.8 (2019-05-10)
 
 ### Changes
