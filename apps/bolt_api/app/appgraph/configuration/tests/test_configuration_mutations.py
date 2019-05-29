@@ -7,7 +7,7 @@ from services.testing.testing_util import BoltCase
 class TestConfigurationMutations(BoltCase):
 
     def test_create_conf(self):
-        name = 'test config 123'
+        name = 'test config 12345'
         resp = self.gql_client('''mutation ($name:String!, $id:UUID!, $testsource_repo_id:UUID!, $test_target:String!) {
             testrun_configuration_create(
                 name:$name
@@ -61,7 +61,7 @@ class TestConfigurationMutations(BoltCase):
         ], out['configuration_parameters'], 'expected configuration parameters do not match')
 
     def test_update_conf(self):
-        name = 'updated test config name 1'
+        name = 'updated test config name 12345'
         resp = self.gql_client('''mutation ($name:String!, $id:UUID!, $test_target:String!) {
             testrun_configuration_update(
                 id:$id

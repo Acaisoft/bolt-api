@@ -23,7 +23,7 @@ REDIS_DB = 0
 
 BUCKET_PUBLIC_UPLOADS = 'media.bolt.acaisoft.io'
 BUCKET_PRIVATE_STORAGE = 'uploads-bolt-acaisoft'
-UPLOADS_PUBSUB_SUBSCRIPTION = 'uploads-bolt-acaisoft'
+UPLOADS_PUBSUB_SUBSCRIPTION = 'uploads-bolt-acaisoft' # TODO: remove
 GOOGLE_APPLICATION_CREDENTIALS = 'instance/acai-bolt-356aea83d223.json'
 
 CONFIG_VERSION = '01beta'

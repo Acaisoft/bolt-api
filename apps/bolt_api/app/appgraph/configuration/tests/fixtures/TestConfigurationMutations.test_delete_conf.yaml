@@ -42,21 +42,21 @@
                     "message": "OK"
                 },
                 "headers": {
-                    "Server": [
-                        "Warp/3.2.26"
-                    ],
-                    "Date": [
-                        "Tue, 28 May 2019 13:00:31 GMT"
+                    "Transfer-Encoding": [
+                        "chunked"
                     ],
                     "Content-Type": [
                         "application/json; charset=utf-8"
                     ],
-                    "Transfer-Encoding": [
-                        "chunked"
+                    "Date": [
+                        "Wed, 29 May 2019 11:36:44 GMT"
+                    ],
+                    "Server": [
+                        "Warp/3.2.26"
                     ]
                 },
                 "body": {
-                    "string": "{\"data\":{\"update_configuration\":{\"affected_rows\" : 1, \"returning\" : [{\"id\":\"7262d765-4d18-48a9-9d08-dd142ce8dab5\",\"name\":\"updated test config name 1\",\"type_slug\":\"load_tests\",\"project_id\":\"04ce4055-5278-4fd5-aab9-2148faa58cdd\",\"test_source_id\":\"04ce4055-5278-4fd5-aab9-2148faa58cdd\"}]}}}"
+                    "string": "{\"data\":{\"update_configuration\":{\"affected_rows\" : 1, \"returning\" : [{\"id\":\"7262d765-4d18-48a9-9d08-dd142ce8dab5\",\"name\":\"updated test config name 12345\",\"type_slug\":\"load_tests\",\"project_id\":\"04ce4055-5278-4fd5-aab9-2148faa58cdd\",\"test_source_id\":\"04ce4055-5278-4fd5-aab9-2148faa58cdd\"}]}}}"
                 }
             }
         }

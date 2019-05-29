@@ -50,18 +50,27 @@ class UpdateValidate(graphene.Mutation):
     Output = gql_util.ValidationInterface
 
     @staticmethod
+    def patch_query_data(query_data, patch_from, field_names):
+        for a in field_names:
+            if a not in patch_from:
+                raise RuntimeError(f'patch_query_data from arg missing "{a}" key')
+            query_data[a] = patch_from.get(a)
+        return query_data
+
+    @staticmethod
     def validate(
             info, id, name=None, type_slug=None, test_source_id=None, configuration_parameters=None,
-            configuration_envvars=None, has_pre_test=None, has_post_test=None, has_load_tests=None, has_monitoring=None):
+            configuration_envvars=None, has_pre_test=None, has_post_test=None, has_load_tests=None,
+            has_monitoring=None):
 
         role, user_id = gql_util.get_request_role_userid(
             info,
             (const.ROLE_ADMIN, const.ROLE_TENANT_ADMIN, const.ROLE_MANAGER, const.ROLE_TESTER)
         )
 
-        sections = [x for x in (has_pre_test, has_post_test, has_load_tests, has_monitoring) if x is not None]
-        assert len(sections), \
-            f'At least one section is required'
+        query_data = {
+            'configuration_parameters': {'data': []}
+        }
 
         original = hce(current_app.config, '''query ($confId:uuid!, $userId:uuid!) {
             configuration (where:{
@@ -76,14 +85,32 @@ class UpdateValidate(graphene.Mutation):
                 type_slug
                 project_id
                 test_source_id
+                configuration_parameters { parameter_slug value configuration_id }
+                configuration_envvars { name value configuration_id }
+                has_pre_test 
+                has_post_test 
+                has_load_tests 
+                has_monitoring
             }
         }''', {'confId': str(id), 'userId': user_id})
         assert len(original['configuration']), f'configuration does not exist'
 
         is_performed = original['configuration'][0]['performed']
         if is_performed:
-            assert not any((type_slug, test_source_id, configuration_parameters)), \
-                f'configuration {str(id)} has already been performed, only name is editable'
+            assert not any((type_slug, test_source_id, configuration_parameters, has_pre_test, has_post_test,
+                            has_load_tests, has_monitoring)), \
+                f'configuration {str(id)} has already been performed, only name and envvars are editable'
+            # populate query data fields from db, leter overwrite if args are None
+            query_data = UpdateValidate.patch_query_data(
+                query_data,
+                original['configuration'][0],
+                [
+                    'name', 'type_slug', 'test_source_id',
+                    'has_pre_test', 'has_post_test', 'has_load_tests', 'has_monitoring'
+                ]
+            )
+            query_data['configuration_parameters'] = {'data': original['configuration'][0]['configuration_parameters']}
+            query_data['configuration_envvars'] = {'data': original['configuration'][0]['configuration_envvars']}
 
         if name:
             name = validators.validate_text(name)
@@ -159,10 +186,6 @@ class UpdateValidate(graphene.Mutation):
             assert repo.get('hasUserAccess', None), \
                 f'non-admin ({role}) user {user_id} does not have access to configuration {str(id)}'
 
-        query_data = {
-            'configuration_parameters': {'data': []}
-        }
-
         if has_pre_test is not None:
             query_data['has_pre_test'] = has_pre_test
         if has_post_test is not None:
@@ -171,6 +194,15 @@ class UpdateValidate(graphene.Mutation):
             query_data['has_load_tests'] = has_load_tests
         if has_monitoring is not None:
             query_data['has_monitoring'] = has_monitoring
+
+        sections = [x for x in (
+            query_data.get('has_pre_test', None),
+            query_data.get('has_post_test', None),
+            query_data.get('has_load_tests', None),
+            query_data.get('has_monitoring', None),
+        ) if x is not None]
+        assert len(sections), \
+            f'At least one section is required'
 
         if name and name != original['configuration'][0]['name']:
             name = validators.validate_text(name)
@@ -215,7 +247,8 @@ class UpdateValidate(graphene.Mutation):
                         query_data['instances'] = math.ceil(int(param_value) / const.TESTRUN_MAX_USERS_PER_INSTANCE)
 
         if has_monitoring:
-            monitoring_parameters = validators.validate_monitoring_params(configuration_parameters or [], defaults=repo['parameter'])
+            monitoring_parameters = validators.validate_monitoring_params(configuration_parameters or [],
+                                                                          defaults=repo['parameter'])
             if monitoring_parameters:
                 for slug, value in monitoring_parameters.items():
                     query_data['configuration_parameters']['data'].append({
@@ -240,7 +273,8 @@ class UpdateValidate(graphene.Mutation):
         return query_data
 
     def mutate(self, info, id, name=None, type_slug=None, test_source_id=None, configuration_parameters=None,
-               configuration_envvars=None, has_pre_test=None, has_post_test=None, has_load_tests=None, has_monitoring=None):
+               configuration_envvars=None, has_pre_test=None, has_post_test=None, has_load_tests=None,
+               has_monitoring=None):
         UpdateValidate.validate(
             info, id, name, type_slug, test_source_id, configuration_parameters, configuration_envvars,
             has_pre_test, has_post_test, has_load_tests, has_monitoring
@@ -255,8 +289,8 @@ class Update(UpdateValidate):
 
     def mutate(
             self, info, id, name=None, type_slug=None, test_source_id=None, configuration_parameters=None,
-            configuration_envvars=None, has_pre_test=None, has_post_test=None, has_load_tests=None, has_monitoring=None):
-
+            configuration_envvars=None, has_pre_test=None, has_post_test=None, has_load_tests=None,
+            has_monitoring=None):
         query_params = UpdateValidate.validate(
             info, id, name, type_slug, test_source_id, configuration_parameters, configuration_envvars,
             has_pre_test, has_post_test, has_load_tests, has_monitoring

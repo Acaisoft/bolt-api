@@ -73,4 +73,4 @@ def get_project_summary(config, user_id):
         out[pid]['num_tests_passed'] += item['passed_requests']
         out[pid]['num_tests_failed'] += item['failed_requests']
 
-    return list(out.values())
+    return sorted(out.values(), key=lambda x: x['name'])

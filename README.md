@@ -9,14 +9,14 @@ to fetch dependencies after cloning.
 
 ### Development
 
-Almost everything needed to run bolt-api in development mode is contained in
+Everything (except bolt-deployer - it lives inside cluster) needed to run bolt-api locally is contained in
 `docker-compose` file, it should be enough to just execute:
 
 ```
 docker-compose up
 ```
 
-in root directory of this repo, then open a connection to the `bolt-deployer` service:
+in root directory of this repo, then forward a port to the `bolt-deployer` service:
 
 ```
 kubectl -n bolt-deployer port-forward svc/bolt-deployer 7777:80
@@ -76,26 +76,25 @@ Where hasura methods are insufficient, bolt-api provides a superset of methods:
 * `testrun_configuration_update_validate`
 * `testrun_start` - given a configuration id, start actual tests (pass result to `testrun_status`)
 
+For current list check graphiql interface.
+
 ##### Authentication in development
 
-In debug mode developers can use:
-
-* `oauth_conf` - exposes configured oauth client ids
-* `oauth_authtoken` - exchanges oauth auth-token for a hasura jwt token
-* http://localhost:5000/google/login and http://localhost:5000/github/login helper urls 
-
-to perform oauth authentication, sufficient for testing permissions. 
+Hasura setup in docker-compose uses a token literal of `devaccess`, use that to authenticate per Hasura docs.
 
 ### Project organization
 
-* `/app/` - bolt-api flask server, use `flask run` to start in development mode or `/wsgi.py`
-* `/bolt-deployer/` - git submodule, enabes integration with bolt-api through `bolt-deployer/sdk`
-* `/bolt_api/` - python module containing common bolt-api graphql libraries and utilities  
+* `/apps/bolt_api/` - bolt-api flask server, forwarded as remote hasura chema, use `flask run` to start in development mode or `./wsgi.py`
+    * `/apps/bolt_api/app/appgraph` - contains graphql mutations and queries
+    * `/apps/bolt_api/app/webhooks` - contains public (!) endpoints for hasura to call on configured events, list with `flask routes`
+* `/apps/bolt_metrics_api/` - metrics exporter for offloading and separating heavy tasks
+* `/bolt-deployer/` - git submodule, enabes integration with bolt-api through `pip install bolt-deployer/sdk`
 * `/charts/` - helm deployment charts
-* `/dev_setup/` - scratchpad area, populates fresh hasura instance with lots of data
-* `/hasura/` - holds hasura migrations, schema definitions, and hasura-cli configuration
-* `/instance/` - holds flask configuration, override with `CONFIG_FILE_PATH` and `SECRETS_FILE_PATH` env variables
-* `/requirements/` - pip install -r core.txt
+* `/cmds/` - helper flask commands list with `flask --help`  
+* `/instance/` - flask configuration, override with `CONFIG_FILE_PATH` and `SECRETS_FILE_PATH` env variables
+* `/services/` - python module containing core functionality  
+* `/subsystems/` - holds hasura migrations, schema definitions, and hasura-cli configuration
+* `/requirements.txt` - installs development requirements
 
 ### Production Setup & Deployment
 
@@ -104,40 +103,18 @@ controlled by `CONFIG_FILE_PATH` and `SECRETS_FILE_PATH` env variables.
 
 Deployment requirements:
 
+* python >= 3.6 venv
 * redis
 * hasura
-* `pip install -r requirements/core.txt`
-* environment variables:
-    * `PORT` 
-    run wsgi on this
-    * `HASURA_GRAPHQL_ACCESS_KEY` 
-    to authorize as service-account with, hasura instance access_key must equal this
-    * `HASURA_GQL` 
-    full address of hasura, eg. http://localhost:8080/v1alpha1/graphql
-    * `REDIS_HOST` and `REDIS_PORT` and `REDIS_DB`
-    * `BUCKET_PUBLIC_UPLOADS`
-    path to Google Cloud Storage bucket for uploads ment to be public
-    * `GOOGLE_APPLICATION_CREDENTIALS` 
-    path to google service account credentials json file, 
-    necessary for uploads 
-* app configuration in `instance/conf.py`:
-    * `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` 
-    from https://console.cloud.google.com/apis/credentials/oauthclient/
-    * `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET` 
-    from https://github.com/settings/applications/
-    * `OAUTH_REDIRECT` 
-    base address to redirect oauth responses to, 
-    must be common for all oauth app providers, will most likely point to a frontend 
-    address, eg.:
-    if redirect address is configured in app is:  
-    https://appfrontend.appspot.com/google/auth
-    then OAUTH_REDIRECT will be https://appfrontend.appspot.com
-    * `SECRET_KEY` 
-    really secret, used for signing and verifying jwt tokens
-    * `JWT_ALGORITHM` 
-    defaults to `HS256`
+* `pip install -r requirements.txt`
+* project configuration variables:
+    * by default are read from `/instance/localhost-config.py` and `/instance/secrets.py`
+    * conf files locations are configurable through `CONFIG_FILE_PATH` and `SECRETS_FILE_PATH` environment variables
+    * missing but required config variables are checked at startup
+    * external services necessary for operation are loaded eagerly where possible, with Hasura being notable exception
+    (Hasura starts _after_ bolt_api) 
 
-### Startup sequence
+### Manual Startup Sequence
 
 #### Preparation
 
@@ -150,7 +127,7 @@ Deployment requirements:
 
 ###### DB:
 
-Once hasura and db are up, go into `hasura` subfolder, 
+Once hasura and db are up, go into `/subsystems/hasura/` subfolder, 
 adjust `endpoint` in `hasura/config.yaml` and execute hasura CLI tool:
 ```
 /bin/hasura migrate apply
@@ -158,7 +135,7 @@ adjust `endpoint` in `hasura/config.yaml` and execute hasura CLI tool:
 
 ###### Services:
 
-Start redis and db first, then api, then hasura.
+Start redis and db first, then api, then hasura, finally any monitoring.
 
 Port forward to bolt-deployer using:
 ```
@@ -170,19 +147,13 @@ Order is important.
 ##### Remote schema:
 
 Hasura migrations (see DB) set up bolt-api as remote schema thus offloading access and authorization 
-to hasura. Bolt-api queries and mutations can be distinguished by the `testrun_` prefix.
+to hasura. Bolt-api queries and mutations are to be distinguished by the `testrun_` prefix.
 
 ### File Uploads
 
-Files are uploaded directly to designated GCS buckets, through time-limited urls.
+Files are uploaded directly to designated GCS buckets, through time-limited signed urls.
 
-Upload processing (currently only image resizing) uses a bucket object change notification to listen to 
-and react to changes. This feature requires a service account with both write and read access to pub/sub
-and a correctly configured notification, see :[https://cloud.google.com/storage/docs/reporting-changes]
-or simply:
-```bash
-gsutil notification create -t uploads-bolt-acaisoft -f json gs://uploads-bolt-acaisoft
-```
+Mutations accept 
 
 To test uploads e2e:
 ```bash

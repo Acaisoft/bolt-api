@@ -18,16 +18,14 @@ example_test_creator_data = '''{"global_headers":{"HASURA_GRAPHQL_JWT_SECRET":"s
 
 
 def setup_demo_project(config, name, req_user_id, req_user_email, _async=True):
-    project_logo = 'https://storage.googleapis.com/media.bolt.acaisoft.io/project_logos/d85d29e5-8204-46a7-8218-40bdcf68c978'
-
     assert not all((req_user_id, req_user_email)), 'must provide one of user_id, user_email'
     assert any((req_user_id, req_user_email)), 'must provide either user_id or user_email'
 
     # create project
     logger.info(f'creating project {name}')
-    proj_resp = hce(config, '''mutation ($name:String!, $logo:String!) {
-        testrun_project_create (name:$name, description:"demo project", image_url:$logo) { returning {id} }
-    }''', {'logo': project_logo, 'name': name})
+    proj_resp = hce(config, '''mutation ($name:String!) {
+        testrun_project_create (name:$name, description:"demo project") { returning {id} }
+    }''', {'name': name})
     project_id = proj_resp['testrun_project_create']['returning'][0]['id']
 
     if req_user_email:
@@ -121,6 +119,7 @@ def fill_in_project(config, name, project_id):
     resp = hce(config, '''mutation ($name:String!, $id:UUID!, $testsource_creator_id:UUID!) {
     testrun_configuration_create(
         name:$name
+        has_load_tests:true
         project_id:$id
         type_slug:"load_tests"
         test_source_id:$testsource_creator_id
@@ -142,6 +141,7 @@ def fill_in_project(config, name, project_id):
     hce(config, '''mutation ($name:String!, $id:UUID!) {
     testrun_configuration_create(
         name:$name
+        has_load_tests:true
         project_id:$id
         type_slug:"load_tests"
         configuration_parameters:[{
