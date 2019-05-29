@@ -1,6 +1,218 @@
 Changelog
 =========
 
+## 0.2.9 (2019-05-29)
+
+### Changes
+
+* Switch from notification-based to handler-based image processing. [Piotr Mońko]
+
+* Add default metrics charts configuration. [Piotr Mońko]
+
+* Add monitoring interval parameter. [Piotr Mońko]
+
+* Return token from testrun_start if role is ADMIN. [Piotr Mońko]
+
+* Add tenant_admin role support, add scenario params deployer support, bump deployer version, add debug token output from testrun_start. [Piotr Mońko]
+
+* Make conf params required only when load_tests scenario is enabled. [Piotr Mońko]
+
+### Other
+
+* Add tests. [Piotr Mońko]
+
+* Add more vcr tests. [Piotr Mońko]
+
+* Add testutil and projec tests. [Piotr Mońko]
+
+* Add exec_id to insert of totals. [Piotr Mońko]
+
+* Fix requests totals query. [Piotr Mońko]
+
+* Optimize and reduce heavy callbacks. [Piotr Mońko]
+
+* Optimize and reduce heavy callbacks. [Piotr Mońko]
+
+* Remove retalimiting from webhooks. [Piotr Mońko]
+
+* Add missing requirement. [Piotr Mońko]
+
+* Merge branch 'master' into bup. [Piotr Mońko]
+
+* Fix typo in hasura permissions, add ratelimiting to webhooks. [Piotr Mońko]
+
+* Remove worker-tmp-dir. [Piotr Mońko]
+
+* Merge branch 'master' into bup. [Piotr Mońko]
+
+* Fix another type. [Piotr Mońko]
+
+* Fix type. [Piotr Mońko]
+
+* Add configuration chart metadata. [Piotr Mońko]
+
+* Change gunicorn worker-tmp-dir. [Piotr Mońko]
+
+* Fix missing input wrapper. [Piotr Mońko]
+
+* Merge branch 'master' into bup. [Piotr Mońko]
+
+* Implement bolt uploads processor. [Piotr Mońko]
+
+* Fix bad code. [Piotr Mońko]
+
+* Fix pip requirements. [Piotr Mońko]
+
+* Fix project summary additional fields. [Piotr Mońko]
+
+* Add migrations for monitoring_interval. [Piotr Mońko]
+
+* Fix validation configuration updataion. [Piotr Mońko]
+
+* Fix quiet update error. [Piotr Mońko]
+
+* Validate testrun has_something. [Piotr Mońko]
+
+* Remove temporarily new constant. [Piotr Mońko]
+
+* Update bolt-deployer. [Piotr Mońko]
+
+* Add new param. [Piotr Mońko]
+
+* Fix perms. [Piotr Mońko]
+
+* Fix build. [Piotr Mońko]
+
+* Change perms in metadata. [Piotr Mońko]
+
+* Remove invalid update. [Piotr Mońko]
+
+* Fix missing return. [Piotr Mońko]
+
+* Fix missing return. [Piotr Mońko]
+
+* Increase worker timeout, add workers, fix bytes>int comparison. [Piotr Mońko]
+
+* Track upserts. [Piotr Mońko]
+
+* Add logs. [Piotr Mońko]
+
+* Add logs. [Piotr Mońko]
+
+* Merged in refactoring-requirements (pull request #16) [Artiom Borysiewicz]
+
+  Refactoring
+
+* Refactoring. [art.barysevich]
+
+* Merged in refactoring-requirements (pull request #15) [Artiom Borysiewicz]
+
+  Fix pip. Refactoring
+
+* Fix pip. Refactoring. [art.barysevich]
+
+* Update bolt-deployer sdk, add charts conf data storage table. [Piotr Mońko]
+
+* Rename types in configuration create/update. [Piotr Mońko]
+
+* Convert mounts_per_worker to int. [Piotr Mońko]
+
+* Fix type mismatch. [Piotr Mońko]
+
+* Add configuration sections support. [Piotr Mońko]
+
+* Increase deployer connection timeout. [Piotr Mońko]
+
+* Refactor export endpoints. add raw json output. [Piotr Mońko]
+
+
+## 0.2.8 (2019-05-10)
+
+### Changes
+
+* Change TESTRUN_MAX_USERS_PER_INSTANCE to 690. [Piotr Mońko]
+
+* Add envvars manipulations to testrun_configuration_update mutation. [Piotr Mońko]
+
+### Other
+
+* Add domain to export link. [Piotr Mońko]
+
+* Fix timestamp conversion error. [Piotr Mońko]
+
+* O Merge branch 'extensions_data_exports' [Piotr Mońko]
+
+* Fix lost order. [Piotr Mońko]
+
+* Merged in extensions_data_exports (pull request #14) [Piotr Mońko]
+
+  wip nfs extension data in exports
+
+* Wip nfs extension data in exports. [Piotr Mońko]
+
+* Add nfs additional data series support to exporter. [Piotr Mońko]
+
+* Merged in add-slug-and-created-at-to-additional-data (pull request #13) [Artiom Borysiewicz]
+
+  Add slug/created_at to additional data
+
+* Fix migrations. [art.barysevich]
+
+* Add slug/created_at to additional data. [art.barysevich]
+
+* Fix return invalid column type in tabular data export. [Piotr Mońko]
+
+* Fix data exporter to use new execution_errors table. [Piotr Mońko]
+
+* Change identifier to query name in exported data. [Piotr Mońko]
+
+* Fix output of testrun_project_summary. [Piotr Mońko]
+
+* Update test runner version. [Piotr Mońko]
+
+* Add min_/max_ from avg resp size to request_totals. [Piotr Mońko]
+
+* Fix minor issues. [Piotr Mońko]
+
+* Merged in add-execution-id-for-testrunner-permissions (pull request #12) [Artiom Borysiewicz]
+
+  Add permissions for execution_id for testrunner
+
+* Add permissions for execution_id for testrunner. [art.barysevich]
+
+* Add update and update_validate extension mutations. [Piotr Mońko]
+
+* Update testrunner version, add create and create_validate mutations to extensions. [Piotr Mońko]
+
+* Merged in add-table-with-additional-data (pull request #11) [Artiom Borysiewicz]
+
+  Add table with additional data
+
+* Add table with additional data. [art.barysevich]
+
+* Update version. Update docker-compose file for mac. [art.barysevich]
+
+* Update image version 0.1.17 -> 0.1.18. [art.barysevich]
+
+* Fix error. [Piotr Mońko]
+
+* Bump test runner version. [Piotr Mońko]
+
+* Add nfs extension support to db and deployer. [Piotr Mońko]
+
+* Remove total calculations on delete. [Piotr Mońko]
+
+* Increase worker timeout. [Piotr Mońko]
+
+* Increase worker timeout. [Piotr Mońko]
+
+* Fix asserts in hasura webhooks. [Piotr Mońko]
+
+* Bump test runner version. [Piotr Mońko]
+
+* Cleanup unused tables, fix crash. [Piotr Mońko]
+
+
 ## 0.2.7 (2019-04-29)
 
 ### Changes
