@@ -86,11 +86,14 @@ def get_test_preparation_job_status(execution_id: str, test_preparation_job_id: 
             'status': new_status,
             'test_preparation_job_error': err,
             'test_preparation_job_status': response.status,
-            'test_preparation_job_statuscheck_timestamp': str(datetime.now()),
         }
     }
     if commit_sha:
         update_data['data']['commit_hash'] = commit_sha
+
+    if not current_app.config.get(const.SELFTEST_FLAG):
+        # skip in selftest, interferes with vcr
+        update_data['data']['test_preparation_job_statuscheck_timestamp'] = str(datetime.now())
 
     update_response = hce(current_app.config, '''mutation ($exec_id:uuid!, $data:execution_set_input!) {
         update_execution(_set: $data, where:{id:{_eq:$exec_id}}) { returning { id } }

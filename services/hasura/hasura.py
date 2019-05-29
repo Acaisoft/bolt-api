@@ -56,7 +56,10 @@ def hasura_selfsignedtoken_for_testrunner(config):
     :return: str: jwt token
     """
 
-    execution_id = str(uuid.uuid4())
+    execution_id = os.getenv('SELFSIGNED_TOKEN_EXECUTION_ID', False)
+    if not execution_id:
+        execution_id = str(uuid.uuid4())
+
     payload = {"https://hasura.io/jwt/claims": {
         "x-hasura-allowed-roles": [const.ROLE_TESTRUNNER],
         "x-hasura-default-role": const.ROLE_TESTRUNNER,

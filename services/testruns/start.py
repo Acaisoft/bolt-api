@@ -149,7 +149,6 @@ def start(app_config, conf_id, user_id, no_cache):
 
     initial_state = {
         'configuration_id': str(conf_id),
-        'start': str(datetime.now()),
         'status': const.TESTRUN_PREPARING,
         'execution_metrics_metadata': {
             'data': {
