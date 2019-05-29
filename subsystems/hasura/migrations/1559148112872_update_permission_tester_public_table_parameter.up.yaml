@@ -1,0 +1,18 @@
+- args:
+    permission:
+      allow_aggregations: true
+      columns:
+      - default_value
+      - id
+      - name
+      - param_name
+      - param_type
+      - slug_name
+      - type_slug
+      filter: {}
+      limit: null
+    role: tester
+    table:
+      name: parameter
+      schema: public
+  type: create_select_permission

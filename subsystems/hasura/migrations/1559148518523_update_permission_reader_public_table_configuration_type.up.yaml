@@ -1,0 +1,20 @@
+- args:
+    role: reader
+    table:
+      name: configuration_type
+      schema: public
+  type: drop_select_permission
+- args:
+    permission:
+      allow_aggregations: true
+      columns:
+      - description
+      - id
+      - name
+      - slug_name
+      filter: {}
+    role: reader
+    table:
+      name: configuration_type
+      schema: public
+  type: create_select_permission

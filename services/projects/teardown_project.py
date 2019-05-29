@@ -30,7 +30,6 @@ def teardown(config, project_name, project_id):
         delete_configuration_envvars (where:{configuration:{project_id:{_in:$projIds}}}) {affected_rows}
         delete_configuration_parameter (where:{configuration:{project_id:{_in:$projIds}}}) {affected_rows}
         delete_result_error (where:{execution:{configuration:{project_id:{_in:$projIds}}}}) {affected_rows}
-        delete_result_distribution (where:{execution:{configuration:{project_id:{_in:$projIds}}}}) {affected_rows}
         delete_result_aggregate (where:{execution:{configuration:{project_id:{_in:$projIds}}}}) {affected_rows}
         delete_execution_instance (where:{execution:{configuration:{project_id:{_in:$projIds}}}}) {affected_rows}
         delete_execution (where:{configuration:{project_id:{_in:$projIds}}}) {affected_rows}
