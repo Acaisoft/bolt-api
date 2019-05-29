@@ -1,3 +1,5 @@
+import json
+
 import graphene
 import math
 from flask import current_app
@@ -5,6 +7,7 @@ from apps.bolt_api.app.appgraph.configuration import types
 from services import const, gql_util
 from services import validators
 from services.hasura import hce
+from services.testruns.defaults import DEFAULT_CHART_CONFIGURATION
 
 
 class CreateValidate(graphene.Mutation):
@@ -25,24 +28,46 @@ class CreateValidate(graphene.Mutation):
             description='Test source to fetch test definition from.')
         configuration_parameters = graphene.List(
             types.ConfigurationParameterInput,
-            required=True,
+            required=False,
             description='Default parameter types overrides.')
-        runner_parameters = graphene.List(
-            types.ConfigurationParameterInput,
+        configuration_envvars = graphene.List(
+            types.ConfigurationEnvVarInput,
             required=False,
             description='Parameters passed as environment variables to testrunner.')
+        has_pre_test = graphene.Boolean(
+            required=False,
+            description='Test has pre_test hooks.')
+        has_post_test = graphene.Boolean(
+            required=False,
+            description='Test has post_test hooks.')
+        has_load_tests = graphene.Boolean(
+            required=False,
+            description='Test has load_tests hooks.')
+        has_monitoring = graphene.Boolean(
+            required=False,
+            description='Test has monitoring hooks.')
 
     Output = gql_util.ValidationInterface
 
     @staticmethod
-    def validate(info, name, type_slug, project_id, test_source_id=None, configuration_parameters=None, runner_parameters=None):
+    def validate(
+            info, name, type_slug, project_id,
+            test_source_id=None, configuration_parameters=None, configuration_envvars=None,
+            has_pre_test=False, has_post_test=False, has_load_tests=False, has_monitoring=False):
         project_id = str(project_id)
 
-        assert type_slug in const.TESTTYPE_CHOICE, f'invalid choice of type_slug (valid choices: {const.TESTTYPE_CHOICE})'
+        assert type_slug in const.TESTTYPE_CHOICE, \
+            f'invalid choice of type_slug (valid choices: {const.TESTTYPE_CHOICE})'
 
         name = validators.validate_text(name)
 
-        role, user_id = gql_util.get_request_role_userid(info, (const.ROLE_ADMIN, const.ROLE_MANAGER, const.ROLE_TESTER))
+        role, user_id = gql_util.get_request_role_userid(
+            info,
+            (const.ROLE_ADMIN, const.ROLE_TENANT_ADMIN, const.ROLE_MANAGER, const.ROLE_TESTER)
+        )
+
+        assert any((has_pre_test, has_post_test, has_load_tests, has_monitoring)), \
+            f'At least one section is required'
 
         repo_query = {
             'type_slug': type_slug,
@@ -115,7 +140,7 @@ class CreateValidate(graphene.Mutation):
             }
         }''', repo_query)
 
-        if role != const.ROLE_ADMIN:
+        if role not in (const.ROLE_ADMIN, const.ROLE_TENANT_ADMIN):
             assert repo.get('user_project', None), \
                 f'non-admin ({role}) user {user_id} does not have access to project {project_id}'
 
@@ -126,6 +151,11 @@ class CreateValidate(graphene.Mutation):
         query_data = {
             'name': name,
             'project_id': project_id,
+            'has_pre_test': has_pre_test,
+            'has_post_test': has_post_test,
+            'has_load_tests': has_load_tests,
+            'has_monitoring': has_monitoring,
+            'monitoring_chart_configuration': json.loads(DEFAULT_CHART_CONFIGURATION),
         }
 
         if user_id:
@@ -134,29 +164,41 @@ class CreateValidate(graphene.Mutation):
         if type_slug:
             query_data['type_slug'] = type_slug
 
-        if runner_parameters:
-            for rp in runner_parameters:
-                assert rp['parameter_slug'].replace('_', '').isalnum(), \
-                    f'configuration runner_parameter "{rp["parameter_slug"]}" is not alphanumeric'
-                assert not rp['parameter_slug'].startswith('BOLT_'), f'runner_parameter cannot start with BOLT_'
+        if configuration_envvars:
+            for rp in configuration_envvars:
+                assert rp['name'].replace('_', '').isalnum(), \
+                    f'configuration runner_parameter "{rp["name"]}" is not alphanumeric'
+                assert not rp['name'].startswith('BOLT_'), f'environment variable cannot start with BOLT_'
             query_data['configuration_envvars'] = {
                 'data': [{
-                    'name': x['parameter_slug'],
+                    'name': x['name'],
                     'value': x['value'],
-                } for x in runner_parameters]
+                } for x in configuration_envvars]
             }
 
-        patched_params = validators.validate_test_params(configuration_parameters, defaults=repo['parameter'])
-        if patched_params:
-            query_data['configuration_parameters'] = {'data': []}
-            for parameter_slug, param_value in patched_params.items():
-                query_data['configuration_parameters']['data'].append({
-                    'parameter_slug': parameter_slug,
-                    'value': param_value,
-                })
-                # calculate instances number based on num of users
-                if parameter_slug == const.TESTPARAM_USERS:
-                    query_data['instances'] = math.ceil(int(param_value) / const.TESTRUN_MAX_USERS_PER_INSTANCE)
+        if has_load_tests:
+            patched_params = validators.validate_load_test_params(configuration_parameters or [], defaults=repo['parameter'])
+            if patched_params:
+                query_data['configuration_parameters'] = {'data': []}
+                for parameter_slug, param_value in patched_params.items():
+                    query_data['configuration_parameters']['data'].append({
+                        'parameter_slug': parameter_slug,
+                        'value': param_value,
+                    })
+                    # calculate instances number based on num of users
+                    if parameter_slug == const.TESTPARAM_USERS:
+                        query_data['instances'] = math.ceil(int(param_value) / const.TESTRUN_MAX_USERS_PER_INSTANCE)
+
+        if has_monitoring:
+            monitoring_parameters = validators.validate_monitoring_params(configuration_parameters or [], defaults=repo['parameter'])
+            if monitoring_parameters:
+                if 'configuration_parameters' not in query_data:
+                    query_data['configuration_parameters'] = {'data': []}
+                for slug, value in monitoring_parameters.items():
+                    query_data['configuration_parameters']['data'].append({
+                        'parameter_slug': slug,
+                        'value': value,
+                    })
 
         if test_source_id:
             test_source = repo.get('test_source')
@@ -181,8 +223,14 @@ class CreateValidate(graphene.Mutation):
 
         return query_data
 
-    def mutate(self, info, name, type_slug, project_id, test_source_id=None, configuration_parameters=None, runner_parameters=None):
-        CreateValidate.validate(info, name, type_slug, project_id, test_source_id, configuration_parameters, runner_parameters)
+    def mutate(
+            self, info, name, type_slug, project_id, test_source_id=None, configuration_parameters=None,
+            configuration_envvars=None, has_pre_test=False, has_post_test=False, has_load_tests=False,
+            has_monitoring=False):
+        CreateValidate.validate(
+            info, name, type_slug, project_id, test_source_id, configuration_parameters,
+            configuration_envvars, has_pre_test, has_post_test, has_load_tests, has_monitoring
+        )
         return gql_util.ValidationResponse(ok=True)
 
 
@@ -191,9 +239,13 @@ class Create(CreateValidate):
 
     Output = gql_util.OutputTypeFactory(types.ConfigurationType, 'Create')
 
-    def mutate(self, info, name, type_slug, project_id, test_source_id=None, configuration_parameters=None, runner_parameters=None):
-
-        query_params = CreateValidate.validate(info, name, type_slug, project_id, test_source_id, configuration_parameters, runner_parameters)
+    def mutate(
+            self, info, name, type_slug, project_id, test_source_id=None, configuration_parameters=None,
+            configuration_envvars=None, has_pre_test=False, has_post_test=False, has_load_tests=False, has_monitoring=False):
+        query_params = CreateValidate.validate(
+            info, name, type_slug, project_id, test_source_id, configuration_parameters, configuration_envvars,
+            has_pre_test, has_post_test, has_load_tests, has_monitoring
+        )
 
         query = '''mutation ($data:[configuration_insert_input!]!) {
             insert_configuration(
@@ -204,13 +256,17 @@ class Create(CreateValidate):
                     name 
                     type_slug 
                     project_id 
-                    test_source_id 
+                    test_source_id
+                    has_pre_test
+                    has_post_test
+                    has_load_tests
+                    has_monitoring
                     configuration_parameters {
                         parameter_slug
                         value
                     }
-                    runner_parameters:configuration_envvars {
-                        parameter_slug:name
+                    configuration_envvars {
+                        name
                         value
                     }
                 } 

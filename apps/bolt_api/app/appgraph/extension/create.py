@@ -28,7 +28,7 @@ class CreateValidate(graphene.Mutation):
 
         assert type_slug in const.EXTENSION_CHOICE, f'invalid choice of type_slug (valid choices: {const.EXTENSION_CHOICE})'
 
-        role, user_id = gql_util.get_request_role_userid(info, (const.ROLE_ADMIN, const.ROLE_MANAGER))
+        role, user_id = gql_util.get_request_role_userid(info, (const.ROLE_ADMIN, const.ROLE_TENANT_ADMIN, const.ROLE_MANAGER))
 
         resp = hce(current_app.config, '''query ($conf_id:uuid!, $user_id:uuid!) {
             configuration(where:{

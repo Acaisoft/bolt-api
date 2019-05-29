@@ -5,7 +5,7 @@ from flask import current_app
 from apps.bolt_api.app.appgraph.configuration import types
 from services import const, gql_util
 from services import validators
-from services.hasura import hasura_client, hce
+from services.hasura import hce
 
 
 class UpdateValidate(graphene.Mutation):
@@ -30,19 +30,38 @@ class UpdateValidate(graphene.Mutation):
             types.ConfigurationParameterInput,
             required=False,
             description='Default parameter types overrides.')
-        runner_parameters = graphene.List(
-            types.ConfigurationParameterInput,
+        configuration_envvars = graphene.List(
+            types.ConfigurationEnvVarInput,
             required=False,
             description='Parameters passed as environment variables to testrunner.')
+        has_pre_test = graphene.Boolean(
+            required=False,
+            description='Test has pre_test hooks.')
+        has_post_test = graphene.Boolean(
+            required=False,
+            description='Test has post_test hooks.')
+        has_load_tests = graphene.Boolean(
+            required=False,
+            description='Test has load_tests hooks.')
+        has_monitoring = graphene.Boolean(
+            required=False,
+            description='Test has monitoring hooks.')
 
     Output = gql_util.ValidationInterface
 
     @staticmethod
-    def validate(info, id, name=None, type_slug=None, test_source_id=None, configuration_parameters=None,
-                 runner_parameters=None):
+    def validate(
+            info, id, name=None, type_slug=None, test_source_id=None, configuration_parameters=None,
+            configuration_envvars=None, has_pre_test=None, has_post_test=None, has_load_tests=None, has_monitoring=None):
 
-        role, user_id = gql_util.get_request_role_userid(info,
-                                                         (const.ROLE_ADMIN, const.ROLE_MANAGER, const.ROLE_TESTER))
+        role, user_id = gql_util.get_request_role_userid(
+            info,
+            (const.ROLE_ADMIN, const.ROLE_TENANT_ADMIN, const.ROLE_MANAGER, const.ROLE_TESTER)
+        )
+
+        sections = [x for x in (has_pre_test, has_post_test, has_load_tests, has_monitoring) if x is not None]
+        assert len(sections), \
+            f'At least one section is required'
 
         original = hce(current_app.config, '''query ($confId:uuid!, $userId:uuid!) {
             configuration (where:{
@@ -136,11 +155,22 @@ class UpdateValidate(graphene.Mutation):
             }
         }''', repo_query)
 
-        if role != const.ROLE_ADMIN:
+        if role not in (const.ROLE_ADMIN, const.ROLE_TENANT_ADMIN):
             assert repo.get('hasUserAccess', None), \
                 f'non-admin ({role}) user {user_id} does not have access to configuration {str(id)}'
 
-        query_data = {}
+        query_data = {
+            'configuration_parameters': {'data': []}
+        }
+
+        if has_pre_test is not None:
+            query_data['has_pre_test'] = has_pre_test
+        if has_post_test is not None:
+            query_data['has_post_test'] = has_post_test
+        if has_load_tests is not None:
+            query_data['has_load_tests'] = has_load_tests
+        if has_monitoring is not None:
+            query_data['has_monitoring'] = has_monitoring
 
         if name and name != original['configuration'][0]['name']:
             name = validators.validate_text(name)
@@ -171,37 +201,50 @@ class UpdateValidate(graphene.Mutation):
             else:
                 raise AssertionError(f'test source {str(test_source_id)} is invalid: {test_source["source_type"]}')
 
-        if configuration_parameters:
-            patched_params = validators.validate_test_params(configuration_parameters, defaults=repo['parameter'])
+        if has_load_tests:
+            patched_params = validators.validate_load_test_params(configuration_parameters, defaults=repo['parameter'])
             if patched_params:
-                query_data['configuration_parameters'] = {'data': []}
                 for parameter_slug, param_value in patched_params.items():
                     query_data['configuration_parameters']['data'].append({
                         'parameter_slug': parameter_slug,
                         'value': param_value,
+                        'configuration_id': str(id),
                     })
                     # calculate instances number based on num of users
                     if parameter_slug == const.TESTPARAM_USERS:
                         query_data['instances'] = math.ceil(int(param_value) / const.TESTRUN_MAX_USERS_PER_INSTANCE)
 
-        if runner_parameters:
-            for rp in runner_parameters:
-                assert rp['parameter_slug'].replace('_', '').isalnum(), \
-                    f'configuration runner_parameter "{rp["parameter_slug"]}" is not alphanumeric'
-                assert not rp['parameter_slug'].startswith('BOLT_'), f'runner_parameter cannot start with BOLT_'
+        if has_monitoring:
+            monitoring_parameters = validators.validate_monitoring_params(configuration_parameters or [], defaults=repo['parameter'])
+            if monitoring_parameters:
+                for slug, value in monitoring_parameters.items():
+                    query_data['configuration_parameters']['data'].append({
+                        'parameter_slug': slug,
+                        'value': value,
+                        'configuration_id': str(id),
+                    })
+
+        if configuration_envvars:
+            for rp in configuration_envvars:
+                assert rp['name'].replace('_', '').isalnum(), \
+                    f'configuration runner_parameter "{rp["name"]}" is not alphanumeric'
+                assert not rp['name'].startswith('BOLT_'), f'configuration_envvars.name cannot start with BOLT_'
             query_data['configuration_envvars'] = {
                 'data': [{
-                    'name': x['parameter_slug'],
+                    'name': x['name'],
                     'value': x['value'],
                     'configuration_id': str(id),
-                } for x in runner_parameters]
+                } for x in configuration_envvars]
             }
 
         return query_data
 
     def mutate(self, info, id, name=None, type_slug=None, test_source_id=None, configuration_parameters=None,
-               runner_parameters=None):
-        UpdateValidate.validate(info, id, name, type_slug, test_source_id, configuration_parameters, runner_parameters)
+               configuration_envvars=None, has_pre_test=None, has_post_test=None, has_load_tests=None, has_monitoring=None):
+        UpdateValidate.validate(
+            info, id, name, type_slug, test_source_id, configuration_parameters, configuration_envvars,
+            has_pre_test, has_post_test, has_load_tests, has_monitoring
+        )
         return gql_util.ValidationResponse(ok=True)
 
 
@@ -210,27 +253,49 @@ class Update(UpdateValidate):
 
     Output = gql_util.OutputTypeFactory(types.ConfigurationType, 'Update')
 
-    @staticmethod
-    def mutate_configuration_parameters(conf_id, configuration_parameters):
-        for cp in configuration_parameters:
-            hce(current_app.config, '''mutation ($confId:uuid!, $slug:String!, $value:String!) {
-                update_configuration_parameter(
-                    where:{ configuration_id:{_eq:$confId}, parameter_slug:{_eq:$slug} },
-                    _set:{ value: $value }
-                ) {
-                    affected_rows
-                }
-            }''', variable_values={
-                'confId': conf_id,
-                'slug': cp['parameter_slug'],
-                'value': cp['value']
-            })
+    def mutate(
+            self, info, id, name=None, type_slug=None, test_source_id=None, configuration_parameters=None,
+            configuration_envvars=None, has_pre_test=None, has_post_test=None, has_load_tests=None, has_monitoring=None):
 
-    @staticmethod
-    def mutate_runner_parameters(conf_id, configuration_parameters):
-        resp = hce(current_app.config, '''mutation ($data:[configuration_envvars_insert_input!]!) {
+        query_params = UpdateValidate.validate(
+            info, id, name, type_slug, test_source_id, configuration_parameters, configuration_envvars,
+            has_pre_test, has_post_test, has_load_tests, has_monitoring
+        )
+
+        params = query_params.pop('configuration_parameters', {'data': []})['data']
+        envs = query_params.pop('configuration_envvars', {'data': []})['data']
+
+        query = '''mutation (
+            $id:uuid!, 
+            $data:configuration_set_input!
+            $params:[configuration_parameter_insert_input!]!
+            $envs:[configuration_envvars_insert_input!]!
+        ) {
+            
+            delete_configuration_parameter (
+                where: {configuration_id:{_eq:$id}}
+            ) {
+                affected_rows
+            } 
+            
+            insert_configuration_parameter (
+                objects: $params
+                on_conflict: {
+                    constraint: configuration_parameter_pkey
+                    update_columns: [ value ]
+                }
+            ) {
+                affected_rows
+            }
+            
+            delete_configuration_envvars (
+                where: {configuration_id:{_eq:$id}}
+            ) {
+                affected_rows
+            } 
+        
             insert_configuration_envvars (
-                objects: $data
+                objects: $envs
                 on_conflict: {
                     constraint: configuration_envvars_pkey
                     update_columns: [ value ]
@@ -238,33 +303,33 @@ class Update(UpdateValidate):
             ) {
                 affected_rows
             }
-        }''', variable_values={'data': configuration_parameters})
-
-    def mutate(self, info, id, name=None, type_slug=None, test_source_id=None, configuration_parameters=None,
-               runner_parameters=None):
-        query_params = UpdateValidate.validate(info, id, name, type_slug, test_source_id, configuration_parameters,
-                                               runner_parameters)
-
-        Update.mutate_configuration_parameters(
-            str(id),
-            query_params.pop('configuration_parameters', {'data': []})['data']
-        )
-
-        Update.mutate_runner_parameters(
-            str(id),
-            query_params.pop('configuration_envvars', {'data': []})['data']
-        )
-
-        query = '''mutation ($id:uuid!, $data:configuration_set_input!) {
+            
             update_configuration(
                 where:{id:{_eq:$id}},
                 _set: $data
             ) {
-                returning { id name type_slug project_id test_source_id } 
+                returning { 
+                    id 
+                    name 
+                    type_slug 
+                    project_id 
+                    test_source_id 
+                    has_pre_test
+                    has_post_test
+                    has_load_tests
+                    has_monitoring
+                    configuration_envvars { name value }
+                    configuration_parameters { parameter_slug value }
+                } 
             }
         }'''
 
-        conf_response = hce(current_app.config, query, variable_values={'id': str(id), 'data': query_params})
+        conf_response = hce(current_app.config, query, variable_values={
+            'id': str(id),
+            'data': query_params,
+            'params': params,
+            'envs': envs,
+        })
         assert conf_response['update_configuration'], f'cannot update configuration ({str(conf_response)})'
 
         return gql_util.OutputValueFromFactory(Update, conf_response['update_configuration'])

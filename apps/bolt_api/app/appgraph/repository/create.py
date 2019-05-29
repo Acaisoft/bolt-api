@@ -1,9 +1,10 @@
+import os
 import uuid
 import graphene
 from flask import current_app
 
 from apps.bolt_api.app.appgraph.repository import types
-from services import const, gql_util
+from services import const, gql_util, testing
 from services import validators
 from services.hasura import hce
 
@@ -29,7 +30,7 @@ class CreateValidate(graphene.Mutation):
 
     @staticmethod
     def validate(info, name, repository_url, project_id, type_slug):
-        role, user_id = gql_util.get_request_role_userid(info, (const.ROLE_ADMIN, const.ROLE_MANAGER, const.ROLE_TESTER))
+        role, user_id = gql_util.get_request_role_userid(info, (const.ROLE_ADMIN, const.ROLE_TENANT_ADMIN, const.ROLE_MANAGER, const.ROLE_TESTER))
 
         project_id = str(project_id)
 
@@ -94,7 +95,13 @@ class Create(CreateValidate):
 
     def mutate(self, info, name, repository_url, project_id, type_slug):
         query_params = CreateValidate.validate(info, name, repository_url, project_id, type_slug)
-        query_params['id'] = str(uuid.uuid4())
+
+        # generating random uuid here breaks vcr when selftesting
+        if testing.request_is_selftest(info):
+            query_params['id'] = str(project_id)
+        else:
+            query_params['id'] = str(uuid.uuid4())
+
         test_source_params = {
             'id': query_params['id'],
             'project_id': query_params['project_id'],

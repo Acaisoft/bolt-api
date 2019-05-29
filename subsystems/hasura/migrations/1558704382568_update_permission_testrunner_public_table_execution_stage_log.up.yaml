@@ -1,0 +1,29 @@
+- args:
+    role: testrunner
+    table:
+      name: execution_stage_log
+      schema: public
+  type: drop_insert_permission
+- args:
+    permission:
+      check: {}
+      columns:
+      - id
+      - timestamp
+      - stage
+      - level
+      - msg
+      - execution_id
+      - job_name
+      localPresets:
+      - key: execution_id
+        value: x-hasura-Testruner-Id
+      - key: ""
+        value: ""
+      set:
+        execution_id: x-hasura-Testruner-Id
+    role: testrunner
+    table:
+      name: execution_stage_log
+      schema: public
+  type: create_insert_permission

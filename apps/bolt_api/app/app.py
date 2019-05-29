@@ -5,7 +5,7 @@ from flask import Flask
 from apps.bolt_api.app import appgraph, healthcheck, webhooks
 from services.configure import configure, validate
 from services.logger import setup_custom_logger
-from services import deployer, const
+from services import deployer, const, uploads
 from services.cache import get_cache
 from services.hasura import hasura_client
 

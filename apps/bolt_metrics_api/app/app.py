@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from flask_limiter import Limiter
 
 from apps.bolt_metrics_api.app import exports, healthcheck

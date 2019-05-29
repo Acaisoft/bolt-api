@@ -36,7 +36,7 @@ class Update(validate.Validate):
     def mutate(self, info, id, name=None, data=None, max_wait=None, min_wait=None, type_slug=None):
         id = str(id)
 
-        role, user_id = gql_util.get_request_role_userid(info, (const.ROLE_ADMIN, const.ROLE_MANAGER, const.ROLE_TESTER))
+        role, user_id = gql_util.get_request_role_userid(info, (const.ROLE_ADMIN, const.ROLE_TENANT_ADMIN, const.ROLE_MANAGER, const.ROLE_TESTER))
 
         original = hce(current_app.config, '''query ($objId:uuid!, $userId:uuid!) {
             test_creator (where:{

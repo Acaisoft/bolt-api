@@ -1,3 +1,4 @@
+import json
 import os
 
 import requests
@@ -72,5 +73,7 @@ def hce(config, query, *args, **kwargs):
     if type(query) is str:
         if config.get('HCE_DEBUG', False):
             print(query)
+            print(json.dumps(args))
+            print(json.dumps(kwargs))
         query = gql(query)
     return hasura_client(config).execute(query, *args, **kwargs)

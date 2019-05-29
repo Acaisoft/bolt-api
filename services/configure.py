@@ -3,9 +3,8 @@ import os
 
 from flask import Flask
 import sentry_sdk
+from prometheus_flask_exporter import PrometheusMetrics
 from sentry_sdk.integrations.flask import FlaskIntegration
-
-from services import const
 
 
 def configure(app: Flask):
@@ -17,6 +16,14 @@ def configure(app: Flask):
 
     secrets_file_path = os.environ.get('SECRETS_FILE_PATH', 'localhost-secrets.py')
     app.config.from_pyfile(secrets_file_path)
+
+    google_service_account = app.config.get('GOOGLE_APPLICATION_CREDENTIALS', None)
+    if google_service_account:
+        os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = google_service_account
+
+    os.environ['DEBUG_METRICS'] = '1'
+    metrics = PrometheusMetrics(app, defaults_prefix='bolt_api')
+    app.extensions['metrics'] = metrics
 
     sentry_dsn = app.config.get('SENTRY_DSN', None)
     if sentry_dsn and not app.debug:
@@ -34,5 +41,8 @@ def validate(app, required_config_vars):
     for var_name in required_config_vars:
         if app.config.get(var_name, None) is None:
             missing.append(var_name)
-    assert not missing, f'{len(missing)} undefined config variables: {", ".join(missing)}'
+    if missing:
+        raise EnvironmentError(
+            f'{len(missing)} undefined config variable{"s" if len(missing) > 1 else ""}: {", ".join(missing)}'
+        )
     app.logger.info('config valid')

@@ -7,6 +7,8 @@ from services.projects.summary import get_project_summary
 
 class SummaryItem(graphene.ObjectType):
     project_id = graphene.String()
+    description = graphene.String()
+    image_url = graphene.String()
     name = graphene.String()
     num_scenarios = graphene.Int()
     num_sources = graphene.Int()

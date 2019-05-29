@@ -11,6 +11,34 @@ services:
     image: redis:5-alpine
     ports:
       - "6379:6379"
+  prom:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./subsystems/prometheus/:/etc/prometheus/
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    depends_on:
+      - "cadvisor"
+      - "grafana"
+    links:
+      - cadvisor
+      - api
+  cadvisor:
+    image: google/cadvisor
+    command: -port=9998
+    ports:
+      - "9998:9998"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
   hasura:
 #    image: hasura/graphql-engine:v1.0.0-alpha44
     image: hasura/graphql-engine:v1.0.0-alpha44.cli-migrations
@@ -18,6 +46,7 @@ services:
       - "8080:8080"
     depends_on:
       - "postgres"
+      - "redis"
     restart: always
     environment:
       HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:@postgres:5432/postgres
@@ -32,7 +61,7 @@ services:
       BOLT_API_CONFIGURATION_PARAM_CHANGE: http://api:5000/webhooks/configuration_param/update
       BOLT_API_EXECUTION_REQUESTS_INSERT: http://api:5000/webhooks/execution_requests/insert
     volumes:
-      - ./hasura/migrations:/hasura-migrations
+      - ./subsystems/hasura/migrations:/hasura-migrations
   api:
     build:
       context: .
@@ -43,12 +72,43 @@ services:
     ports:
       - "5000:5000"
     depends_on:
+      - "redis"
       - "postgres"
     restart: always
     environment:
       CONFIG_FILE_PATH: docker-compose-config.py
       FLASK_ENV: development
     entrypoint: ["flask", "run", "--eager-loading", "--host", "0.0.0.0", "--port", "5000"]
+  metrics:
+    build:
+      context: .
+      dockerfile: apps/bolt_metrics_api/Dockerfile
+    volumes:
+      - ./apps:/apps
+      - ./services:/services
+    ports:
+      - "5005:5005"
+    depends_on:
+      - "redis"
+      - "hasura"
+    restart: always
+    environment:
+      CONFIG_FILE_PATH: docker-compose-config.py
+      FLASK_ENV: development
+    entrypoint: ["flask", "run", "--eager-loading", "--host", "0.0.0.0", "--port", "5005"]
+  grafana:
+    image: grafana/grafana
+    volumes:
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - "metrics"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: 123
+      GF_INSTALL_PLUGINS: grafana-simple-json-datasource
 volumes:
   hasura_migrations:
   db_data:
+  grafana_data:
+  prometheus_data:

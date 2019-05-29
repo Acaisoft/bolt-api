@@ -175,7 +175,22 @@ to hasura. Bolt-api queries and mutations can be distinguished by the `testrun_`
 ### File Uploads
 
 Files are uploaded directly to designated GCS buckets, through time-limited urls.
-To perform an upload:
+
+Upload processing (currently only image resizing) uses a bucket object change notification to listen to 
+and react to changes. This feature requires a service account with both write and read access to pub/sub
+and a correctly configured notification, see :[https://cloud.google.com/storage/docs/reporting-changes]
+or simply:
+```bash
+gsutil notification create -t uploads-bolt-acaisoft -f json gs://uploads-bolt-acaisoft
+```
+
+To test uploads e2e:
+```bash
+flask upload_file --path /tmp/file.jpg
+```
+Then check for errors and if scaled versions are available.
+
+To perform an upload manually:
 
 * generate `Content-MD5` standard header for file being uploaded:
 ```

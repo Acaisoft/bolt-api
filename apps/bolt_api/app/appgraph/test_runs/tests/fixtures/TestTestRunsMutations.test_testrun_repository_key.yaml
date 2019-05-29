@@ -1,0 +1,49 @@
+{
+    "version": 1,
+    "interactions": [
+        {
+            "request": {
+                "method": "GET",
+                "uri": "http://bolt-deployer/management/id_rsa.pub/",
+                "body": null,
+                "headers": {
+                    "Accept": [
+                        "*/*"
+                    ],
+                    "User-Agent": [
+                        "OpenAPI-Generator/0.1.25/python"
+                    ],
+                    "Content-Type": [
+                        "application/json"
+                    ]
+                }
+            },
+            "response": {
+                "status": {
+                    "code": 200,
+                    "message": "OK"
+                },
+                "headers": {
+                    "Date": [
+                        "Wed, 29 May 2019 08:20:03 GMT"
+                    ],
+                    "Connection": [
+                        "close"
+                    ],
+                    "content-length": [
+                        "398"
+                    ],
+                    "Server": [
+                        "gunicorn/19.9.0"
+                    ],
+                    "content-type": [
+                        "application/json; charset=UTF-8"
+                    ]
+                },
+                "body": {
+                    "string": "{\"id_rsa_pub\": \"ssh-rsa AAAAB3NzaC1ycfakekey\"}"
+                }
+            }
+        }
+    ]
+}

@@ -6,8 +6,9 @@ from services.exports.data_export_token import issue_export_token
 
 
 class LinkReturnInterface(graphene.Interface):
-    url = graphene.String()
     token = graphene.String()
+    grafana_url = graphene.String()
+    raw_json = graphene.String()
 
 
 class DataExportLink(graphene.Mutation):
@@ -20,12 +21,13 @@ class DataExportLink(graphene.Mutation):
     Output = gql_util.OutputInterfaceFactory(LinkReturnInterface, 'Delete')
 
     def mutate(self, info, execution_id, valid_hours):
-        _, user_id = gql_util.get_request_role_userid(info, (const.ROLE_ADMIN, const.ROLE_MANAGER))
+        _, user_id = gql_util.get_request_role_userid(info, (const.ROLE_ADMIN, const.ROLE_TENANT_ADMIN, const.ROLE_MANAGER))
 
         token = issue_export_token(current_app.config, const.EXPORT_SCOPE_EXECUTION, str(execution_id), user_id, valid_hours)
 
         # TODO: fix host
         return gql_util.OutputValueFromFactory(DataExportLink, {'returning': [{
             'token': str(token),
-            'url': f'https://api-metrics.dev.bolt.acaisoft.io/exports/grafana_simple_json/{str(token)}'
+            'raw_json': f'https://api-metrics.dev.bolt.acaisoft.io/exports/{str(token)}/json',
+            'grafana_url': f'https://api-metrics.dev.bolt.acaisoft.io/exports/{str(token)}/grafana',
         }]})

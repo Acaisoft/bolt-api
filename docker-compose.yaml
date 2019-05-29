@@ -1,5 +1,12 @@
 version: '3.6'
+# starts all services, including monitoring, with notable exception of bolt-deployer
+# TODO: make test_runs executable inside
 services:
+  dockerhost:
+    # supposedly should enable docker host forwarder ports access from inside container, does not seem to work
+    image: qoomon/docker-host
+    cap_add: [ 'NET_ADMIN', 'NET_RAW' ]
+    restart: on-failure
   postgres:
     image: postgres
     restart: always
@@ -11,6 +18,35 @@ services:
     image: redis:5-alpine
     ports:
       - "6379:6379"
+  prom:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./subsystems/prometheus/:/etc/prometheus/
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    depends_on:
+      - "cadvisor"
+      - "grafana"
+    links:
+      - cadvisor
+      - api
+      - metrics
+  cadvisor:
+    image: google/cadvisor
+    command: -port=9998
+    ports:
+      - "9998:9998"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
   hasura:
 #    image: hasura/graphql-engine:v1.0.0-alpha44
     image: hasura/graphql-engine:v1.0.0-alpha44.cli-migrations
@@ -18,9 +54,10 @@ services:
       - "8080:8080"
     depends_on:
       - "postgres"
+      - "redis"
     restart: always
     environment:
-      HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:@localhost:5432/postgres
+      HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:@postgres:5432/postgres
       HASURA_GRAPHQL_ENABLE_CONSOLE: "true" # set to "false" to disable console
       HASURA_GRAPHQL_MIGRATIONS_DIR:
       ## execute ./toos/encode_jwt_secret.py to obtain HASURA_GRAPHQL_JWT_SECRET from Flask config
@@ -32,8 +69,9 @@ services:
       BOLT_API_CONFIGURATION_PARAM_CHANGE: http://api:5000/webhooks/configuration_param/update
       BOLT_API_EXECUTION_REQUESTS_INSERT: http://api:5000/webhooks/execution_requests/insert
     volumes:
-      - ./hasura/migrations:/hasura-migrations
-    network_mode: "host"
+      - ./subsystems/hasura/migrations:/hasura-migrations
+    links:
+      - postgres
   api:
     build:
       context: .
@@ -50,8 +88,9 @@ services:
     environment:
       CONFIG_FILE_PATH: docker-compose-config.py
       FLASK_ENV: development
+    links:
+      - hasura
     entrypoint: ["flask", "run", "--eager-loading", "--host", "0.0.0.0", "--port", "5000"]
-    network_mode: "host"
   metrics:
     build:
       context: .
@@ -68,16 +107,15 @@ services:
     environment:
       CONFIG_FILE_PATH: docker-compose-config.py
       FLASK_ENV: development
+    links:
+      - hasura
     entrypoint: ["flask", "run", "--eager-loading", "--host", "0.0.0.0", "--port", "5005"]
-    network_mode: "host"
   grafana:
     image: grafana/grafana
     volumes:
       - grafana_data:/var/lib/grafana
     ports:
       - "3000:3000"
-    depends_on:
-      - "metrics"
     environment:
       GF_SECURITY_ADMIN_PASSWORD: 123
       GF_INSTALL_PLUGINS: grafana-simple-json-datasource
@@ -86,3 +124,4 @@ volumes:
   hasura_migrations:
   db_data:
   grafana_data:
+  prometheus_data:

@@ -20,12 +20,42 @@ class ConfigurationParameterType(graphene.ObjectType):
         interfaces = (ConfigurationParameterInterface,)
 
 
+class ConfigurationEnvVarAbstractType(graphene.AbstractType):
+    name = graphene.String()
+    value = graphene.String()
+
+
+class ConfigurationEnvVarInterface(ConfigurationEnvVarAbstractType, graphene.Interface):
+    pass
+
+
+class ConfigurationEnvVarInput(ConfigurationEnvVarAbstractType, graphene.InputObjectType):
+    pass
+
+
+class ConfigurationEnvVarType(graphene.ObjectType):
+    class Meta:
+        interfaces = (ConfigurationEnvVarInterface,)
+
+
 class ConfigurationInterface(graphene.Interface):
     id = graphene.UUID()
     name = graphene.String()
     type_slug = graphene.String(
         description=f'Configuration type: "{const.TESTTYPE_LOAD}"')
     project_id = graphene.UUID()
+    has_pre_test = graphene.Boolean(
+        required=False,
+        description='Test has pre_test hooks.')
+    has_post_test = graphene.Boolean(
+        required=False,
+        description='Test has post_test hooks.')
+    has_load_tests = graphene.Boolean(
+        required=False,
+        description='Test has load_tests hooks.')
+    has_monitoring = graphene.Boolean(
+        required=False,
+        description='Test has monitoring hooks.')
     test_source_id = graphene.UUID(
         required=False,
         description='Test source to fetch test definition from.')
@@ -40,6 +70,6 @@ class ConfigurationType(graphene.ObjectType):
     configuration_parameters = graphene.List(
         ConfigurationParameterType,
         description='Default parameter types overrides.')
-    runner_parameters = graphene.List(
-        ConfigurationParameterType,
+    configuration_envvars = graphene.List(
+        ConfigurationEnvVarType,
         description='Testrunner environment variables.')

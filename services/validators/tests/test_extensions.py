@@ -18,7 +18,13 @@ class TestExtensionsValidation(unittest.TestCase):
             }
         ]
         out = validate_extensions(ins)
-        expected = [{'type': 'nfs', 'server': '1.2.3.4', 'path': '/bob/sinclair', 'mount_options': ['async', 'ro']}]
+        expected = [{
+            'name': 'nfs',
+            'server': '1.2.3.4',
+            'path': '/bob/sinclair',
+            'mounts_per_worker': 1,
+            'mount_options': ['async', 'ro'],
+        }]
         self.assertEqual(expected, out)
 
     def test_invalid_data(self):
@@ -32,6 +38,11 @@ class TestExtensionsValidation(unittest.TestCase):
                 ]
             }
         ]
-        out = validate_extensions(ins)
-        expected = [{'type': 'nfs', 'server': '1.2.3.4', 'path': '/bob/sinclair', 'mount_options': []}]
+        try:
+            validate_extensions(ins)
+        except AssertionError as e:
+            out = str(e)
+        else:
+            out = 'did not raise AssertionError'
+        expected = '''invalid option for "nfs": "invalid_options", valid choices are: ('server', 'path', 'mounts_per_worker', 'mount_options')'''
         self.assertEqual(expected, out)

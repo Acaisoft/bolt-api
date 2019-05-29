@@ -1,0 +1,10 @@
+- args:
+    sql: CREATE TABLE "public"."execution_metrics_data"("id" serial NOT NULL, "execution_id"
+      uuid NOT NULL, "timestamp" timestamp with time zone NOT NULL, "data" json NOT
+      NULL, PRIMARY KEY ("id") , FOREIGN KEY ("execution_id") REFERENCES "public"."execution"("id")
+      ON UPDATE cascade ON DELETE cascade);
+  type: run_sql
+- args:
+    name: execution_metrics_data
+    schema: public
+  type: add_existing_table_or_view

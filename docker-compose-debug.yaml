@@ -1,0 +1,90 @@
+version: '3.6'
+# starts minimum of services, with networking=host, for debugging and development
+services:
+  postgres:
+    image: postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+  redis:
+    image: redis:5-alpine
+    ports:
+      - "6379:6379"
+  hasura:
+#    image: hasura/graphql-engine:v1.0.0-alpha44
+    image: hasura/graphql-engine:v1.0.0-alpha44.cli-migrations
+    ports:
+      - "8080:8080"
+    depends_on:
+      - "postgres"
+      - "redis"
+      - "api"
+    restart: always
+    environment:
+      HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:@localhost:5432/postgres
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "true" # set to "false" to disable console
+      HASURA_GRAPHQL_MIGRATIONS_DIR:
+      ## execute ./toos/encode_jwt_secret.py to obtain HASURA_GRAPHQL_JWT_SECRET from Flask config
+      HASURA_GRAPHQL_JWT_SECRET: '{"type": "HS256", "key": "slkd1o8wnO*#LUFHNO4islkd1o8wnO*#"}'
+      ## uncomment next line to set an access key
+      HASURA_GRAPHQL_ACCESS_KEY: devaccess
+      BOLT_API_GRAPHQL: http://api:5000/graphql
+      BOLT_API_EXECUTION_STATE_CHANGE: http://api:5000/webhooks/execution/update
+      BOLT_API_CONFIGURATION_PARAM_CHANGE: http://api:5000/webhooks/configuration_param/update
+      BOLT_API_EXECUTION_REQUESTS_INSERT: http://api:5000/webhooks/execution_requests/insert
+    volumes:
+      - ./subsystems/hasura/migrations:/hasura-migrations
+    network_mode: "host"
+  api:
+    build:
+      context: .
+      dockerfile: apps/bolt_api/Dockerfile
+    volumes:
+      - ./apps:/apps
+      - ./services:/services
+    ports:
+      - "5000:5000"
+    depends_on:
+      - "redis"
+      - "postgres"
+    restart: always
+    environment:
+      CONFIG_FILE_PATH: docker-compose-config.py
+      FLASK_ENV: development
+    network_mode: "host"
+    entrypoint: ["flask", "run", "--eager-loading", "--host", "0.0.0.0", "--port", "5000"]
+  metrics:
+    build:
+      context: .
+      dockerfile: apps/bolt_metrics_api/Dockerfile
+    volumes:
+      - ./apps:/apps
+      - ./services:/services
+    ports:
+      - "5005:5005"
+    depends_on:
+      - "redis"
+      - "hasura"
+    restart: always
+    environment:
+      CONFIG_FILE_PATH: docker-compose-config.py
+      FLASK_ENV: development
+    network_mode: "host"
+    entrypoint: ["flask", "run", "--eager-loading", "--host", "0.0.0.0", "--port", "5005"]
+  grafana:
+    image: grafana/grafana
+    volumes:
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: 123
+      GF_INSTALL_PLUGINS: grafana-simple-json-datasource
+    network_mode: "host"
+volumes:
+  hasura_migrations:
+  db_data:
+  grafana_data:
+  prometheus_data:

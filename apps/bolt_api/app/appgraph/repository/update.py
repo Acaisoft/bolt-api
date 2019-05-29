@@ -25,7 +25,7 @@ class UpdateValidate(graphene.Mutation):
 
     @staticmethod
     def validate(info, id, name=None, repository_url=None, type_slug=None):
-        role, user_id = gql_util.get_request_role_userid(info, (const.ROLE_ADMIN, const.ROLE_MANAGER, const.ROLE_TESTER))
+        role, user_id = gql_util.get_request_role_userid(info, (const.ROLE_ADMIN, const.ROLE_TENANT_ADMIN, const.ROLE_MANAGER, const.ROLE_TESTER))
 
         if name:
             name = validators.validate_text(name)

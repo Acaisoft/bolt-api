@@ -1,0 +1,81 @@
+- args:
+    permission:
+      allow_aggregations: true
+      columns:
+      - execution_id
+      - id
+      - level
+      - msg
+      - stage
+      - timestamp
+      filter:
+        _and:
+        - execution:
+            configuration:
+              is_deleted:
+                _eq: false
+        - execution:
+            configuration:
+              project:
+                is_deleted:
+                  _eq: false
+      limit: null
+    role: reader
+    table:
+      name: execution_stage_log
+      schema: public
+  type: create_select_permission
+- args:
+    permission:
+      allow_aggregations: true
+      columns:
+      - execution_id
+      - id
+      - level
+      - msg
+      - stage
+      - timestamp
+      filter:
+        _and:
+        - execution:
+            configuration:
+              is_deleted:
+                _eq: false
+        - execution:
+            configuration:
+              project:
+                is_deleted:
+                  _eq: false
+      limit: null
+    role: tester
+    table:
+      name: execution_stage_log
+      schema: public
+  type: create_select_permission
+- args:
+    permission:
+      allow_aggregations: true
+      columns:
+      - execution_id
+      - id
+      - level
+      - msg
+      - stage
+      - timestamp
+      filter:
+        _and:
+        - execution:
+            configuration:
+              is_deleted:
+                _eq: false
+        - execution:
+            configuration:
+              project:
+                is_deleted:
+                  _eq: false
+      limit: null
+    role: manager
+    table:
+      name: execution_stage_log
+      schema: public
+  type: create_select_permission
