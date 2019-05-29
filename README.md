@@ -24,11 +24,17 @@ kubectl -n bolt-deployer port-forward svc/bolt-deployer 7777:80
 
 (Make sure you connect to bolt-deployer in dev/correct k8 environment).
 
-This starts hasura on http://localhost:8080 and bolt-api on http://localhost:5000.
+This starts hasura on http://localhost:8080 and bolt-api on http://localhost:5000 and basic monitoring.
+
+To start a minimal set of services (db+redis+hasura) use:
+```bash
+docker-compose -f docker-compose-debug.yaml up
+```
+and launch bolt-api beforehand by yourself, this may be necessary to debug hasura-bolt communication.
 
 To connect to hasura and have your changes recorded:
 
-* `cd hasura`
+* `cd subsystems/hasura`
 * `hasura-cli console`
 
 That opens a proxy to hasura listening on http://localhost:9695 with bolt-api as it's remote-schema.
@@ -114,6 +120,8 @@ Deployment requirements:
     * external services necessary for operation are loaded eagerly where possible, with Hasura being notable exception
     (Hasura starts _after_ bolt_api) 
     * see `/services/const.py:REQUIRED_BOLT_API_CONFIG_VARS` for current requirements descriptions
+    * access to Google services (buckets, etc) is facilitated by setting a `GOOGLE_APPLICATION_CREDENTIALS` 
+    environment variable to the path of a google service account json file
 
 ### Manual Startup Sequence
 
