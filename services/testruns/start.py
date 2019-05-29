@@ -148,7 +148,7 @@ def start(app_config, conf_id, user_id, no_cache):
     if not chart_config:
         chart_config = json.loads(DEFAULT_CHART_CONFIGURATION)
     # override if NFS extension is defined
-    if test_extensions[0]['type'] == const.EXTENSION_NFS:
+    if test_config['configuration_extensions'][0]['type'] == const.EXTENSION_NFS:
         chart_config = json.loads(NFS_CHART_CONFIGURATION)
 
     initial_state = {
