@@ -10,7 +10,7 @@ from services.user_management import user_management
 logger = setup_custom_logger(__file__)
 
 
-class GetProjectRegistrationToken(graphene.Mutation):
+class GetProjectInvitationToken(graphene.Mutation):
     """Creates a user registration token for given project."""
 
     class Arguments:
@@ -21,7 +21,7 @@ class GetProjectRegistrationToken(graphene.Mutation):
             required=True,
             description='Default user role.')
 
-    Output = gql_util.OutputInterfaceFactory(types.GetProjectRegistrationInterface, 'GetRegToken')
+    Output = gql_util.OutputInterfaceFactory(types.GetProjectInvitationInterface, 'GetRegToken')
 
     def mutate(self, info, project_id, role):
         project_id = str(project_id)
@@ -54,13 +54,13 @@ class GetProjectRegistrationToken(graphene.Mutation):
 
         full_token, short_token = user_management.user_create_registration_token(str(project_id), role, requested_by_uuid=req_user_id)
 
-        return gql_util.OutputValueFromFactory(GetProjectRegistrationToken, {'returning': [{
+        return gql_util.OutputValueFromFactory(GetProjectInvitationToken, {'returning': [{
             'token': short_token,
         }]})
 
 
 class RegisterUser(graphene.Mutation):
-    """Registers a user using existing registration token."""
+    """Registers a user using an invitation token."""
 
     class Arguments:
         email = graphene.String(
@@ -68,7 +68,7 @@ class RegisterUser(graphene.Mutation):
             description='User email.')
         token = graphene.String(
             required=True,
-            description='Registration token.')
+            description='Invitation token.')
 
     Output = gql_util.OutputInterfaceFactory(types.SimpleStatusInterface, 'RegisterUser')
 
@@ -82,7 +82,7 @@ class RegisterUser(graphene.Mutation):
         }]})
 
 
-class DisableRegistration(graphene.Mutation):
+class DisableInvitation(graphene.Mutation):
     """Disable registration in project."""
 
     class Arguments:
@@ -90,7 +90,7 @@ class DisableRegistration(graphene.Mutation):
             required=True,
             description='Project ID.')
 
-    Output = gql_util.OutputInterfaceFactory(types.SimpleStatusInterface, 'DisableRegistration')
+    Output = gql_util.OutputInterfaceFactory(types.SimpleStatusInterface, 'DisableInvitation')
 
     def mutate(self, info, project_id):
         project_id = str(project_id)
@@ -112,6 +112,6 @@ class DisableRegistration(graphene.Mutation):
         user_management.disable_registration(project_id)
         logger.info(f'successfully closed registration for {project_id}')
 
-        return gql_util.OutputValueFromFactory(DisableRegistration, {'returning': [{
+        return gql_util.OutputValueFromFactory(DisableInvitation, {'returning': [{
             'success': True,
         }]})

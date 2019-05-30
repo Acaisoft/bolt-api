@@ -10,6 +10,8 @@ def get_project_summary(config, user_id):
         description
         image_url
         
+        invitation_tokens: user_registration_tokens { invitation_token }
+        
         scenarios: configurations_aggregate(where: {
             is_deleted: {_eq: false}, 
             project: {is_deleted: {_eq: false}, userProjects: {user_id: {_eq: $uid}}}
@@ -65,6 +67,7 @@ def get_project_summary(config, user_id):
             'num_sources': p['sources']['aggregate']['count'],
             'num_tests_passed': 0,
             'num_tests_failed': 0,
+            'invitation_open': len(p['invitation_tokens']) > 0,
         }
 
     for i in resp['tests']['nodes']:

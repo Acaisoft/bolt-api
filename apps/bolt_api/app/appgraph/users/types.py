@@ -1,7 +1,7 @@
 import graphene
 
 
-class GetProjectRegistrationInterface(graphene.Interface):
+class GetProjectInvitationInterface(graphene.Interface):
     token = graphene.String()
 
 

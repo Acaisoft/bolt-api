@@ -14,6 +14,7 @@ class SummaryItem(graphene.ObjectType):
     num_sources = graphene.Int()
     num_tests_passed = graphene.Int()
     num_tests_failed = graphene.Int()
+    invitation_open = graphene.Boolean()
 
 
 class SummaryResponse(graphene.ObjectType):

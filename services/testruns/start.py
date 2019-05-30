@@ -7,9 +7,12 @@ from services import const
 from services.hasura.hasura import hasura_token_for_testrunner
 from services.deployer import clients
 from services.hasura import hce
+from services.logger import setup_custom_logger
 from services.testruns.defaults import DEPLOYER_TIMEOUT, DEFAULT_CHART_CONFIGURATION, NFS_CHART_CONFIGURATION
 from services.validators import validate_extensions
 from services.validators.configuration import validate_test_configuration_by_id, validate_monitoring_params
+
+logger = setup_custom_logger(__file__)
 
 
 def start_image(app_config, project_id, workers, extensions, run_monitoring, run_load_test, monitoring_deadline_secs):
@@ -31,10 +34,18 @@ def start_image(app_config, project_id, workers, extensions, run_monitoring, run
         monitoring_deadline_secs=monitoring_deadline_secs,
         run_load_test=run_load_test,
     )
-    return clients.jobs(app_config).jobs_post(
-        job_create_schema=data,
-        _request_timeout=DEPLOYER_TIMEOUT
-    ), execution_id, job_token
+
+    try:
+        return clients.jobs(app_config).jobs_post(
+            job_create_schema=data,
+            _request_timeout=DEPLOYER_TIMEOUT
+        ), execution_id, job_token
+    except Exception as e:
+        if 'NewConnectionError' in str(e):
+            logger.warn(str(e))
+            raise AssertionError('Deployment Management service is temporarily overloaded, please try again later')
+        else:
+            raise
 
 
 def start_job(app_config, project_id, repo_url, workers, no_cache, extensions, run_monitoring, run_load_test,
@@ -58,10 +69,18 @@ def start_job(app_config, project_id, repo_url, workers, no_cache, extensions, r
         monitoring_deadline_secs=monitoring_deadline_secs,
         run_load_test=run_load_test,
     )
-    return clients.images(app_config).image_builds_post(
-        image_build_request_schema=data,
-        _request_timeout=DEPLOYER_TIMEOUT
-    ), execution_id, job_token
+
+    try:
+        return clients.images(app_config).image_builds_post(
+            image_build_request_schema=data,
+            _request_timeout=DEPLOYER_TIMEOUT
+        ), execution_id, job_token
+    except Exception as e:
+        if 'NewConnectionError' in str(e):
+            logger.warn(str(e))
+            raise AssertionError('Image Build service is temporarily overloaded, please try again later')
+        else:
+            raise
 
 
 def start(app_config, conf_id, user_id, no_cache):

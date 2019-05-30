@@ -1,0 +1,62 @@
+- args:
+    permission:
+      allow_aggregations: true
+      columns:
+      - id
+      - name
+      - url
+      - project_id
+      - performed
+      - created_by_id
+      - type_slug
+      - is_deleted
+      filter:
+        _and:
+        - project:
+            userProjects:
+              user_id:
+                _eq: X-Hasura-User-Id
+        - project:
+            is_deleted:
+              _eq: false
+        - is_deleted:
+            _eq: false
+    role: tenantadmin
+    table:
+      name: repository
+      schema: public
+  type: create_select_permission
+- args:
+    role: manager
+    table:
+      name: repository
+      schema: public
+  type: drop_select_permission
+- args:
+    permission:
+      allow_aggregations: true
+      columns:
+      - id
+      - name
+      - url
+      - project_id
+      - performed
+      - created_by_id
+      - type_slug
+      - is_deleted
+      filter:
+        _and:
+        - project:
+            userProjects:
+              user_id:
+                _eq: X-Hasura-User-Id
+        - project:
+            is_deleted:
+              _eq: false
+        - is_deleted:
+            _eq: false
+    role: manager
+    table:
+      name: repository
+      schema: public
+  type: create_select_permission
