@@ -1,6 +1,14 @@
 import graphene
 
 
+class GetProjectRegistrationInterface(graphene.Interface):
+    token = graphene.String()
+
+
+class SimpleStatusInterface(graphene.Interface):
+    success = graphene.Boolean()
+
+
 class UserInterface(graphene.Interface):
     id = graphene.UUID()
     email = graphene.String()

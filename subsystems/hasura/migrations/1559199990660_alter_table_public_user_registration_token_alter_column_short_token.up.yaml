@@ -1,0 +1,4 @@
+- args:
+    sql: ALTER TABLE "public"."user_registration_token" ADD CONSTRAINT "user_registration_token_short_token_key"
+      UNIQUE ("short_token")
+  type: run_sql

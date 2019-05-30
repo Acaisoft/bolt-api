@@ -1,0 +1,4 @@
+- args:
+    sql: ALTER TABLE "public"."user_registration_token" ADD COLUMN "created_by" uuid
+      NULL
+  type: run_sql

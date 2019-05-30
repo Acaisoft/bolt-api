@@ -15,6 +15,42 @@ def user_create(email, project, role):
     user_management.user_create(email, project, role)
 
 
+@click.command(name='user_create_registration_token')
+@click.argument('project', required=True)
+@click.argument('role', required=True)
+@with_appcontext
+def user_create_registration_token(project, role):
+    """
+    Open registration to given project with given default role.
+    Return a registration token.
+    """
+    full, short = user_management.user_create_registration_token(project, role)
+    print(f'full registration token: {full}\nshort token: {short}')
+
+
+@click.command(name='user_register')
+@click.argument('email', required=True)
+@click.argument('token', required=True)
+@with_appcontext
+def user_register(email, token):
+    """
+    Register user account, given an email and a registration token.
+    Return new user id.
+    """
+    user_id = user_management.user_register(email, token)
+    print(f'user account has been created, please go to login page')
+
+
+@click.command(name='disable_registration')
+@click.argument('project_id', required=False)
+@with_appcontext
+def disable_registration(project_id=None):
+    """
+    Disable registratino to project or to all projects.
+    """
+    user_management.disable_registration(project_id)
+
+
 @click.command(name='user_list_in_project')
 @click.argument('project', required=True)
 @with_appcontext

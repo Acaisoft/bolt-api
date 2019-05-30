@@ -27,7 +27,7 @@ class CreateValidate(graphene.Mutation):
 
     @staticmethod
     def validate(info, name, description=None, image_url=None):
-        role, user_id = gql_util.get_request_role_userid(info, (const.ROLE_ADMIN,))
+        role, user_id = gql_util.get_request_role_userid(info, (const.ROLE_ADMIN, const.ROLE_TENANT_ADMIN,))
 
         validators.validate_text(name)
 
@@ -78,7 +78,7 @@ class Create(CreateValidate):
         return uploads.get_object_public_url(current_app.config, file_id)
 
     def mutate(self, info, name, description=None, image_url=None):
-        _, user_id = gql_util.get_request_role_userid(info, (const.ROLE_ADMIN,))
+        _, user_id = gql_util.get_request_role_userid(info, (const.ROLE_ADMIN, const.ROLE_TENANT_ADMIN))
 
         query_params = CreateValidate.validate(info, name, description, image_url)
 

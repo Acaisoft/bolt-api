@@ -1,3 +1,5 @@
+import uuid
+
 from flask import current_app
 from schematics import types
 
@@ -36,6 +38,90 @@ def user_create(email, project, role):
     }''', {'data': {'user_id': user_id, 'project_id': project}})
 
     return user_id
+
+
+def user_create_registration_token(project, role, requested_by_uuid=None):
+    """
+    Enables registration in given project with given default role
+    :param project: project to assign new registeree to
+    :param role: role to assign to user, if no other is available
+    :param requested_by_uuid: optional uuid of the user requesting the token
+    :return: registration token
+    """
+    p = types.UUIDType()
+    p.validate(project)
+    r = types.BaseType(choices=const.ROLE_CHOICE)
+    r.validate(role)
+
+    current_app.logger.info('generating registration token')
+    token = str(uuid.uuid4())
+    short_token = token[9:23]
+    q_data = {
+        'project_id': project,
+        'user_role': role,
+        'token': token,
+        'short_token': short_token,
+    }
+
+    if requested_by_uuid:
+        p.validate(requested_by_uuid)
+        q_data['created_by'] = requested_by_uuid
+
+    query = hce(current_app.config, '''mutation ($data:[user_registration_token_insert_input!]!) {
+        insert_user_registration_token(
+            objects:$data
+        ) {
+            returning { token }
+        }
+    }''', {'data': q_data})
+    assert query['insert_user_registration_token'], f'unexpected error: {str(query)}'
+    return token, short_token
+
+
+def user_register(email, registration_token):
+    """
+    Registers a user using a registration_token from @user_create_registration_token
+    :param email: user email
+    :param registration_token: short version of the registration token
+    :return: user id
+    """
+    p = types.EmailType()
+    p.validate(email)
+    current_app.logger.info('validating registration token')
+    r = types.StringType(max_length=14, min_length=14)
+    r.validate(registration_token)
+    resp = hce(current_app.config, '''query ($st:String!) {
+        user_registration_token ( where: {short_token: {_eq:$st} }) {
+            project_id
+            user_role
+        }
+    }''', {'st': registration_token})
+    assert len(resp['user_registration_token']) == 1, f'invalid token'
+    project_id = resp['user_registration_token'][0]['project_id']
+    user_role = resp['user_registration_token'][0]['user_role']
+
+    user_id = user_create(email=email, project=project_id, role=user_role)
+    return user_id
+
+
+def disable_registration(project_id=None):
+    """
+    Disables registration for project or all projects (deletes all registration tokens for given project(s)).
+    :param project_id: optional, None equals all projects
+    :return:
+    """
+    if project_id:
+        current_app.logger.info(f'disabling registration for project {project_id}')
+        resp = hce(current_app.config, '''mutation ($pid:uuid!) {
+            delete_user_registration_token (where:{project_id:{_eq:$pid}}) { affected_rows }
+        }''', {'pid': project_id})
+        assert resp.get('errors', None) is None, f'cant close registration: {str(resp)}'
+    else:
+        current_app.logger.info(f'disabling registration for all projects')
+        resp = hce(current_app.config, '''mutation {
+            delete_user_registration_token (where:{user_role:{_neq:"nop"}}) { affected_rows }
+        }''', {'pid': project_id})
+        assert resp.get('errors', None) is None, f'cant close registration: {str(resp)}'
 
 
 def user_unassign_from_project(user_id, project_id):

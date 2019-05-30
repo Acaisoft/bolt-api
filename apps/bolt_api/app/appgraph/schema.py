@@ -60,6 +60,9 @@ class TestrunMutations(graphene.ObjectType):
     testrun_user_assign = to_field(users.UserAssignToProject)
     testrun_user_roles = to_field(users.UserAddRole)
     testrun_user_unassign = to_field(users.UserRemoveFromProject)
+    testrun_registration_open = to_field(users.GetProjectRegistrationToken)
+    testrun_register_user = to_field(users.RegisterUser)
+    testrun_registration_disable = to_field(users.DisableRegistration)
 
     # debug only
     testrun_project_purge = to_field(demo.PurgeProject)
