@@ -30,7 +30,7 @@ def setup_demo_project(config, name, req_user_id, req_user_email, _async=True):
 
     if req_user_email:
         # create and assign user
-        user_management.user_create(req_user_email, project_id, const.ROLE_READER)
+        user_management.user_create(req_user_email, const.ROLE_READER, project_id)
     elif req_user_id:
         # assign user to project
         logger.info(f'assigning user {req_user_id} to project {project_id}')

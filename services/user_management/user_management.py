@@ -8,34 +8,37 @@ from services.hasura import hce
 from services.keycloak.users import create_user_with_role, list_users, user_assign_roles
 
 
-def user_create(email, project, role):
+def user_create(email, role, project=None):
     """
-    Create a user in keycloak with given roles
+    Create a user in keycloak with given roles, optionally assign to given project
     """
     e = types.EmailType(max_length=256)
     e.validate(email)
-    p = types.UUIDType()
-    p.validate(project)
+    if project:
+        p = types.UUIDType()
+        p.validate(project)
     r = types.BaseType(choices=const.ROLE_CHOICE)
     r.validate(role)
 
-    project_query = hce(current_app.config, '''query ($project:uuid!) {
-        project_by_pk (id:$project) {
-            is_deleted
-            name
-            userProjects { user_id }
-        }
-    }''', {'project': project})
-    assert project_query['project_by_pk'], f'invalid project id f{project}: {project_query}'
+    if project:
+        project_query = hce(current_app.config, '''query ($project:uuid!) {
+            project_by_pk (id:$project) {
+                is_deleted
+                name
+                userProjects { user_id }
+            }
+        }''', {'project': project})
+        assert project_query['project_by_pk'], f'invalid project id f{project}: {project_query}'
 
     current_app.logger.info('adding keycloak user')
     user_id = create_user_with_role(current_app.config, email, role)
     assert user_id, f'expected a non-empty keycloak user_id instead of {user_id}'
 
-    current_app.logger.info('adding user-project relation')
-    hce(current_app.config, '''mutation ($data:user_project_insert_input!) {
-        insert_user_project(objects: [$data]) { affected_rows }
-    }''', {'data': {'user_id': user_id, 'project_id': project}})
+    if project:
+        current_app.logger.info('adding user-project relation')
+        hce(current_app.config, '''mutation ($data:user_project_insert_input!) {
+            insert_user_project(objects: [$data]) { affected_rows }
+        }''', {'data': {'user_id': user_id, 'project_id': project}})
 
     return user_id
 
@@ -100,7 +103,7 @@ def user_register(email, invitation_token):
     project_id = resp['user_registration_token'][0]['project_id']
     user_role = resp['user_registration_token'][0]['user_role']
 
-    user_id = user_create(email=email, project=project_id, role=user_role)
+    user_id = user_create(email=email, role=user_role, project=project_id)
     return user_id
 
 

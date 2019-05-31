@@ -6,14 +6,14 @@ from services.user_management import user_management
 
 @click.command(name='user_create')
 @click.argument('email', required=True)
-@click.argument('project', required=True)
 @click.argument('role', required=True)
+@click.argument('project', required=False)
 @with_appcontext
-def user_create(email, project, role):
+def user_create(email, role, project):
     """
     Create a user in keycloak with given roles.
     """
-    user_management.user_create(email, project, role)
+    user_management.user_create(email, role, project)
 
 
 @click.command(name='user_create_invitation')
@@ -107,4 +107,4 @@ def user_login(email, passwd):
     )
     print(resp)
     print(resp.headers)
-    print(resp.json())
+    print(resp.text)

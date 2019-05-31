@@ -240,3 +240,66 @@ mutation {
   ) { affected_rows }
 }
 ```
+
+### Users
+
+Authentication is handled by Keycloak and passed onto Hasura through a JWT with special claims structure.
+
+Below is a Script Mapper for generating hasura claims. It relies on calling client having a set of roles 
+matching the ones used by Hasura and bolt-api, see `sevice/const.ROLE_CHOICE`.
+
+```javascript
+/**
+ * Available variables: 
+ * user - the current user
+ * realm - the current realm
+ * token - the current token
+ * userSession - the current userSession
+ * keycloakSession - the current userSession
+ */
+var ArrayList = Java.type("java.util.ArrayList");
+var forEach = Array.prototype.forEach;
+var roles = new ArrayList();
+var realmClients = realm.getClients(); 
+var currentClient = keycloakSession.getContext().getClient();
+var user_id = user.getId();
+var default_role = "";
+// TODO: bolt multitenancy support needs some support in keycloak too
+var tenant_id = user.getFirstAttribute("tenant_id");
+
+function mapper (roleModel) {
+    if (!roles.contains(roleModel.getName())) {
+        roles.add(roleModel.getName());
+        if (roleModel.isComposite()) {
+            forEach.call(roleModel.getComposites().toArray(), mapper);
+        }
+    }
+}
+
+forEach.call(user.getClientRoleMappings(currentClient).toArray(), mapper);
+
+if (roles.contains("reader")) {
+    default_role = "reader";
+}
+if (roles.contains("tester")) {
+    default_role = "tester";
+}
+if (roles.contains("manager")) {
+    default_role = "manager";
+}
+if (roles.contains("tenantadmin")) {
+    default_role = "tenantadmin";
+}
+if (roles.contains("admin")) {
+    default_role = "admin";
+}
+
+var claims = {
+    "x-hasura-default-role": default_role,
+    "x-hasura-tenant-id": tenant_id,
+    "x-hasura-allowed-roles": roles,
+    "x-hasura-user-id": user_id,
+  };
+  
+exports = claims;
+```
