@@ -20,6 +20,9 @@ def user_create(email, role, project=None):
     r = types.BaseType(choices=const.ROLE_CHOICE)
     r.validate(role)
 
+    if not project:
+        assert role == const.ROLE_TENANT_ADMIN, f'a user without project must have a "tenantadmin" role'
+
     if project:
         project_query = hce(current_app.config, '''query ($project:uuid!) {
             project_by_pk (id:$project) {
