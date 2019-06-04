@@ -1,0 +1,26 @@
+- args:
+    permission:
+      allow_aggregations: true
+      columns:
+      - average_content_size
+      - average_response_time
+      - execution_id
+      - identifier
+      - max_content_size
+      - max_response_time
+      - median_response_time
+      - method
+      - min_content_size
+      - min_response_time
+      - name
+      - num_failures
+      - num_requests
+      - requests_per_second
+      - timestamp
+      filter: {}
+      limit: null
+    role: tenantadmin
+    table:
+      name: execution_request_totals
+      schema: public
+  type: create_select_permission
