@@ -1,0 +1,17 @@
+- args:
+    permission:
+      allow_upsert: true
+      check: {}
+      columns:
+      - created_at
+      - data
+      - id
+      localPresets:
+      - key: ""
+        value: ""
+      set: {}
+    role: testrunner
+    table:
+      name: argo_execution_log
+      schema: public
+  type: create_insert_permission
