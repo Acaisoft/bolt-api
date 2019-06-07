@@ -1,0 +1,14 @@
+- args:
+    permission:
+      allow_aggregations: false
+      columns:
+      - created_at
+      - data
+      - id
+      filter: {}
+      limit: null
+    role: reader
+    table:
+      name: argo_execution_log
+      schema: public
+  type: create_select_permission
