@@ -10,6 +10,7 @@ def DOCKER_REPOSITORY_METRICS_API = "eu.gcr.io/acai-bolt/bolt-metrics-api"
 def GCR_CREDENTIALS = "acai-bolt-gcp-private-key"
 def DEV_BRANCH = "master"
 def PROD_BRANCH = "prod"
+def DEV_LITE_BRANCH = "dev-lite"
 def GCR_URL = "https://eu.gcr.io"
 
 node('docker') {
@@ -35,7 +36,7 @@ node('docker') {
         }
 
         stage('Build images') {
-            if (env.BRANCH_NAME != DEV_BRANCH && env.BRANCH_NAME != PROD_BRANCH) {
+            if (env.BRANCH_NAME != DEV_BRANCH && env.BRANCH_NAME != PROD_BRANCH && env.BRANCH_NAME != DEV_LITE_BRANCH) {
                 Utils.markStageSkippedForConditional('Build image')
                 return;
             }
@@ -44,7 +45,7 @@ node('docker') {
         }
 
         stage('Push images') {
-            if (env.BRANCH_NAME != DEV_BRANCH && env.BRANCH_NAME != PROD_BRANCH) {
+            if (env.BRANCH_NAME != DEV_BRANCH && env.BRANCH_NAME != PROD_BRANCH && env.BRANCH_NAME != DEV_LITE_BRANCH) {
                 Utils.markStageSkippedForConditional('Push image')
                 return;
             }
