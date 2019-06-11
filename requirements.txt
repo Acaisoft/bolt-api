@@ -2,4 +2,3 @@
 -r apps/bolt_api/requirements/core.txt
 vcrpy==2.0.1
 bolt-deployer/sdk
-PyYAML==5.1.1
