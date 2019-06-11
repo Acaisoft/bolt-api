@@ -10,6 +10,10 @@ RUN mkdir /install
 WORKDIR /install
 
 RUN apk add --no-cache --virtual .build-deps gcc musl-dev libffi-dev jpeg-dev zlib-dev openssl-dev build-base
+
+RUN curl -L https://github.com/argoproj/argo/releases/download/v2.3.0/argo-linux-amd64 > /usr/bin/argo \
+  && chmod +x /usr/bin/argo
+
 # ~205 MB
 # core requirements for hasura and graphql
 COPY apps/bolt_api/requirements/core.txt /requirements_core.txt
@@ -21,6 +25,7 @@ RUN apk del .build-deps
 
 FROM base
 COPY --from=builder /install /usr/local
+COPY --from=builder /usr/bin/argo /usr/bin/argo
 
 COPY apps /apps
 COPY services /services
