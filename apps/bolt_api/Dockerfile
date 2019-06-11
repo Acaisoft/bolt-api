@@ -9,7 +9,7 @@ FROM base as builder
 RUN mkdir /install
 WORKDIR /install
 
-RUN apk add --no-cache --virtual .build-deps gcc musl-dev libffi-dev jpeg-dev zlib-dev openssl-dev build-base
+RUN apk add --no-cache --virtual .build-deps gcc musl-dev libffi-dev jpeg-dev zlib-dev openssl-dev build-base curl
 
 RUN curl -L https://github.com/argoproj/argo/releases/download/v2.3.0/argo-linux-amd64 > /usr/bin/argo \
   && chmod +x /usr/bin/argo
