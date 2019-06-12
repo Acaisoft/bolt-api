@@ -191,17 +191,17 @@ def start(app_config, conf_id, user_id, no_cache):
 
         logger.info(f'Testrun start output {output}')
 
-        deployer_response, execution_id, hasura_token = start_job(
-            app_config=app_config,
-            project_id=test_config['project_id'],
-            workers=test_config['instances'],
-            repo_url=test_config['test_source']['repository']['url'],
-            no_cache=no_cache,
-            extensions=test_extensions,
-            monitoring_deadline_secs=monitoring_deadline_secs,
-            run_monitoring=test_config['has_monitoring'],
-            run_load_test=test_config['has_load_tests'],
-        )
+        # deployer_response, execution_id, hasura_token = start_job(
+        #     app_config=app_config,
+        #     project_id=test_config['project_id'],
+        #     workers=test_config['instances'],
+        #     repo_url=test_config['test_source']['repository']['url'],
+        #     no_cache=no_cache,
+        #     extensions=test_extensions,
+        #     monitoring_deadline_secs=monitoring_deadline_secs,
+        #     run_monitoring=test_config['has_monitoring'],
+        #     run_load_test=test_config['has_load_tests'],
+        # )
         # initial_state['test_preparation_job_id'] = deployer_response.id
         # initial_state['test_preparation_job_status'] = deployer_response.status
     elif code_source == const.CONF_SOURCE_JSON:
