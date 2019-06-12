@@ -33,7 +33,6 @@ COPY instance /instance
 COPY bolt-deployer/sdk /bolt-deployer/sdk
 RUN mkdir /apps/executions
 RUN pip install /bolt-deployer/sdk
-RUN rm -rf /bolt-deployer/sdk
 WORKDIR /
 
 ARG release
