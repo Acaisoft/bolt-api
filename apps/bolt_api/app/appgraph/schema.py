@@ -1,7 +1,7 @@
 import graphene
 
 from apps.bolt_api.app.appgraph import configuration, project, repository, test_creator, uploads, users, test_runs, \
-    data_export, extension
+    data_export, extension, argo
 from apps.bolt_api.app.appgraph.project import demo
 from services import gql_util
 
@@ -63,6 +63,9 @@ class TestrunMutations(graphene.ObjectType):
     testrun_invitation_open = to_field(users.GetProjectInvitationToken)
     testrun_invitation_register_user = to_field(users.RegisterUser)
     testrun_invitation_disable = to_field(users.DisableInvitation)
+
+    # argo
+    testrun_argo_create_execution_log = to_field(argo.CreateExecutionLog)
 
     # debug only
     testrun_project_purge = to_field(demo.PurgeProject)

@@ -3,6 +3,7 @@ import json
 import deployer_cli
 from datetime import datetime
 
+from apps.bolt_api.app import argo
 from services import const
 from services.hasura.hasura import hasura_token_for_testrunner
 from services.deployer import clients
@@ -182,17 +183,25 @@ def start(app_config, conf_id, user_id, no_cache):
     }
 
     if code_source == const.CONF_SOURCE_REPO:
-        deployer_response, execution_id, hasura_token = start_job(
-            app_config=app_config,
-            project_id=test_config['project_id'],
-            workers=test_config['instances'],
-            repo_url=test_config['test_source']['repository']['url'],
-            no_cache=no_cache,
-            extensions=test_extensions,
-            monitoring_deadline_secs=monitoring_deadline_secs,
-            run_monitoring=test_config['has_monitoring'],
-            run_load_test=test_config['has_load_tests'],
-        )
+        client = argo.Client('/apps/executions')
+        hasura_token, execution_id = hasura_token_for_testrunner(app_config)
+        output = client.run_master_slave(hasura_token, execution_id, 1, test_config['project_id'],
+                                         test_config['test_source']['repository']['url'],
+                                         test_config['instances'], test_config['has_monitoring'])
+
+        logger.info(f'Testrun start output {output}')
+
+        # deployer_response, execution_id, hasura_token = start_job(
+        #     app_config=app_config,
+        #     project_id=test_config['project_id'],
+        #     workers=test_config['instances'],
+        #     repo_url=test_config['test_source']['repository']['url'],
+        #     no_cache=no_cache,
+        #     extensions=test_extensions,
+        #     monitoring_deadline_secs=monitoring_deadline_secs,
+        #     run_monitoring=test_config['has_monitoring'],
+        #     run_load_test=test_config['has_load_tests'],
+        # )
         # initial_state['test_preparation_job_id'] = deployer_response.id
         # initial_state['test_preparation_job_status'] = deployer_response.status
     elif code_source == const.CONF_SOURCE_JSON:
