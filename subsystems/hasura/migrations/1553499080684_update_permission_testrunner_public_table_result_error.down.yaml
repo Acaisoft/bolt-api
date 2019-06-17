@@ -1,6 +1,0 @@
-- args:
-    role: testrunner
-    table:
-      name: result_error
-      schema: public
-  type: drop_insert_permission

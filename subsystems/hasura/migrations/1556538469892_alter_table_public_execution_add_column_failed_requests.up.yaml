@@ -1,4 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."execution" ADD COLUMN "failed_requests" integer NOT
-      NULL DEFAULT 0
-  type: run_sql

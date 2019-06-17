@@ -1,6 +1,0 @@
-- args:
-    relationship: executionByparameterId
-    table:
-      name: execution_parameter
-      schema: public
-  type: drop_relationship

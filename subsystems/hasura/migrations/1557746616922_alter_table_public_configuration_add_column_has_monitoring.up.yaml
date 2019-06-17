@@ -1,4 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."configuration" ADD COLUMN "has_monitoring" boolean
-      NOT NULL DEFAULT false
-  type: run_sql

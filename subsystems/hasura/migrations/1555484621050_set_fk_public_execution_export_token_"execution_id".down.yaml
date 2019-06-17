@@ -1,3 +1,0 @@
-- args:
-    sql: alter table "public"."execution_export_token" drop constraint execution_export_token_execution_id_fkey;
-  type: run_sql

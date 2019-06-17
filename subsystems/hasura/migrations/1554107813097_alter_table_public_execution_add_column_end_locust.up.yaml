@@ -1,3 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."execution" ADD COLUMN "end_locust" timestamptz NULL
-  type: run_sql

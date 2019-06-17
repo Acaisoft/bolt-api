@@ -1,4 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."user" ADD COLUMN "is_reader" boolean NOT NULL DEFAULT
-      true
-  type: run_sql

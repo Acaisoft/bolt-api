@@ -1,4 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."execution_instance" ADD FOREIGN KEY ("execution_id")
-      REFERENCES "public"."execution" ("id")
-  type: run_sql

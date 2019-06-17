@@ -1,2 +1,0 @@
-ALTER TABLE public.test_creator_configuration_m2m
-  DROP CONSTRAINT IF EXISTS test_creator_configuration_m2m_pkey;

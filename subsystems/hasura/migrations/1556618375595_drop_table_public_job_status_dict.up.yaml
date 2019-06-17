@@ -1,3 +1,0 @@
-- args:
-    sql: DROP TABLE "public"."job_status_dict"
-  type: run_sql

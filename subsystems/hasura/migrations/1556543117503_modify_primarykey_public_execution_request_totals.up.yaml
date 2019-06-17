@@ -1,9 +1,0 @@
-- args:
-    sql: "\n          alter table \"public\".\"execution_request_totals\" drop constraint
-      \"execution_request_totals_pkey\";\n        "
-  type: run_sql
-- args:
-    sql: "\n            alter table \"public\".\"execution_request_totals\"\n            add
-      constraint \"execution_request_totals_pkey\" primary key ( execution_id, identifier
-      );\n          "
-  type: run_sql

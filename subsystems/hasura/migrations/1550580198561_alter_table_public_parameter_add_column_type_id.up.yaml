@@ -1,3 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."parameter" ADD COLUMN "type_id" uuid NULL
-  type: run_sql

@@ -1,4 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."user_registration_token" ADD COLUMN "created_at" timestamp
-      with time zone NULL DEFAULT now()
-  type: run_sql

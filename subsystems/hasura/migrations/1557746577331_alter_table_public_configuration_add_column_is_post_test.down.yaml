@@ -1,3 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."configuration" DROP COLUMN "is_post_test"
-  type: run_sql

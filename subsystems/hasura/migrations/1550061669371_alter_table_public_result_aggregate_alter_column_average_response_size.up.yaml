@@ -1,8 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."result_aggregate" ALTER COLUMN "average_response_size"
-      TYPE numeric;
-  type: run_sql
-- args:
-    sql: COMMENT ON COLUMN "public"."result_aggregate"."average_response_size" IS
-      'size in bytes'
-  type: run_sql

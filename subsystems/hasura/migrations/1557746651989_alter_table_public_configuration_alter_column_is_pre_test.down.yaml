@@ -1,3 +1,0 @@
-- args:
-    sql: alter table "public"."configuration" rename column "has_pre_test" to "is_pre_test";
-  type: run_sql

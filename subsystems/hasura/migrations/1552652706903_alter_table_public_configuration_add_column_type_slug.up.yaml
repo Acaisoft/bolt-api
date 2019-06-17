@@ -1,3 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."configuration" ADD COLUMN "type_slug" text NULL
-  type: run_sql

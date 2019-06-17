@@ -1,4 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."execution_export_token" ALTER COLUMN "execution_id"
-      SET NOT NULL;
-  type: run_sql

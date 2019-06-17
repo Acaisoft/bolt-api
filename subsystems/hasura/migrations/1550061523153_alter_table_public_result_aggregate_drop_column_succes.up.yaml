@@ -1,3 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."result_aggregate" DROP COLUMN "succes"
-  type: run_sql

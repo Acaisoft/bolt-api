@@ -1,8 +1,0 @@
-- args:
-    name: configuration
-    table:
-      name: test_creator_configuration_m2m
-      schema: public
-    using:
-      foreign_key_constraint_on: configuration_id
-  type: create_object_relationship

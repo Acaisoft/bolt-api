@@ -1,6 +1,0 @@
-- args:
-    role: reader
-    table:
-      name: execution_result
-      schema: public
-  type: drop_select_permission

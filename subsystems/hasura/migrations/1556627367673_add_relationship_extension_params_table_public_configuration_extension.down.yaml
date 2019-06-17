@@ -1,6 +1,0 @@
-- args:
-    relationship: extension_params
-    table:
-      name: configuration_extension
-      schema: public
-  type: drop_relationship

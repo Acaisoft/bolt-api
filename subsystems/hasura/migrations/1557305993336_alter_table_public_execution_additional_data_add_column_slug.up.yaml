@@ -1,3 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."execution_additional_data" ADD COLUMN "slug" text NULL
-  type: run_sql

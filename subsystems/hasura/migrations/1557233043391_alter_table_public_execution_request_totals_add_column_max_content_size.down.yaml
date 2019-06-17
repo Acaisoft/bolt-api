@@ -1,3 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."execution_request_totals" DROP COLUMN "max_content_size"
-  type: run_sql

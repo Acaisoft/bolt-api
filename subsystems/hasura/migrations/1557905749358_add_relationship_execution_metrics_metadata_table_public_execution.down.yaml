@@ -1,6 +1,0 @@
-- args:
-    relationship: execution_metrics_metadata
-    table:
-      name: execution
-      schema: public
-  type: drop_relationship

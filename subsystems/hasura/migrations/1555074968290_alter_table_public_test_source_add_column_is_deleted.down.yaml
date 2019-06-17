@@ -1,3 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."test_source" DROP COLUMN "is_deleted"
-  type: run_sql

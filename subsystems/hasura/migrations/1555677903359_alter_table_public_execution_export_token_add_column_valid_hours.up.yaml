@@ -1,4 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."execution_export_token" ADD COLUMN "valid_hours" integer
-      NOT NULL DEFAULT 24
-  type: run_sql

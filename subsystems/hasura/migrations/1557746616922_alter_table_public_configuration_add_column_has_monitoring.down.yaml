@@ -1,3 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."configuration" DROP COLUMN "has_monitoring"
-  type: run_sql

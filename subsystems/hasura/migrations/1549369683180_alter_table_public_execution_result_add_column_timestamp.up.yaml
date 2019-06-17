@@ -1,3 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."execution_result" ADD COLUMN "timestamp" bigint NULL
-  type: run_sql

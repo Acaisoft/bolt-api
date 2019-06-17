@@ -1,3 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."configuration_parameter" DROP CONSTRAINT "configuration_parameter_parameter_id_fkey"
-  type: run_sql

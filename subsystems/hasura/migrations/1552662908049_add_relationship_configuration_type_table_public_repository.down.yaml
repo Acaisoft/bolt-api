@@ -1,6 +1,0 @@
-- args:
-    relationship: configuration_type
-    table:
-      name: repository
-      schema: public
-  type: drop_relationship

@@ -1,4 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."configuration" ADD COLUMN "performed" boolean NOT NULL
-      DEFAULT true
-  type: run_sql

@@ -1,5 +1,0 @@
-- args:
-    cascade: false
-    sql: insert into parameter (name, param_type, param_name, type_slug, slug_name)
-      values ('Monitoring duration', 'int', '-md', 'load_tests', 'monitoring_duration')
-  type: run_sql

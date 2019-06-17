@@ -1,4 +1,0 @@
-- args:
-    cascade: false
-    sql: update repository set type_slug = 'load_tests'
-  type: run_sql

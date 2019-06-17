@@ -1,6 +1,0 @@
-- args:
-    relationship: configuration_envvars
-    table:
-      name: configuration
-      schema: public
-  type: drop_relationship

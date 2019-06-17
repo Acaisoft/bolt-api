@@ -1,4 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."parameter" ADD COLUMN "type_slug" text NULL DEFAULT
-      'load_tests'
-  type: run_sql

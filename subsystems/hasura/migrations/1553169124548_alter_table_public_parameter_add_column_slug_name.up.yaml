@@ -1,3 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."parameter" ADD COLUMN "slug_name" text NULL UNIQUE
-  type: run_sql

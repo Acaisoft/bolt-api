@@ -1,3 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."argo_execution_log" DROP COLUMN "argo_id"
-  type: run_sql

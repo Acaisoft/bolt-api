@@ -1,6 +1,0 @@
-- args:
-    relationship: configurationParameters
-    table:
-      name: parameter
-      schema: public
-  type: drop_relationship

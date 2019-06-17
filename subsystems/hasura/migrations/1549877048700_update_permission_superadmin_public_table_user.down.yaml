@@ -1,6 +1,0 @@
-- args:
-    role: superadmin
-    table:
-      name: user
-      schema: public
-  type: drop_select_permission

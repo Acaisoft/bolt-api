@@ -1,4 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."result_distribution" ADD COLUMN "result_type" text
-      NOT NULL DEFAULT 'request'
-  type: run_sql

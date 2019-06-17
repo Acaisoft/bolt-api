@@ -1,1 +1,0 @@
-DELETE FROM public.parameter WHERE name IN ('time', 'users', 'users/second', 'host');

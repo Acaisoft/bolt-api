@@ -1,4 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."execution" ADD COLUMN "test_preparation_job_error"
-      text NULL
-  type: run_sql

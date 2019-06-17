@@ -1,3 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."user_registration_token" DROP COLUMN "short_token"
-  type: run_sql

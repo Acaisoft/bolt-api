@@ -1,3 +1,0 @@
-- args:
-    sql: DROP TABLE "public"."execution_metrics_data"
-  type: run_sql

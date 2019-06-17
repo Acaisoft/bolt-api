@@ -1,6 +1,0 @@
-- args:
-    relationship: test_creator
-    table:
-      name: test_source
-      schema: public
-  type: drop_relationship

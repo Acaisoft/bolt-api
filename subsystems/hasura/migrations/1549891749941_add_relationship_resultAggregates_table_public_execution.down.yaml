@@ -1,6 +1,0 @@
-- args:
-    relationship: resultAggregates
-    table:
-      name: execution
-      schema: public
-  type: drop_relationship

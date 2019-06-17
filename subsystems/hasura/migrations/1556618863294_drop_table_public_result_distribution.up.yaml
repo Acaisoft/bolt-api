@@ -1,3 +1,0 @@
-- args:
-    sql: DROP TABLE "public"."result_distribution"
-  type: run_sql

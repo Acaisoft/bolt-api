@@ -1,7 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."execution" ALTER COLUMN "test_preparation_job_id" TYPE
-      text;
-  type: run_sql
-- args:
-    sql: COMMENT ON COLUMN "public"."execution"."test_preparation_job_id" IS ''
-  type: run_sql

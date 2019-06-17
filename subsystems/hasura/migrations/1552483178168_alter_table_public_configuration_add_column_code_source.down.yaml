@@ -1,3 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."configuration" DROP COLUMN "code_source"
-  type: run_sql

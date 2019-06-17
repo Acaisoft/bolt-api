@@ -1,3 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."execution_result" DROP CONSTRAINT "execution_result_execution_id_fkey"
-  type: run_sql

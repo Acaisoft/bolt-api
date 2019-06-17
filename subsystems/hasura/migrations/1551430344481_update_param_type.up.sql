@@ -1,1 +1,0 @@
-update parameter set type_id = (select id from configuration_type where slug_name = 'load_tests' limit 1);

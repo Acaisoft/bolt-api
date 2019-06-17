@@ -1,3 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."user_registration_token" DROP CONSTRAINT "user_registration_token_short_token_key"
-  type: run_sql

@@ -1,3 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."configuration_parameter" DROP COLUMN "parameter_slug"
-  type: run_sql

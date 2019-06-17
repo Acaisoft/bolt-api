@@ -1,6 +1,0 @@
-- args:
-    role: reader
-    table:
-      name: result_aggregate
-      schema: public
-  type: drop_select_permission

@@ -1,4 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."test_creator_configuration_m2m" ADD COLUMN "type_slug"
-      text NOT NULL DEFAULT 'load_tests'
-  type: run_sql

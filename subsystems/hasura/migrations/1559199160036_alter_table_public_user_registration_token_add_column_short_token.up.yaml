@@ -1,4 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."user_registration_token" ADD COLUMN "short_token" text
-      NULL
-  type: run_sql

@@ -1,4 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."execution" ADD COLUMN "test_preparation_job_statuscheck_timestamp"
-      timestamptz NULL
-  type: run_sql

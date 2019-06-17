@@ -1,4 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."job_status" ADD FOREIGN KEY ("status_code") REFERENCES
-      "public"."job_status_dict" ("code")
-  type: run_sql

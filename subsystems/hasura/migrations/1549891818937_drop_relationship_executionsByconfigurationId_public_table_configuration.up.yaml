@@ -1,6 +1,0 @@
-- args:
-    relationship: executionsByconfigurationId
-    table:
-      name: configuration
-      schema: public
-  type: drop_relationship

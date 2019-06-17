@@ -1,3 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."configuration" DROP COLUMN "monitoring_chart_configuration"
-  type: run_sql

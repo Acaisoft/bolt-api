@@ -1,3 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."configuration_type" ADD COLUMN "slug_name" text NOT NULL UNIQUE DEFAULT 'load_tests'
-  type: run_sql

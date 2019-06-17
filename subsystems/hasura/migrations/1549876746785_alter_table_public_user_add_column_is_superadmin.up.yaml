@@ -1,4 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."user" ADD COLUMN "is_superadmin" boolean NOT NULL DEFAULT
-      false
-  type: run_sql

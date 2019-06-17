@@ -1,6 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."user" DROP CONSTRAINT "user_email_key"
-  type: run_sql
-- args:
-    sql: COMMENT ON COLUMN "public"."user"."email" IS 'undefined'
-  type: run_sql

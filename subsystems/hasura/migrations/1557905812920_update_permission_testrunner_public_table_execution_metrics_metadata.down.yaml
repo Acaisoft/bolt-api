@@ -1,6 +1,0 @@
-- args:
-    role: testrunner
-    table:
-      name: execution_metrics_metadata
-      schema: public
-  type: drop_insert_permission

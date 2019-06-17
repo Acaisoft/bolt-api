@@ -1,6 +1,0 @@
-- args:
-    role: testrunner
-    table:
-      name: argo_execution_log
-      schema: public
-  type: drop_select_permission

@@ -1,6 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."configuration" ALTER COLUMN "type_id" SET NOT NULL;
-  type: run_sql
-- args:
-    sql: COMMENT ON COLUMN "public"."configuration"."type_id" IS ''
-  type: run_sql

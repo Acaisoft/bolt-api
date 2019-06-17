@@ -1,3 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."test_creator_configuration_m2m" DROP COLUMN "project_id"
-  type: run_sql

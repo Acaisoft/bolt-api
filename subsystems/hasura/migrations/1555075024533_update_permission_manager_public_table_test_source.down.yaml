@@ -1,6 +1,0 @@
-- args:
-    role: manager
-    table:
-      name: test_source
-      schema: public
-  type: drop_select_permission

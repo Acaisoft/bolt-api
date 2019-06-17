@@ -1,7 +1,0 @@
-- args:
-    sql: ALTER TABLE ONLY "public"."repository" ALTER COLUMN "type_slug" SET DEFAULT
-      'load_tests';
-  type: run_sql
-- args:
-    sql: COMMENT ON COLUMN "public"."repository"."type_slug" IS 'undefined'
-  type: run_sql

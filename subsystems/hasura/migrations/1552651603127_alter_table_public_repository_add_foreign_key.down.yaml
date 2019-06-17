@@ -1,3 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."repository" DROP CONSTRAINT "repository_type_slug_fkey"
-  type: run_sql

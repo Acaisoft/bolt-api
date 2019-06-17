@@ -1,4 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."result_aggregate" ADD COLUMN "timestamp" timestamptz
-      NULL
-  type: run_sql

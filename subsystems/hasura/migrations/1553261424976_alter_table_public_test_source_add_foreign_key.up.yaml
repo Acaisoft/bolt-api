@@ -1,4 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."test_source" ADD FOREIGN KEY ("repository_id") REFERENCES
-      "public"."repository" ("id")
-  type: run_sql

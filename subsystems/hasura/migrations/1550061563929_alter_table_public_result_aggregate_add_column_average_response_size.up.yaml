@@ -1,4 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."result_aggregate" ADD COLUMN "average_response_size"
-      integer NULL
-  type: run_sql

@@ -1,4 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."execution_request_totals" ADD COLUMN "min_content_size"
-      numeric NULL DEFAULT 0
-  type: run_sql

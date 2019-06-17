@@ -1,6 +1,0 @@
-- args:
-    relationship: repository
-    table:
-      name: test_source
-      schema: public
-  type: drop_relationship

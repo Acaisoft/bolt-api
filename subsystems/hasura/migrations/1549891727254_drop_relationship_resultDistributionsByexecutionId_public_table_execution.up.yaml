@@ -1,6 +1,0 @@
-- args:
-    relationship: resultDistributionsByexecutionId
-    table:
-      name: execution
-      schema: public
-  type: drop_relationship

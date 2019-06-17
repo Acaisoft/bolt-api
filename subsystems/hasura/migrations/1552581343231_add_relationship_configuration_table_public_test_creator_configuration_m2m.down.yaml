@@ -1,6 +1,0 @@
-- args:
-    relationship: configuration
-    table:
-      name: test_creator_configuration_m2m
-      schema: public
-  type: drop_relationship

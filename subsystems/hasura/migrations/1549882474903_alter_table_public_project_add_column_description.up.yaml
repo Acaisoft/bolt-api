@@ -1,3 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."project" ADD COLUMN "description" text NULL
-  type: run_sql

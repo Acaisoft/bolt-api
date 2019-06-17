@@ -1,4 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."configuration" ADD COLUMN "is_load_tests" boolean NOT
-      NULL DEFAULT false
-  type: run_sql

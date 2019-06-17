@@ -1,4 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."configuration" ADD COLUMN "monitoring_chart_configuration"
-      json NULL
-  type: run_sql

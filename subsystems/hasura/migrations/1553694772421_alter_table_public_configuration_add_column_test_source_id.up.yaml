@@ -1,3 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."configuration" ADD COLUMN "test_source_id" uuid NULL
-  type: run_sql

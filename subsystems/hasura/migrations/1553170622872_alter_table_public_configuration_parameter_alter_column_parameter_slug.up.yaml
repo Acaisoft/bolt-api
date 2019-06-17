@@ -1,8 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."configuration_parameter" ALTER COLUMN "parameter_slug"
-      SET NOT NULL;
-  type: run_sql
-- args:
-    sql: COMMENT ON COLUMN "public"."configuration_parameter"."parameter_slug" IS
-      ''
-  type: run_sql

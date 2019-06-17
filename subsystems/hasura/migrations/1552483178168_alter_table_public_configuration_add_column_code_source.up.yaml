@@ -1,4 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."configuration" ADD COLUMN "code_source" text NULL DEFAULT
-      'repository'
-  type: run_sql

@@ -1,8 +1,0 @@
-- args:
-    name: configuration_type
-    table:
-      name: parameter
-      schema: public
-    using:
-      foreign_key_constraint_on: type_slug
-  type: create_object_relationship

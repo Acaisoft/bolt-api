@@ -1,3 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."execution_request_totals" DROP COLUMN "id"
-  type: run_sql

@@ -1,4 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."configuration_parameter" ADD FOREIGN KEY ("parameter_slug")
-      REFERENCES "public"."parameter" ("slug_name")
-  type: run_sql
