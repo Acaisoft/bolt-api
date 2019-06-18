@@ -1,9 +1,7 @@
 import json
-
 import deployer_cli
-from datetime import datetime
+import requests
 
-from apps.bolt_api.app import argo
 from services import const
 from services.hasura.hasura import hasura_token_for_testrunner
 from services.deployer import clients
@@ -105,6 +103,8 @@ def start(app_config, conf_id, user_id, no_cache):
         }) {
             project_id
             instances
+            has_pre_test
+            has_post_test
             has_load_tests
             has_monitoring
             monitoring_chart_configuration
@@ -183,28 +183,40 @@ def start(app_config, conf_id, user_id, no_cache):
     }
 
     if code_source == const.CONF_SOURCE_REPO:
-        client = argo.Client('/apps/executions')
         hasura_token, execution_id = hasura_token_for_testrunner(app_config)
-        output = client.run_master_slave(hasura_token, execution_id, 1, test_config['project_id'],
-                                         test_config['test_source']['repository']['url'],
-                                         test_config['instances'], test_config['has_monitoring'])
+        # common workflow fields
+        workflow_data = {
+            'tenant_id': '1',
+            'project_id': test_config['project_id'],
+            'repository_url': test_config['test_source']['repository']['url'],
+            'execution_id': execution_id,
+            'auth_token': hasura_token,
+            'duration_seconds': 123,
+            'job_pre_start': None,
+            'job_load_tests': None,
+            'job_monitoring': None,
+            'job_post_stop': None,
+            'no_cache': no_cache,
+        }
+        # pre start
+        if test_config['has_pre_test']:
+            workflow_data['job_pre_start'] = {'env_vars': {}}
+        # load tests
+        if test_config['has_load_tests']:
+            workflow_data['job_load_tests'] = {'env_vars': {}, 'workers': test_config['instances']}
+        # monitoring
+        if test_config['has_monitoring']:
+            workflow_data['job_monitoring'] = {'env_vars': {}}
+        # post stop
+        if test_config['has_post_test']:
+            workflow_data['job_post_stop'] = {'env_vars': {}}
 
-        logger.info(f'Testrun start output {output}')
-
-        # deployer_response, execution_id, hasura_token = start_job(
-        #     app_config=app_config,
-        #     project_id=test_config['project_id'],
-        #     workers=test_config['instances'],
-        #     repo_url=test_config['test_source']['repository']['url'],
-        #     no_cache=no_cache,
-        #     extensions=test_extensions,
-        #     monitoring_deadline_secs=monitoring_deadline_secs,
-        #     run_monitoring=test_config['has_monitoring'],
-        #     run_load_test=test_config['has_load_tests'],
-        # )
-        # initial_state['test_preparation_job_id'] = deployer_response.id
-        # initial_state['test_preparation_job_status'] = deployer_response.status
+        logger.info(f'Workflow creator data {workflow_data}')
+        # TODO; workflow response must return id of flow (argo_id or argo_name) and we need to save it to database
+        response = requests.post(const.WORKFLOW_CREATOR_ENDPOINT, json=workflow_data)
+        assert response.status_code == 200, f'Error during execution workflow creator. Response {response.status_code}'
     elif code_source == const.CONF_SOURCE_JSON:
+        # TODO: DEPRECATED. NEED TO FIX (merge to argo)
         deployer_response, execution_id, hasura_token = start_image(
             app_config=app_config,
             project_id=test_config['project_id'],
