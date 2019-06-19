@@ -212,7 +212,7 @@ def start(app_config, conf_id, user_id, no_cache):
             workflow_data['job_post_stop'] = {'env_vars': {}}
 
         logger.info(f'Workflow creator data {workflow_data}')
-        response = requests.post(app_config.WORKFLOW_CREATOR_ENDPOINT, json=workflow_data)
+        response = requests.post(app_config['WORKFLOW_CREATOR_ENDPOINT'], json=workflow_data)
         logger.info(f'Response from workflow creator {response.json()} | Status code {response.status_code}')
         assert response.status_code == 200, f'Error during execution workflow creator. Response {response.status_code}'
         assert 'name' in response.json().keys(), f'Cannot find argo_name in json response {response.json()}'

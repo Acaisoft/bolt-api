@@ -67,8 +67,6 @@ REQUIRED_METRICS_API_CONFIG_VARS = (
     'SECRET_KEY',
 )
 
-WORKFLOW_CREATOR_ENDPOINT = 'http://bolt-workflow-creator.bolt-workflow-creator.svc.cluster.local/workflows'
-
 # default testrunner image for use by `test_creator` tests, override with BOLT_TEST_RUNNER_IMAGE
 DEFAULT_TEST_RUNNER_IMAGE = 'eu.gcr.io/acai-bolt/bolt-test-runner:0.1.31'
 
