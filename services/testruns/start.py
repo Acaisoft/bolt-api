@@ -212,9 +212,12 @@ def start(app_config, conf_id, user_id, no_cache):
             workflow_data['job_post_stop'] = {'env_vars': {}}
 
         logger.info(f'Workflow creator data {workflow_data}')
-        # TODO; workflow response must return id of flow (argo_id or argo_name) and we need to save it to database
-        response = requests.post(const.WORKFLOW_CREATOR_ENDPOINT, json=workflow_data)
+        response = requests.post(app_config.WORKFLOW_CREATOR_ENDPOINT, json=workflow_data)
+        logger.info(f'Response from workflow creator {response.json()} | Status code {response.status_code}')
         assert response.status_code == 200, f'Error during execution workflow creator. Response {response.status_code}'
+        assert 'name' in response.json().keys(), f'Cannot find argo_name in json response {response.json()}'
+        # set argo_name for execution
+        initial_state['argo_name'] = response.json()['name']
     elif code_source == const.CONF_SOURCE_JSON:
         # TODO: DEPRECATED. NEED TO FIX (merge to argo)
         deployer_response, execution_id, hasura_token = start_image(
