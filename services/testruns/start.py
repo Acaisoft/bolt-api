@@ -213,11 +213,18 @@ def start(app_config, conf_id, user_id, no_cache):
 
         logger.info(f'Workflow creator data {workflow_data}')
         response = requests.post(app_config['WORKFLOW_CREATOR_ENDPOINT'], json=workflow_data)
-        logger.info(f'Response from workflow creator {response.json()} | Status code {response.status_code}')
+        logger.info(f'Workflow response {response}')
+        logger.info(f'Workflow response text {response.text} | Status {response.status_code}')
         assert response.status_code == 200, f'Error during execution workflow creator. Response {response.status_code}'
-        assert 'name' in response.json().keys(), f'Cannot find argo_name in json response {response.json()}'
-        # set argo_name for execution
-        initial_state['argo_name'] = response.json()['name']
+        try:
+            json_response = response.json()
+        except (json.decoder.JSONDecodeError, KeyError) as ex:
+            logger.exception(f'Caught exception during getting json response from workflow creator | {ex}')
+            assert False, f'Caught exception during getting json response from workflow creator | {ex}'
+        else:
+            # set argo_name for execution
+            initial_state['argo_name'] = json_response['name']
+            logger.info(f'Added argo_name field to initial_state data {initial_state}')
     elif code_source == const.CONF_SOURCE_JSON:
         # TODO: DEPRECATED. NEED TO FIX (merge to argo)
         deployer_response, execution_id, hasura_token = start_image(
