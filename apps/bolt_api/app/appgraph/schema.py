@@ -52,6 +52,7 @@ class TestrunMutations(graphene.ObjectType):
 
     # testrun management
     testrun_start = to_field(test_runs.TestrunStart)
+    testrun_terminate = to_field(test_runs.TestrunTerminate)
 
     # testrun (execution) data export
     testrun_data_export = to_field(data_export.DataExportLink)
@@ -80,6 +81,7 @@ AppSchema = graphene.Schema(
         extension.ExtensionType,
         test_creator.TestCreatorType,
         test_runs.TestrunStartObject,
+        test_runs.TestrunTerminateObject,
         test_runs.StatusResponse,
         users.UserListType,
         users.UserListItemType,
