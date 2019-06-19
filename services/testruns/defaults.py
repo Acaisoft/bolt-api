@@ -95,6 +95,16 @@ DEFAULT_CHART_CONFIGURATION = '''{
       "y_data_key": "latency",
       "y_format": "number",
       "y_label": "app_component"
+    },
+    {
+      "x_format": "number",
+      "node_name": "apps_backpressed",
+      "x_data_key": "timestamp",
+      "y_format": "bool",
+      "y_label": "app_name",
+      "title": "Backpressured per App",
+      "type": "heatmap",
+      "y_data_key": "backpressured"
     }
   ]
 }'''
