@@ -31,7 +31,7 @@ class TestrunTerminate(graphene.Mutation):
         endpoint = current_app.config['WORKFLOW_TERMINATE_ENDPOINT']
         response = requests.post(endpoint, json={'workflow_name': argo_name})
         if response.status_code == 200:
-            logger.info(f'Workflow {argo_name} was successfully terminated. Response: {response.json()}')
+            logger.info(f'Workflow {argo_name} was successfully terminated. Response: {response.text}')
             return True, '200. Workflow was successfully terminated'
         else:
             logger.info(f'Error during terminating workflow | {response.status_code} | {response.text}')
