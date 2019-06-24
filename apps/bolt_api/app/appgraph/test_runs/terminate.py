@@ -72,7 +72,7 @@ class TestrunTerminate(graphene.Mutation):
     def mutate(self, info, argo_name):
         role, user_id = gql_util.get_request_role_userid(
             info, (const.ROLE_ADMIN, const.ROLE_TENANT_ADMIN, const.ROLE_MANAGER, const.ROLE_TESTER))
-        TestrunTerminate.validate_user_assigned_to_project(argo_name, user_id)
+        # TestrunTerminate.validate_user_assigned_to_project(argo_name, user_id)
         logger.info(f'Executed mutation `testrun_terminate` | {argo_name} | {role} | {user_id}')
         # try to terminate flow
         ok, message = TestrunTerminate.terminate_flow(argo_name)
