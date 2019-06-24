@@ -1,5 +1,7 @@
 - args:
+    allowlist: []
     functions: []
+    query_collections: []
     query_templates: []
     remote_schemas:
     - comment: null
@@ -2305,6 +2307,45 @@
         permission:
           allow_aggregations: true
           columns:
+          - argo_name
+          - commit_hash
+          - configuration_id
+          - created_by_id
+          - end
+          - end_locust
+          - failed_requests
+          - id
+          - passed_requests
+          - start
+          - start_locust
+          - status
+          - test_job_error
+          - test_job_id
+          - test_preparation_job_error
+          - test_preparation_job_id
+          - test_preparation_job_status
+          - test_preparation_job_statuscheck_timestamp
+          - total_requests
+          filter:
+            _and:
+            - configuration:
+                is_deleted:
+                  _eq: false
+            - configuration:
+                project:
+                  is_deleted:
+                    _eq: false
+            - configuration:
+                project:
+                  userProjects:
+                    user_id:
+                      _eq: X-Hasura-User-Id
+        role: manager
+      - comment: null
+        permission:
+          allow_aggregations: true
+          columns:
+          - argo_name
           - commit_hash
           - configuration_id
           - created_by_id
@@ -2339,61 +2380,7 @@
         permission:
           allow_aggregations: true
           columns:
-          - commit_hash
-          - configuration_id
-          - created_by_id
-          - end
-          - end_locust
-          - id
-          - start
-          - start_locust
-          - status
-          - test_job_error
-          - test_job_id
-          - test_preparation_job_error
-          - test_preparation_job_id
-          - test_preparation_job_status
-          - test_preparation_job_statuscheck_timestamp
-          filter:
-            _and:
-            - configuration:
-                is_deleted:
-                  _eq: false
-            - configuration:
-                project:
-                  is_deleted:
-                    _eq: false
-            - configuration:
-                project:
-                  userProjects:
-                    user_id:
-                      _eq: X-Hasura-User-Id
-        role: tester
-      - comment: null
-        permission:
-          allow_aggregations: false
-          columns:
-          - id
-          - configuration_id
-          - start
-          - end
-          - status
-          - test_preparation_job_id
-          - test_job_id
-          - test_preparation_job_status
-          - test_preparation_job_statuscheck_timestamp
-          - test_preparation_job_error
-          - created_by_id
-          - test_job_error
-          - commit_hash
-          filter:
-            id:
-              _eq: X-Hasura-Testruner-Id
-        role: testrunner
-      - comment: null
-        permission:
-          allow_aggregations: true
-          columns:
+          - argo_name
           - commit_hash
           - configuration_id
           - created_by_id
@@ -2431,14 +2418,13 @@
         permission:
           allow_aggregations: true
           columns:
+          - argo_name
           - commit_hash
           - configuration_id
           - created_by_id
           - end
           - end_locust
-          - failed_requests
           - id
-          - passed_requests
           - start
           - start_locust
           - status
@@ -2448,7 +2434,6 @@
           - test_preparation_job_id
           - test_preparation_job_status
           - test_preparation_job_statuscheck_timestamp
-          - total_requests
           filter:
             _and:
             - configuration:
@@ -2463,7 +2448,29 @@
                   userProjects:
                     user_id:
                       _eq: X-Hasura-User-Id
-        role: manager
+        role: tester
+      - comment: null
+        permission:
+          allow_aggregations: false
+          columns:
+          - argo_name
+          - commit_hash
+          - configuration_id
+          - created_by_id
+          - end
+          - id
+          - start
+          - status
+          - test_job_error
+          - test_job_id
+          - test_preparation_job_error
+          - test_preparation_job_id
+          - test_preparation_job_status
+          - test_preparation_job_statuscheck_timestamp
+          filter:
+            id:
+              _eq: X-Hasura-Testruner-Id
+        role: testrunner
       table: execution
       update_permissions:
       - comment: null
