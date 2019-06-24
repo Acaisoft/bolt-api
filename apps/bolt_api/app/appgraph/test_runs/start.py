@@ -29,7 +29,8 @@ class TestrunStart(graphene.Mutation):
     Output = TestrunStartInterface
 
     def mutate(self, info, conf_id, no_cache=False, debug=False):
-        role, user_id = gql_util.get_request_role_userid(info, (const.ROLE_ADMIN, const.ROLE_TENANT_ADMIN, const.ROLE_MANAGER, const.ROLE_TESTER))
+        role, user_id = gql_util.get_request_role_userid(
+            info, (const.ROLE_ADMIN, const.ROLE_TENANT_ADMIN, const.ROLE_MANAGER, const.ROLE_TESTER))
 
         if debug and role == const.ROLE_ADMIN:
             os.environ['SELFSIGNED_TOKEN_FOR_TESTRUNNER'] = "1"
