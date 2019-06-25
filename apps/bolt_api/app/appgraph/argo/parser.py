@@ -93,11 +93,9 @@ class ArgoFlowParser(object):
 
     def parse_argo_statuses(self, argo_data):
         logger.info(f'Start parsing argo data {argo_data}')
-        logger.info(type(argo_data))
         load_tests_data = []
         for key, value in argo_data.get('nodes', {}).items():
-            logger.info(key)
-            logger.info(value)
+            logger.info(f'Key {key} | value {value}')
             if value['type'] != ArgoFlow.POD.value:
                 continue
             if value['templateName'] == ArgoFlow.PRE_START.value:
@@ -109,7 +107,7 @@ class ArgoFlowParser(object):
             elif value['templateName'] == ArgoFlow.MONITORING.value:
                 logger.info(f'Detected monitoring argo pod {value}')
                 self.parse_status_for('argo_monitoring', value)
-            elif value['templateName'] == (ArgoFlow.LOAD_TESTS_MASTER.value, ArgoFlow.LOAD_TESTS_SLAVE.value):
+            elif value['templateName'] in (ArgoFlow.LOAD_TESTS_MASTER.value, ArgoFlow.LOAD_TESTS_SLAVE.value):
                 load_tests_data.append(value)  # aggregate records for master/slaves
         # analyze and parse together data for slaves and for master
         if load_tests_data:
