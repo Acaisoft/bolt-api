@@ -98,7 +98,7 @@ class ArgoFlowParser(object):
         for key, value in argo_data.get('nodes', {}).items():
             logger.info(key)
             logger.info(value)
-            if value['type'] is not ArgoFlow.POD.value:
+            if value['type'] != ArgoFlow.POD.value:
                 continue
             if value['templateName'] == ArgoFlow.PRE_START.value:
                 logger.info(f'Detected pre_start argo pod {value}')
@@ -112,4 +112,5 @@ class ArgoFlowParser(object):
             elif value['templateName'] == (ArgoFlow.LOAD_TESTS_MASTER.value, ArgoFlow.LOAD_TESTS_SLAVE.value):
                 load_tests_data.append(value)  # aggregate records for master/slaves
         # analyze and parse together data for slaves and for master
-        self.parse_load_tests_status(load_tests_data)
+        if load_tests_data:
+            self.parse_load_tests_status(load_tests_data)
