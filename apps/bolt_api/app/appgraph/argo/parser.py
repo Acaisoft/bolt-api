@@ -78,7 +78,7 @@ class ArgoFlowParser(object):
         '''
         data = {
             'execution_id': self.execution_id, 'timestamp': datetime.now().isoformat(),
-            'stage': stage, 'level': level, 'msg': msg,
+            'stage': stage, 'level': level, 'msg': msg
         }
         logger.info(f'Inserting execution log (status) with data {data}')
         response = hce(current_app.config, query, variable_values={'data': data})
@@ -95,8 +95,9 @@ class ArgoFlowParser(object):
 
     def parse_status_for(self, stage, data):
         current_status = self.get_current_status_for(stage)
-        phase = data.get('phase', '').upper()
-        if phase is not None and current_status != phase:
+        phase = data.get('phase', 'UNKNOWN').upper()
+        allowed_statuses = self.status_mapper[current_status]
+        if phase != current_status and phase in allowed_statuses:
             level = 'error' if phase in (Status.FAILED.value, Status.ERROR.value) else 'info'
             self.insert_execution_stage_log(stage, level, phase)
 
