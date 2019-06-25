@@ -80,6 +80,7 @@ class ArgoFlowParser(object):
         logger.info(f'Detected load_tests pods {data}')
         current_status = self.get_current_status_for('argo_load_tests')
         argo_load_tests_statuses = [d.get('phase').upper() for d in data]
+        logger.info(f'Argo load tests statuses {argo_load_tests_statuses} | current status {current_status}')
         if Status.ERROR.value in argo_load_tests_statuses and current_status != Status.ERROR.value:
             self.insert_execution_stage_log('argo_load_tests', 'error', Status.ERROR.value)
         elif Status.FAILED.value in argo_load_tests_statuses and current_status != Status.FAILED.value:
