@@ -66,7 +66,7 @@ class ArgoFlowParser(object):
             logger.info(f'Extracted current status {status} for {stage}')
             return status
         except LookupError:
-            logger.exception(f'Current status for stage {stage} does not exist')
+            logger.info(f'Current status for stage {stage} does not exist')
             return None
 
     def parse_status_for(self, stage, data):
@@ -93,20 +93,23 @@ class ArgoFlowParser(object):
 
     def parse_argo_statuses(self, argo_data):
         logger.info(f'Start parsing argo data {argo_data}')
+        logger.info(type(argo_data))
         load_tests_data = []
         for key, value in argo_data.get('nodes', {}).items():
+            logger.info(key)
+            logger.info(value)
             if value['type'] is not ArgoFlow.POD.value:
                 continue
-            if value['templateName'] is ArgoFlow.PRE_START.value:
+            if value['templateName'] == ArgoFlow.PRE_START.value:
                 logger.info(f'Detected pre_start argo pod {value}')
                 self.parse_status_for('argo_pre_start', value)
-            elif value['templateName'] is ArgoFlow.POST_STOP.value:
+            elif value['templateName'] == ArgoFlow.POST_STOP.value:
                 logger.info(f'Detected post_stop argo pod {value}')
                 self.parse_status_for('argo_post_stop', value)
-            elif value['templateName'] is ArgoFlow.MONITORING.value:
+            elif value['templateName'] == ArgoFlow.MONITORING.value:
                 logger.info(f'Detected monitoring argo pod {value}')
                 self.parse_status_for('argo_monitoring', value)
-            elif value['templateName'] in (ArgoFlow.LOAD_TESTS_MASTER.value, ArgoFlow.LOAD_TESTS_SLAVE.value):
+            elif value['templateName'] == (ArgoFlow.LOAD_TESTS_MASTER.value, ArgoFlow.LOAD_TESTS_SLAVE.value):
                 load_tests_data.append(value)  # aggregate records for master/slaves
         # analyze and parse together data for slaves and for master
         self.parse_load_tests_status(load_tests_data)
