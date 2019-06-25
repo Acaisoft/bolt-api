@@ -13,6 +13,30 @@ class ArgoFlowParser(object):
     execution_id: None
     current_statuses: None
 
+    status_mapper = {
+        None: [
+            Status.ERROR.value,
+            Status.FAILED.value,
+            Status.PENDING.value,
+            Status.RUNNING.value,
+            Status.SUCCEEDED.value
+        ],
+        Status.ERROR.value: [],
+        Status.FAILED.value: [],
+        Status.SUCCEEDED.value: [],
+        Status.PENDING.value: [
+            Status.RUNNING.value,
+            Status.FAILED.value,
+            Status.ERROR.value,
+            Status.SUCCEEDED.value
+        ],
+        Status.RUNNING.value: [
+            Status.ERROR.value,
+            Status.FAILED.value,
+            Status.SUCCEEDED.value
+        ]
+    }
+
     def __init__(self, argo_id):
         self.execution_id = self.get_execution_by_argo_id(argo_id)
         self.current_statuses = self.get_current_statuses(self.execution_id)
@@ -80,16 +104,18 @@ class ArgoFlowParser(object):
         logger.info(f'Detected load_tests pods {data}')
         current_status = self.get_current_status_for('argo_load_tests')
         argo_load_tests_statuses = [d.get('phase').upper() for d in data]
+        allowed_statuses = self.status_mapper[current_status]
         logger.info(f'Argo load tests statuses {argo_load_tests_statuses} | current status {current_status}')
-        if Status.ERROR.value in argo_load_tests_statuses and current_status != Status.ERROR.value:
+        logger.info(f'Allowed statuses {allowed_statuses}')
+        if Status.ERROR.value in argo_load_tests_statuses and Status.ERROR.value in allowed_statuses:
             self.insert_execution_stage_log('argo_load_tests', 'error', Status.ERROR.value)
-        elif Status.FAILED.value in argo_load_tests_statuses and current_status != Status.FAILED.value:
+        elif Status.FAILED.value in argo_load_tests_statuses and Status.FAILED.value in allowed_statuses:
             self.insert_execution_stage_log('argo_load_tests', 'error', Status.FAILED.value)
-        elif Status.PENDING.value in argo_load_tests_statuses and current_status != Status.PENDING.value:
+        elif Status.PENDING.value in argo_load_tests_statuses and Status.PENDING.value in allowed_statuses:
             self.insert_execution_stage_log('argo_load_tests', 'info', Status.PENDING.value)
-        elif Status.RUNNING.value in argo_load_tests_statuses and current_status != Status.RUNNING.value:
+        elif Status.RUNNING.value in argo_load_tests_statuses and Status.RUNNING.value in allowed_statuses:
             self.insert_execution_stage_log('argo_load_tests', 'info', Status.RUNNING.value)
-        elif Status.SUCCEEDED.value in argo_load_tests_statuses and current_status != Status.SUCCEEDED.value:
+        elif Status.SUCCEEDED.value in argo_load_tests_statuses and Status.SUCCEEDED.value in allowed_statuses:
             self.insert_execution_stage_log('argo_load_tests', 'info', Status.SUCCEEDED.value)
 
     def parse_argo_statuses(self, argo_data):
