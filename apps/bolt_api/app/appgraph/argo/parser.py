@@ -17,6 +17,8 @@ class ArgoFlowParser(object):
     current_statuses: None
     has_load_tests: None
 
+    is_terminated = False
+
     status_mapper = {
         None: [
             Status.ERROR.value,
@@ -111,15 +113,16 @@ class ArgoFlowParser(object):
         allowed_statuses = self.status_mapper[current_status]
         if phase != current_status and phase in allowed_statuses:
             level = 'error' if phase in (Status.FAILED.value, Status.ERROR.value) else 'info'
-            if stage == 'argo_monitoring' and level == 'error' and self.has_load_tests:
+            if stage == 'argo_monitoring' and level == 'error' and self.has_load_tests and not self.is_terminated:
                 logger.info('Monitoring crashed (flow has load_tests). Start terminating flow')
-                TestrunTerminate.terminate_flow(self.argo_id)
+                ok, _ = TestrunTerminate.terminate_flow(self.argo_id)
+                self.is_terminated = True if ok else False
             self.insert_execution_stage_log(stage, level, phase)
 
     def parse_load_tests_status(self, data):
         logger.info(f'Detected load_tests pods {data}')
         current_status = self.get_current_status_for('argo_load_tests')
-        argo_load_tests_statuses = [d.get('phase').upper() for d in data]
+        argo_load_tests_statuses = [d['phase'].upper() for d in data]
         allowed_statuses = self.status_mapper[current_status]
         logger.info(f'Argo load tests statuses {argo_load_tests_statuses} | current status {current_status}')
         logger.info(f'Allowed statuses {allowed_statuses}')
@@ -151,6 +154,13 @@ class ArgoFlowParser(object):
                 logger.info(f'Detected monitoring argo pod {value}')
                 self.parse_status_for('argo_monitoring', value)
             elif value['templateName'] in (ArgoFlow.LOAD_TESTS_MASTER.value, ArgoFlow.LOAD_TESTS_SLAVE.value):
+                # if master crashed we will terminate all flow
+                is_master = value['templateName'] == ArgoFlow.LOAD_TESTS_MASTER.value
+                is_crashed = value['phase'].upper() in (Status.ERROR.value, Status.FAILED.value)
+                is_not_terminated = not self.is_terminated  # argo flow
+                if is_master and is_crashed and is_not_terminated:
+                    ok, _ = TestrunTerminate.terminate_flow(self.argo_id)
+                    self.is_terminated = True if ok else False
                 load_tests_data.append(value)  # aggregate records for master/slaves
         # analyze and parse together data for slaves and for master
         if load_tests_data:
