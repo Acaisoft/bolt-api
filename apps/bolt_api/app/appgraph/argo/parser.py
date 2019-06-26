@@ -1,17 +1,21 @@
 from datetime import datetime
 
 from flask import current_app
+
 from services.hasura import hce
 from services.logger import setup_custom_logger
 
+from apps.bolt_api.app.appgraph.test_runs import TestrunTerminate
 from apps.bolt_api.app.appgraph.argo.enums import ArgoFlow, Status
 
 logger = setup_custom_logger(__file__)
 
 
 class ArgoFlowParser(object):
+    argo_id: None
     execution_id: None
     current_statuses: None
+    has_load_tests: None
 
     status_mapper = {
         None: [
@@ -38,7 +42,10 @@ class ArgoFlowParser(object):
     }
 
     def __init__(self, argo_id):
-        self.execution_id = self.get_execution_by_argo_id(argo_id)
+        self.argo_id = argo_id
+        execution_data = self.get_execution_by_argo_id(argo_id)
+        self.execution_id = execution_data['execution'][0]['id']
+        self.has_load_tests = execution_data['execution'][0]['configuration']['has_load_tests']
         self.current_statuses = self.get_current_statuses(self.execution_id)
 
     def get_execution_by_argo_id(self, argo_id):
@@ -46,12 +53,15 @@ class ArgoFlowParser(object):
             query ($argo_name: String){
                 execution(where: {argo_name: {_eq: $argo_name}}){
                     id
+                    configuration {
+                        has_load_tests
+                    }
                 }
             }
         '''
         response = hce(current_app.config, query, variable_values={'argo_name': argo_id})
         logger.info(f'Response for `get_execution_by_argo_id({argo_id})` | {response}')
-        return response['execution'][0]['id']
+        return response
 
     def get_current_statuses(self, execution_id):
         query = '''
@@ -103,6 +113,9 @@ class ArgoFlowParser(object):
         allowed_statuses = _status_mapper[current_status]
         if phase != current_status and phase in allowed_statuses:
             level = 'error' if phase in (Status.FAILED.value, Status.ERROR.value) else 'info'
+            if stage == 'argo_monitoring' and level == 'error' and self.has_load_tests:
+                logger.info('Monitoring crashed (flow has load_tests). Start terminating flow')
+                TestrunTerminate.terminate_flow(self.argo_id)
             self.insert_execution_stage_log(stage, level, phase)
 
     def parse_load_tests_status(self, data):
