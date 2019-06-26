@@ -17,3 +17,4 @@ class Status(enum.Enum):
     PENDING = 'PENDING'
     RUNNING = 'RUNNING'
     SUCCEEDED = 'SUCCEEDED'
+    TERMINATED = 'TERMINATED'

@@ -14,6 +14,7 @@ logger = setup_custom_logger(__file__)
 class ArgoFlowParser(object):
     argo_id: None
     execution_id: None
+    execution_status: None
     current_statuses: None
     has_load_tests: None
 
@@ -49,14 +50,16 @@ class ArgoFlowParser(object):
         self.argo_id = argo_id
         execution_data = self.get_execution_by_argo_id(argo_id)
         self.execution_id = execution_data['execution'][0]['id']
+        self.execution_status = execution_data['execution'][0]['status']
         self.has_load_tests = execution_data['execution'][0]['configuration']['has_load_tests']
-        self.current_statuses = self.get_current_statuses(self.execution_id)
+        self.current_statuses = self.get_current_statuses()
 
     def get_execution_by_argo_id(self, argo_id):
         query = '''            
             query ($argo_name: String){
                 execution(where: {argo_name: {_eq: $argo_name}}){
                     id
+                    status
                     configuration {
                         has_load_tests
                     }
@@ -67,7 +70,19 @@ class ArgoFlowParser(object):
         logger.info(f'Response for `get_execution_by_argo_id({argo_id})` | {response}')
         return response
 
-    def get_current_statuses(self, execution_id):
+    def update_execution_status(self, status):
+        query = '''
+            mutation ($id: uuid, $status: String) {
+                update_execution (where: {id: {_eq: $id}}, _set: {status: $status}) {
+                    affected_rows
+                }
+            }
+        '''
+        response = hce(current_app.config, query, variable_values={'id': self.execution_id, 'status': status})
+        logger.info(f'Assigned new status {status} for execution {self.execution_id} | {response}')
+        return response
+
+    def get_current_statuses(self):
         query = '''
             query ($execution_id: uuid) {
                 execution_stage_log (where: {execution_id: {_eq: $execution_id}}, order_by: {timestamp: desc}){
@@ -78,8 +93,8 @@ class ArgoFlowParser(object):
                 }
             }
         '''
-        response = hce(current_app.config, query, variable_values={'execution_id': execution_id})
-        logger.info(f'List of current statuses for execution {execution_id} | {response}')
+        response = hce(current_app.config, query, variable_values={'execution_id': self.execution_id})
+        logger.info(f'List of current statuses for execution {self.execution_id} | {response}')
         return response['execution_stage_log']
 
     def insert_execution_stage_log(self, stage, level, msg):
@@ -113,10 +128,15 @@ class ArgoFlowParser(object):
         allowed_statuses = self.status_mapper[current_status]
         if phase != current_status and phase in allowed_statuses:
             level = 'error' if phase in (Status.FAILED.value, Status.ERROR.value) else 'info'
-            if stage == 'argo_monitoring' and level == 'error' and self.has_load_tests and not self.is_terminated:
-                logger.info('Monitoring crashed (flow has load_tests). Start terminating flow')
-                ok, _ = TestrunTerminate.terminate_flow(self.argo_id)
-                self.is_terminated = True if ok else False
+            if stage == 'argo_monitoring' and level == 'error':
+                # update status for execution if monitoring failed
+                if self.execution_status != Status.TERMINATED.value:
+                    self.update_execution_status(Status.FAILED.value)
+                # terminate all flow if monitoring failed and flow has load tests
+                if self.has_load_tests and not self.is_terminated:
+                    logger.info('Monitoring crashed (flow has load_tests). Start terminating flow')
+                    ok, _ = TestrunTerminate.terminate_flow(self.argo_id)
+                    self.is_terminated = True if ok else False
             self.insert_execution_stage_log(stage, level, phase)
 
     def parse_load_tests_status(self, data):
@@ -128,8 +148,14 @@ class ArgoFlowParser(object):
         logger.info(f'Allowed statuses {allowed_statuses}')
         if Status.ERROR.value in argo_load_tests_statuses and Status.ERROR.value in allowed_statuses:
             self.insert_execution_stage_log('argo_load_tests', 'error', Status.ERROR.value)
+            # update status for execution if load tests failed
+            if self.execution_status != Status.TERMINATED.value:
+                self.update_execution_status(Status.FAILED.value)
         elif Status.FAILED.value in argo_load_tests_statuses and Status.FAILED.value in allowed_statuses:
             self.insert_execution_stage_log('argo_load_tests', 'error', Status.FAILED.value)
+            # update status for execution if load tests failed
+            if self.execution_status != Status.TERMINATED.value:
+                self.update_execution_status(Status.FAILED.value)
         elif Status.PENDING.value in argo_load_tests_statuses and Status.PENDING.value in allowed_statuses:
             self.insert_execution_stage_log('argo_load_tests', 'info', Status.PENDING.value)
         elif Status.RUNNING.value in argo_load_tests_statuses and Status.RUNNING.value in allowed_statuses:
