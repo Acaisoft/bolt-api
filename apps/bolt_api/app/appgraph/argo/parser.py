@@ -167,7 +167,6 @@ class ArgoFlowParser(object):
         logger.info(f'Start parsing argo data {argo_data}')
         load_tests_data = []
         for key, value in argo_data.get('nodes', {}).items():
-            logger.info(f'Key {key} | value {value}')
             if value['type'] != ArgoFlow.POD.value:
                 continue
             if value['templateName'] == ArgoFlow.PRE_START.value:
