@@ -1,10 +1,14 @@
+from services import const
 from services.hasura import hce
 
 
-def get_project_summary(config, user_id):
+def get_project_summary(config, user_id, role):
+    project_filter = 'is_deleted: {_eq: false}'
+    if role != const.ROLE_ADMIN:
+        project_filter += ', userProjects: {user_id: {_eq: $uid}}'
 
-    resp = hce(config, '''query ($uid: uuid!) {
-      project(where: {is_deleted: {_eq: false}, userProjects: {user_id: {_eq: $uid}}}) {
+    query = '''query ($uid: uuid!) {
+      project(where: {%s}) {
         id
         name
         description
@@ -53,7 +57,13 @@ def get_project_summary(config, user_id):
         }
       }
     }
-    ''', {'uid': str(user_id)})
+    ''' % (project_filter, )
+
+    query_params = {
+        'uid': str(user_id)
+    }
+
+    resp = hce(config,  query, query_params)
 
     out = {}
 

@@ -29,9 +29,9 @@ class TestrunQueries(graphene.ObjectType):
     )
 
     def resolve_testrun_project_summary(self, info):
-        _, user_id = gql_util.get_request_role_userid(info, const.ROLE_CHOICE)
+        role, user_id = gql_util.get_request_role_userid(info, const.ROLE_CHOICE)
 
-        stats = get_project_summary(current_app.config, user_id)
+        stats = get_project_summary(current_app.config, user_id, role)
 
         out = [SummaryItem(**i) for i in stats]
 
