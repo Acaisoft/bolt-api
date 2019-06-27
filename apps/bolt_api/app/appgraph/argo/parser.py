@@ -183,9 +183,9 @@ class ArgoFlowParser(object):
                 is_master = value['templateName'] == ArgoFlow.LOAD_TESTS_MASTER.value
                 is_crashed = value['phase'].upper() in (Status.ERROR.value, Status.FAILED.value)
                 is_not_terminated = not self.is_terminated  # argo flow
-                if is_master and is_crashed and is_not_terminated:
-                    ok, _ = TestrunTerminate.terminate_flow(self.argo_id)
-                    self.is_terminated = True if ok else False
+                # if is_master and is_crashed and is_not_terminated:
+                #     ok, _ = TestrunTerminate.terminate_flow(self.argo_id)
+                #     self.is_terminated = True if ok else False
                 load_tests_data.append(value)  # aggregate records for master/slaves
         # analyze and parse together data for slaves and for master
         if load_tests_data:
