@@ -74,7 +74,13 @@ class TestrunTerminate(graphene.Mutation):
             info, (const.ROLE_ADMIN, const.ROLE_TENANT_ADMIN, const.ROLE_MANAGER, const.ROLE_TESTER))
         # TestrunTerminate.validate_user_assigned_to_project(argo_name, user_id)
         logger.info(f'Executed mutation `testrun_terminate` | {argo_name} | {role} | {user_id}')
-        TestrunTerminate.update_execution_status(argo_name)
+        # try to terminate flow
         ok, message = TestrunTerminate.terminate_flow(argo_name)
+        if ok:
+            # try to update execution status by argo_name
+            updated_successfully = TestrunTerminate.update_execution_status(argo_name)
+            if not updated_successfully:
+                ok, message = False, 'Error during updating status for execution'
+        # return response with statuses
         out = TestrunTerminateObject(message=message, ok=ok)
         return out
