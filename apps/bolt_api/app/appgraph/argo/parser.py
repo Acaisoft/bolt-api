@@ -128,15 +128,15 @@ class ArgoFlowParser(object):
         allowed_statuses = self.status_mapper[current_status]
         if phase != current_status and phase in allowed_statuses:
             level = 'error' if phase in (Status.FAILED.value, Status.ERROR.value) else 'info'
-            # if stage == 'argo_monitoring' and level == 'error':
-            #     # update status for execution if monitoring failed
-            #     if self.execution_status != Status.TERMINATED.value:
-            #         self.update_execution_status(Status.FAILED.value)
-            #     # terminate all flow if monitoring failed and flow has load tests
-            #     if self.has_load_tests and not self.is_terminated:
-            #         logger.info('Monitoring crashed (flow has load_tests). Start terminating flow')
-            #         ok, _ = TestrunTerminate.terminate_flow(self.argo_id)
-            #         self.is_terminated = True if ok else False
+            if stage == 'argo_monitoring' and level == 'error':
+                # update status for execution if monitoring failed
+                if self.execution_status != Status.TERMINATED.value:
+                    self.update_execution_status(Status.FAILED.value)
+                # terminate all flow if monitoring failed and flow has load tests
+                if self.has_load_tests and not self.is_terminated:
+                    logger.info('Monitoring crashed (flow has load_tests). Start terminating flow')
+                    ok, _ = TestrunTerminate.terminate_flow(self.argo_id)
+                    self.is_terminated = True if ok else False
             self.insert_execution_stage_log(stage, level, phase)
 
     def parse_load_tests_status(self, data):
@@ -183,9 +183,9 @@ class ArgoFlowParser(object):
                 is_master = value['templateName'] == ArgoFlow.LOAD_TESTS_MASTER.value
                 is_crashed = value['phase'].upper() in (Status.ERROR.value, Status.FAILED.value)
                 is_not_terminated = not self.is_terminated  # argo flow
-                # if is_master and is_crashed and is_not_terminated:
-                #     ok, _ = TestrunTerminate.terminate_flow(self.argo_id)
-                #     self.is_terminated = True if ok else False
+                if is_master and is_crashed and is_not_terminated:
+                    ok, _ = TestrunTerminate.terminate_flow(self.argo_id)
+                    self.is_terminated = True if ok else False
                 load_tests_data.append(value)  # aggregate records for master/slaves
         # analyze and parse together data for slaves and for master
         if load_tests_data:
