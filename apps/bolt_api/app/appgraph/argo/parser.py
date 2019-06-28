@@ -188,3 +188,4 @@ class ArgoFlowParser(object):
         # analyze and parse together data for slaves and for master
         if load_tests_data:
             self.parse_load_tests_status(load_tests_data)
+
