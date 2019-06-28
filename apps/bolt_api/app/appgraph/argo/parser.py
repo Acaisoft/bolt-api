@@ -30,9 +30,7 @@ class ArgoFlowParser(object):
         ],
         Status.ERROR.value: [],
         Status.FAILED.value: [],
-        # sometimes argo during crashing container returning status SUCCEEDED and then FAILED/ERROR
-        # we need to allow after status SUCCEEDED assign status FAILED/ERROR
-        Status.SUCCEEDED.value: [Status.FAILED.value, Status.ERROR.value],
+        Status.SUCCEEDED.value: [],
         Status.PENDING.value: [
             Status.RUNNING.value,
             Status.FAILED.value,
