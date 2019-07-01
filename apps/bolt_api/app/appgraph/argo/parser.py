@@ -1,5 +1,4 @@
 from datetime import datetime
-
 from flask import current_app
 
 from services.hasura import hce
@@ -126,7 +125,7 @@ class ArgoFlowParser(object):
         allowed_statuses = self.status_mapper[current_status]
         if phase != current_status and phase in allowed_statuses:
             level = 'error' if phase in (Status.FAILED.value, Status.ERROR.value) else 'info'
-            if stage == 'argo_monitoring' and level == 'error':
+            if stage == 'monitoring' and level == 'error':
                 # update status for execution if monitoring failed
                 if self.execution_status != Status.TERMINATED.value:
                     self.update_execution_status(Status.FAILED.value)
@@ -139,27 +138,27 @@ class ArgoFlowParser(object):
 
     def parse_load_tests_status(self, data):
         logger.info(f'Detected load_tests pods {data}')
-        current_status = self.get_current_status_for('argo_load_tests')
+        current_status = self.get_current_status_for('load_tests')
         argo_load_tests_statuses = [d['phase'].upper() for d in data]
         allowed_statuses = self.status_mapper[current_status]
         logger.info(f'Argo load tests statuses {argo_load_tests_statuses} | current status {current_status}')
         logger.info(f'Allowed statuses {allowed_statuses}')
         if Status.ERROR.value in argo_load_tests_statuses and Status.ERROR.value in allowed_statuses:
-            self.insert_execution_stage_log('argo_load_tests', 'error', Status.ERROR.value)
+            self.insert_execution_stage_log('load_tests', 'error', Status.ERROR.value)
             # update status for execution if load tests failed
             if self.execution_status != Status.TERMINATED.value:
                 self.update_execution_status(Status.FAILED.value)
         elif Status.FAILED.value in argo_load_tests_statuses and Status.FAILED.value in allowed_statuses:
-            self.insert_execution_stage_log('argo_load_tests', 'error', Status.FAILED.value)
+            self.insert_execution_stage_log('load_tests', 'error', Status.FAILED.value)
             # update status for execution if load tests failed
             if self.execution_status != Status.TERMINATED.value:
                 self.update_execution_status(Status.FAILED.value)
         elif Status.PENDING.value in argo_load_tests_statuses and Status.PENDING.value in allowed_statuses:
-            self.insert_execution_stage_log('argo_load_tests', 'info', Status.PENDING.value)
+            self.insert_execution_stage_log('load_tests', 'info', Status.PENDING.value)
         elif Status.RUNNING.value in argo_load_tests_statuses and Status.RUNNING.value in allowed_statuses:
-            self.insert_execution_stage_log('argo_load_tests', 'info', Status.RUNNING.value)
+            self.insert_execution_stage_log('load_tests', 'info', Status.RUNNING.value)
         elif Status.SUCCEEDED.value in argo_load_tests_statuses and Status.SUCCEEDED.value in allowed_statuses:
-            self.insert_execution_stage_log('argo_load_tests', 'info', Status.SUCCEEDED.value)
+            self.insert_execution_stage_log('load_tests', 'info', Status.SUCCEEDED.value)
 
     def parse_argo_statuses(self, argo_data):
         logger.info(f'Start parsing argo data {argo_data}')
@@ -169,13 +168,13 @@ class ArgoFlowParser(object):
                 continue
             if value['templateName'] == ArgoFlow.PRE_START.value:
                 logger.info(f'Detected pre_start argo pod {value}')
-                self.parse_status_for('argo_pre_start', value)
+                self.parse_status_for('pre_start', value)
             elif value['templateName'] == ArgoFlow.POST_STOP.value:
                 logger.info(f'Detected post_stop argo pod {value}')
-                self.parse_status_for('argo_post_stop', value)
+                self.parse_status_for('post_stop', value)
             elif value['templateName'] == ArgoFlow.MONITORING.value:
                 logger.info(f'Detected monitoring argo pod {value}')
-                self.parse_status_for('argo_monitoring', value)
+                self.parse_status_for('monitoring', value)
             elif value['templateName'] in (ArgoFlow.LOAD_TESTS_MASTER.value, ArgoFlow.LOAD_TESTS_SLAVE.value):
                 # if master crashed we will terminate all flow
                 is_master = value['templateName'] == ArgoFlow.LOAD_TESTS_MASTER.value
