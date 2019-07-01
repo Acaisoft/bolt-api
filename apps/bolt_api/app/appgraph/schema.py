@@ -90,3 +90,4 @@ AppSchema = graphene.Schema(
     ],
     auto_camelcase=False,
 )
+
