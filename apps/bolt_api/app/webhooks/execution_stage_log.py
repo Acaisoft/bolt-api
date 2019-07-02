@@ -19,9 +19,11 @@ class Graph(models.Model):
     start = types.PolyModelType(Item, required=False)
     downloading_source = types.PolyModelType(Item, required=False)
     image_preparation = types.PolyModelType(Item, required=False)
+    pre_start = types.PolyModelType(Item, required=False)
     monitoring = types.PolyModelType(Item, required=False)
     load_tests = types.PolyModelType(Item, required=False)
     clean_up = types.PolyModelType(Item, required=False)
+    post_stop = types.PolyModelType(Item, required=False)
     finished = types.PolyModelType(Item, required=False)
 
     def init(self, graph):
@@ -62,24 +64,27 @@ class Graph(models.Model):
 
 @bp.route('/insert', methods=['POST'])
 def execution_stage_log_insert():
-    data = request.get_json()
-    execution_stage_log = data['event']['data']['new']
-    execution_id = execution_stage_log['execution_id']
-    status = execution_stage_log['msg']
-    stage = execution_stage_log['stage']
-    execution_stage_graph_id, graph_data = get_execution_stage_graph(execution_id)
-    execution_data = get_execution(execution_id)
-    has_load_tests = execution_data['execution'][0]['configuration']['has_load_tests']
-    has_monitoring = execution_data['execution'][0]['configuration']['has_monitoring']
-    logger.info('------------------')
-    logger.info(f'{status} {stage}')
-    logger.info(f'{graph_data}')
-    logger.info('------------------')
-    model = Graph()
-    model.init(graph_data)
-    model.update(status, stage)
-    update_execution_stage_graph(execution_stage_graph_id, model.to_json(has_load_tests, has_monitoring))
+    # future is not using already
+    # TODO: delete code and migrations (triggers)
     return jsonify({})
+    # data = request.get_json()
+    # execution_stage_log = data['event']['data']['new']
+    # execution_id = execution_stage_log['execution_id']
+    # status = execution_stage_log['msg']
+    # stage = execution_stage_log['stage']
+    # execution_stage_graph_id, graph_data = get_execution_stage_graph(execution_id)
+    # execution_data = get_execution(execution_id)
+    # has_load_tests = execution_data['execution'][0]['configuration']['has_load_tests']
+    # has_monitoring = execution_data['execution'][0]['configuration']['has_monitoring']
+    # logger.info('------------------')
+    # logger.info(f'{status} {stage}')
+    # logger.info(f'{graph_data}')
+    # logger.info('------------------')
+    # model = Graph()
+    # model.init(graph_data)
+    # model.update(status, stage)
+    # update_execution_stage_graph(execution_stage_graph_id, model.to_json(has_load_tests, has_monitoring))
+    # return jsonify({})
 
 
 def update_execution_stage_graph(_id, data):
