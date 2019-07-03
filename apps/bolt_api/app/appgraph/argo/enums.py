@@ -3,6 +3,7 @@ import enum
 
 class ArgoFlow(enum.Enum):
     POD = 'Pod'
+    RETRY = 'Retry'
     BUILD = 'build'
     MONITORING = 'monitoring'
     PRE_START = 'pre-start'

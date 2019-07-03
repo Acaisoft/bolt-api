@@ -40,7 +40,8 @@ class ArgoFlowParser(object):
             Status.ERROR.value,
             Status.FAILED.value,
             Status.SUCCEEDED.value
-        ]
+        ],
+        Status.TERMINATED.value: []
     }
 
     def __init__(self, argo_id):
@@ -126,9 +127,9 @@ class ArgoFlowParser(object):
         if phase != current_status and phase in allowed_statuses:
             level = 'error' if phase in (Status.FAILED.value, Status.ERROR.value) else 'info'
             if stage == 'monitoring' and level == 'error':
-                # update status for execution if monitoring failed
-                if self.execution_status != Status.TERMINATED.value:
-                    self.update_execution_status(Status.FAILED.value)
+                # # update status for execution if monitoring failed
+                # if self.execution_status != Status.TERMINATED.value:
+                #     self.update_execution_status(Status.FAILED.value)
                 # terminate all flow if monitoring failed and flow has load tests
                 if self.has_load_tests and not self.is_terminated:
                     logger.info('Monitoring crashed (flow has load_tests). Start terminating flow')
@@ -162,29 +163,40 @@ class ArgoFlowParser(object):
 
     def parse_argo_statuses(self, argo_data):
         logger.info(f'Start parsing argo data {argo_data}')
-        load_tests_data = []
+        flow_status = argo_data.get('phase', None)
+        # update common status for execution
+        if flow_status is not None and self.execution_status != Status.TERMINATED.value \
+                and flow_status.upper() != self.execution_status:
+            self.update_execution_status(flow_status.upper())
+        # update stage statuses
+        # load_tests_data = []
         for key, value in argo_data.get('nodes', {}).items():
-            if value['type'] != ArgoFlow.POD.value:
+            template_name = value.get('templateName')
+            display_name = value.get('displayName')
+            if value['type'] != ArgoFlow.POD.value or value['type'] != ArgoFlow.RETRY.value:
                 continue
-            if value['templateName'] == ArgoFlow.PRE_START.value:
+            if template_name == ArgoFlow.PRE_START.value:
                 logger.info(f'Detected pre_start argo pod {value}')
                 self.parse_status_for('pre_start', value)
-            elif value['templateName'] == ArgoFlow.POST_STOP.value:
+            elif template_name == ArgoFlow.POST_STOP.value:
                 logger.info(f'Detected post_stop argo pod {value}')
                 self.parse_status_for('post_stop', value)
-            elif value['templateName'] == ArgoFlow.MONITORING.value:
-                logger.info(f'Detected monitoring argo pod {value}')
+            elif value['type'] == ArgoFlow.RETRY.value and display_name == ArgoFlow.MONITORING.value:
+                logger.info(f'Detected monitoring argo retry {value}')
                 self.parse_status_for('monitoring', value)
-            elif value['templateName'] in (ArgoFlow.LOAD_TESTS_MASTER.value, ArgoFlow.LOAD_TESTS_SLAVE.value):
-                # if master crashed we will terminate all flow
-                is_master = value['templateName'] == ArgoFlow.LOAD_TESTS_MASTER.value
-                is_crashed = value['phase'].upper() in (Status.ERROR.value, Status.FAILED.value)
-                is_not_terminated = not self.is_terminated  # argo flow
-                if is_master and is_crashed and is_not_terminated:
-                    ok, _ = TestrunTerminate.terminate_flow(self.argo_id)
-                    self.is_terminated = True if ok else False
-                load_tests_data.append(value)  # aggregate records for master/slaves
+            elif value.get('templateName') == ArgoFlow.LOAD_TESTS_MASTER.value:
+                logger.info(f'Detected master argo pod {value}')
+                self.parse_status_for('load_tests', value)
+            # elif value['templateName'] in (ArgoFlow.LOAD_TESTS_MASTER.value, ArgoFlow.LOAD_TESTS_SLAVE.value):
+            #     # if master crashed we will terminate all flow
+            #     is_master = value['templateName'] == ArgoFlow.LOAD_TESTS_MASTER.value
+            #     is_crashed = value['phase'].upper() in (Status.ERROR.value, Status.FAILED.value)
+            #     is_not_terminated = not self.is_terminated  # argo flow
+            #     if is_master and is_crashed and is_not_terminated:
+            #         ok, _ = TestrunTerminate.terminate_flow(self.argo_id)
+            #         self.is_terminated = True if ok else False
+            #     load_tests_data.append(value)  # aggregate records for master/slaves
         # analyze and parse together data for slaves and for master
-        if load_tests_data:
-            self.parse_load_tests_status(load_tests_data)
+        # if load_tests_data:
+        #     self.parse_load_tests_status(load_tests_data)
 
