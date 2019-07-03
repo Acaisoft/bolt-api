@@ -39,9 +39,7 @@ def get_executions_by_execution_id(config, execution_id):
     }
     '''
 
-    query_params = {
-        'eid': str(execution_id),
-    }
+    query_params = {'eid': str(execution_id),}
 
     resp = hce(config,  query, query_params)
 
@@ -54,7 +52,7 @@ def get_executions_by_execution_id_by_timestamp(config, execution_id, start, end
     query = '''query ($eid: uuid!, $start: timestamptz!, $end: timestamptz!) {
       execution_metrics_metadata(where: {execution_id: {_eq: $eid}}) {
         execution {
-          execution_metrics_data(order_by: {timestamp: asc}, where: {timestamp: {_gt: $start, _lt: $end}}) {
+          execution_metrics_data(order_by: {timestamp: asc}, where: {timestamp: {_gte: $start, _lte: $end}}) {
             data
           }
         }
