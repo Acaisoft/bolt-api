@@ -1,12 +1,13 @@
 import graphene
 
 from apps.bolt_api.app.appgraph import configuration, project, repository, test_creator, uploads, users, test_runs, \
-    data_export, extension, argo
+    data_export, extension, argo, execution_metrics
 from apps.bolt_api.app.appgraph.project import demo
 from services import gql_util
 
 
-class TestrunQuery(users.UserList, test_runs.TestrunQueries, project.TestrunQueries):
+class TestrunQuery(users.UserList, test_runs.TestrunQueries,
+                   project.TestrunQueries, execution_metrics.ExecutionMetricsQueries):
     pass
 
 
@@ -87,6 +88,7 @@ AppSchema = graphene.Schema(
         users.UserListItemType,
         gql_util.ValidationResponse,
         project.SummaryResponse,
+        execution_metrics.ExecutionMetricsDataResponse
     ],
     auto_camelcase=False,
 )
