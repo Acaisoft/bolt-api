@@ -173,3 +173,4 @@ class ArgoFlowParser(object):
                     logger.info(f'Detected master argo pod {value}')
                     self.parse_stage_status_for('load_tests', value)
         self.parse_common_status(flow_status, build_status)
+
