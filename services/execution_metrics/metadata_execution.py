@@ -1,29 +1,17 @@
-import numpy as np
+from math import ceil
 from services.hasura import hce
 from services import const
 
 
-def _even_select(sample_size, target_size):
-    if target_size > sample_size/2:
-        cut = np.zeros(sample_size, dtype=int)
-        q, r = divmod(sample_size, sample_size - target_size)
-        indices = [q * i + min(i, r) for i in range(sample_size - target_size)]
-        cut[indices] = False
-    else:
-        cut = np.ones(sample_size, dtype=int)
-        q, r = divmod(sample_size, target_size)
-        indices = [q * i + min(i, r) for i in range(target_size)]
-        cut[indices] = True
-
-    return cut
+def _even_select(sequence, num):
+    length = float(len(sequence))
+    for i in range(num):
+        yield sequence[int(ceil(i * length / num))]
 
 
 def _filter_points(data):
     metrics_data = data['execution_metrics_metadata'][0]['execution']['execution_metrics_data']
-    metrics_data_len = len(metrics_data)
-    point_selection_array = _even_select(metrics_data_len, const.MAX_GRAPH_POINTS)
-    filtered_metrics_data = [point for point, not_select in zip(metrics_data, point_selection_array) if not not_select]
-
+    filtered_metrics_data = list(_even_select(metrics_data, const.MAX_GRAPH_POINTS))
     return filtered_metrics_data
 
 
