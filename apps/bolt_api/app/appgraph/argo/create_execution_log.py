@@ -36,6 +36,9 @@ class CreateExecutionLog(graphene.Mutation):
         if type(data) is str:
             data = json.loads(data)
         hce(current_app.config, query, variable_values={'data': data, 'argo_id': argo_id})
-        parser = ArgoFlowParser(argo_id=argo_id)
-        parser.parse_argo_statuses(data)
+        try:
+            parser = ArgoFlowParser(argo_id=argo_id)
+            parser.parse_argo_statuses(data)
+        except Exception:
+            pass
         return gql_util.OutputValueFromFactory(CreateExecutionLog, {'returning': [{}]})
