@@ -124,6 +124,8 @@ class ArgoFlowParser(object):
         current_status = self.get_current_status_for(stage)
         phase = data.get('phase', 'UNKNOWN').upper()
         allowed_statuses = self.status_mapper[current_status]
+        level = 'error' if phase in (Status.FAILED.value, Status.ERROR.value) else 'info'
+        self.insert_execution_stage_log(stage, level, phase)
         if phase != current_status and phase in allowed_statuses:
             level = 'error' if phase in (Status.FAILED.value, Status.ERROR.value) else 'info'
             if stage == 'monitoring' and level == 'error':
