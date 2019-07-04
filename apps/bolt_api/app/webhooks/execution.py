@@ -23,7 +23,7 @@ def execution_update():
         # execution has entered running phase through locust-wrapper, fetch job info once, in case user hasn't had chance
         output = get_test_run_status(new.get('id'))
 
-    if new.get('status') == const.TESTRUN_FINISHED:
+    if new.get('status') in (const.TESTRUN_FINISHED, const.TESTRUN_SUCCEEDED):
         # mark as performed successfully
         resp = hce(current_app.config, '''mutation ($confId:uuid!) {
             update_configuration(_set:{performed:true}, where:{id:{_eq:$confId}}) { affected_rows }
