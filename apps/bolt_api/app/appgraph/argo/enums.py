@@ -19,3 +19,4 @@ class Status(enum.Enum):
     RUNNING = 'RUNNING'
     SUCCEEDED = 'SUCCEEDED'
     TERMINATED = 'TERMINATED'
+    FINISHED = 'FINISHED'
