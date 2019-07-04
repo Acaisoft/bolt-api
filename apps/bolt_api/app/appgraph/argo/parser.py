@@ -164,29 +164,34 @@ class ArgoFlowParser(object):
     def parse_argo_statuses(self, argo_data):
         logger.info(f'Start parsing argo data {argo_data}')
         flow_status = argo_data.get('phase', None)
-        # update common status for execution
-        if flow_status is not None and self.execution_status != Status.TERMINATED.value \
-                and flow_status.upper() != self.execution_status:
-            self.update_execution_status(flow_status.upper())
+        build_status = None
         # update stage statuses
         # load_tests_data = []
         for key, value in argo_data.get('nodes', {}).items():
             template_name = value.get('templateName')
             display_name = value.get('displayName')
-            if value['type'] != ArgoFlow.POD.value or value['type'] != ArgoFlow.RETRY.value:
-                continue
-            if template_name == ArgoFlow.PRE_START.value:
-                logger.info(f'Detected pre_start argo pod {value}')
-                self.parse_status_for('pre_start', value)
-            elif template_name == ArgoFlow.POST_STOP.value:
-                logger.info(f'Detected post_stop argo pod {value}')
-                self.parse_status_for('post_stop', value)
-            elif value['type'] == ArgoFlow.RETRY.value and display_name == ArgoFlow.MONITORING.value:
-                logger.info(f'Detected monitoring argo retry {value}')
-                self.parse_status_for('monitoring', value)
-            elif value.get('templateName') == ArgoFlow.LOAD_TESTS_MASTER.value:
-                logger.info(f'Detected master argo pod {value}')
-                self.parse_status_for('load_tests', value)
+            if value['type'] == ArgoFlow.POD.value or value['type'] == ArgoFlow.RETRY.value:
+                if template_name == ArgoFlow.BUILD.value:
+                    build_status = value.get('phase')
+                if template_name == ArgoFlow.PRE_START.value:
+                    logger.info(f'Detected pre_start argo pod {value}')
+                    self.parse_status_for('pre_start', value)
+                elif template_name == ArgoFlow.POST_STOP.value:
+                    logger.info(f'Detected post_stop argo pod {value}')
+                    self.parse_status_for('post_stop', value)
+                elif value['type'] == ArgoFlow.RETRY.value and display_name == ArgoFlow.MONITORING.value:
+                    logger.info(f'Detected monitoring argo retry {value}')
+                    self.parse_status_for('monitoring', value)
+                elif value.get('templateName') == ArgoFlow.LOAD_TESTS_MASTER.value:
+                    logger.info(f'Detected master argo pod {value}')
+                    self.parse_status_for('load_tests', value)
+        # update common status for execution
+        if build_status is not None and build_status.upper() != Status.SUCCEEDED.value \
+                and self.execution_status != Status.TERMINATED.value:
+            self.update_execution_status(build_status.upper())
+        elif flow_status is not None and self.execution_status != Status.TERMINATED.value \
+                and flow_status.upper() != self.execution_status:
+            self.update_execution_status(flow_status.upper())
             # elif value['templateName'] in (ArgoFlow.LOAD_TESTS_MASTER.value, ArgoFlow.LOAD_TESTS_SLAVE.value):
             #     # if master crashed we will terminate all flow
             #     is_master = value['templateName'] == ArgoFlow.LOAD_TESTS_MASTER.value
