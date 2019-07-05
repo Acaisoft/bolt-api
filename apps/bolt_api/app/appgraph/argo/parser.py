@@ -42,7 +42,12 @@ class ArgoFlowParser(object):
             Status.SUCCEEDED.value
         ],
         Status.TERMINATED.value: [],
-        Status.FINISHED.value: []
+        Status.FINISHED.value: [],
+        Status.MONITORING.value: [
+            Status.FAILED.value,
+            Status.ERROR.value,
+            Status.SUCCEEDED.value
+        ]
     }
 
     def __init__(self, argo_id):
