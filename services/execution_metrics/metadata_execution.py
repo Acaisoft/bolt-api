@@ -6,16 +6,14 @@ from services import const
 def _even_select(sequence, num):
     length = len(sequence)
     if length > num:
-        for i in range(num):
-            yield sequence[int(ceil(i * length / num))]
+        return [sequence[int(ceil(i * length / num))] for i in range(num)]
     else:
-        for i in range(length):
-            yield sequence[i]
+        return sequence
 
 
 def _filter_points(data):
     metrics_data = data['execution_metrics_metadata'][0]['execution']['execution_metrics_data']
-    filtered_metrics_data = list(_even_select(metrics_data, const.MAX_GRAPH_POINTS))
+    filtered_metrics_data = _even_select(metrics_data, const.MAX_GRAPH_POINTS)
     return filtered_metrics_data
 
 
