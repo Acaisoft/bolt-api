@@ -12,7 +12,10 @@ def _even_select(sequence, num):
 
 
 def _filter_points(data):
-    metrics_data = data['execution_metrics_metadata'][0]['execution']['execution_metrics_data']
+    try:
+        metrics_data = data['execution_metrics_metadata'][0]['execution']['execution_metrics_data']
+    except LookupError:
+        return []
     filtered_metrics_data = _even_select(metrics_data, const.MAX_GRAPH_POINTS)
     return filtered_metrics_data
 
