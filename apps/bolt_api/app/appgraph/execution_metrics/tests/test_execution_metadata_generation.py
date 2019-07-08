@@ -1,0 +1,10 @@
+from hypothesis import given
+import hypothesis.strategies as st
+
+from services.execution_metrics.metadata_execution import _even_select
+
+
+@given(sequence=st.lists(st.integers()), list_len_limit=st.integers(min_value=1, max_value=10000))
+def test_even_select(sequence, list_len_limit):
+    evenly_selected_len = len(list(_even_select(list(sequence), list_len_limit)))
+    assert evenly_selected_len == list_len_limit or evenly_selected_len == len(sequence)

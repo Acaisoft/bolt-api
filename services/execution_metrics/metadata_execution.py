@@ -4,9 +4,13 @@ from services import const
 
 
 def _even_select(sequence, num):
-    length = float(len(sequence))
-    for i in range(num):
-        yield sequence[int(ceil(i * length / num))]
+    length = len(sequence)
+    if length >= num:
+        for i in range(num):
+            yield sequence[int(ceil(i * length / num))]
+    else:
+        for i in range(length):
+            yield sequence[i]
 
 
 def _filter_points(data):
