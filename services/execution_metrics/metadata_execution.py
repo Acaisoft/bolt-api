@@ -5,7 +5,7 @@ from services import const
 
 def _even_select(sequence, num):
     length = len(sequence)
-    if length >= num:
+    if length > num:
         for i in range(num):
             yield sequence[int(ceil(i * length / num))]
     else:
