@@ -16,8 +16,9 @@ class ArgoFlowParser(object):
     execution_status: None
     current_statuses: None
     has_load_tests: None
+    has_monitoring = None
 
-    is_terminated = False
+    flow_terminated = False
 
     status_mapper = {
         None: [
@@ -56,6 +57,7 @@ class ArgoFlowParser(object):
         self.execution_id = execution_data['execution'][0]['id']
         self.execution_status = execution_data['execution'][0]['status']
         self.has_load_tests = execution_data['execution'][0]['configuration']['has_load_tests']
+        self.has_monitoring = execution_data['execution'][0]['configuration']['has_monitoring']
         self.current_statuses = self.get_current_statuses()
 
     def get_execution_by_argo_id(self, argo_id):
@@ -66,6 +68,7 @@ class ArgoFlowParser(object):
                     status
                     configuration {
                         has_load_tests
+                        has_monitoring
                     }
                 }
             }
@@ -130,35 +133,55 @@ class ArgoFlowParser(object):
         current_status = self.get_current_status_for(stage)
         phase = data.get('phase', 'UNKNOWN').upper()
         allowed_statuses = self.status_mapper[current_status]
-        level = 'error' if phase in (Status.FAILED.value, Status.ERROR.value) else 'info'
-        self.insert_execution_stage_log(stage, level, phase)
         if phase != current_status and phase in allowed_statuses:
             level = 'error' if phase in (Status.FAILED.value, Status.ERROR.value) else 'info'
-            if stage == 'monitoring' and level == 'error':
-                if self.has_load_tests and not self.is_terminated:
-                    logger.info('Monitoring crashed (flow has load_tests). Start terminating flow')
-                    ok, _ = TestrunTerminate.terminate_flow(self.argo_id)
-                    self.is_terminated = True if ok else False
+            # try to terminate flow if monitoring crashed
+            if stage == 'monitoring' and level == 'error' and self.has_load_tests and not self.flow_terminated:
+                logger.info('Monitoring crashed (flow has load_tests). Start terminating flow')
+                ok, _ = TestrunTerminate.terminate_flow(self.argo_id)
+                if ok:
+                    self.flow_terminated = True
+                    self.update_execution_status(Status.FAILED.value)
+                    self.execution_status = Status.FAILED.value
+            # try to terminate flow if load tests crashed
+            if stage == 'load_tests' and level == 'error' and self.has_monitoring and not self.flow_terminated:
+                logger.info('Load tests crashed (flow has monitoring). Start terminating flow')
+                ok, _ = TestrunTerminate.terminate_flow(self.argo_id)
+                if ok:
+                    self.flow_terminated = True
+                    self.update_execution_status(Status.FAILED.value)
+                    self.execution_status = Status.FAILED.value
             self.insert_execution_stage_log(stage, level, phase)
 
-    def parse_common_status(self, flow_status, build_status):  # for execution
+    def parse_common_status(self, flow_status, build_status, monitoring_status, load_tests_status):
         new_build_status = None
-        if build_status is not None:
-            build_status = build_status.upper()
-            if flow_status is not None and flow_status.upper() == Status.RUNNING.value:
-                if build_status in (Status.PENDING.value, Status.RUNNING.value):
-                    new_build_status = Status.PENDING.value
-                    self.update_execution_status(Status.PENDING.value)
-        if flow_status is not None and new_build_status is None:
-            flow_status = flow_status.upper()
-            allowed_statuses = self.status_mapper[self.execution_status]
-            if flow_status.upper() in allowed_statuses:
-                self.update_execution_status(flow_status)
+        if self.execution_status in (Status.FAILED.value, Status.ERROR.value,
+                                     Status.TERMINATED.value, Status.SUCCEEDED.value):
+            return
+        if build_status is not None and flow_status == Status.RUNNING.value:
+            if build_status.upper() in (Status.PENDING.value, Status.RUNNING.value):
+                new_build_status = Status.PENDING.value
+                self.execution_status = Status.PENDING.value
+                self.update_execution_status(Status.PENDING.value)
+        if new_build_status is None and flow_status in self.status_mapper[self.execution_status]:
+            self.execution_status = flow_status
+            self.update_execution_status(flow_status)
+        if monitoring_status is not None and monitoring_status.upper() in (Status.ERROR.value, Status.FAILED.value):
+            self.execution_status = Status.FAILED.value
+            self.update_execution_status(Status.FAILED.value)
+        if load_tests_status is not None and load_tests_status.upper() in (Status.ERROR.value, Status.FAILED.value):
+            self.execution_status = Status.FAILED.value
+            self.update_execution_status(Status.FAILED.value)
 
     def parse_argo_statuses(self, argo_data):
         logger.info(f'Start parsing argo data {argo_data}')
-        flow_status = argo_data.get('phase', None)
         build_status = None
+        monitoring_status = None
+        load_tests_status = None
+        # exit from parser if flow is not started (flow status is None)
+        flow_status = argo_data.get('phase')
+        if flow_status is None:
+            return
         # update stage statuses
         for key, value in argo_data.get('nodes', {}).items():
             template_name = value.get('templateName')
@@ -174,9 +197,12 @@ class ArgoFlowParser(object):
                     self.parse_stage_status_for('post_stop', value)
                 elif value['type'] == ArgoFlow.RETRY.value and display_name == ArgoFlow.MONITORING.value:
                     logger.info(f'Detected monitoring argo retry {value}')
+                    monitoring_status = value.get('phase')
                     self.parse_stage_status_for('monitoring', value)
                 elif value.get('templateName') == ArgoFlow.LOAD_TESTS_MASTER.value:
                     logger.info(f'Detected master argo pod {value}')
+                    load_tests_status = value.get('phase')
                     self.parse_stage_status_for('load_tests', value)
-        self.parse_common_status(flow_status, build_status)
+        # update execution status
+        self.parse_common_status(flow_status.upper(), build_status, monitoring_status, load_tests_status)
 
