@@ -135,22 +135,6 @@ class ArgoFlowParser(object):
         allowed_statuses = self.status_mapper[current_status]
         if phase != current_status and phase in allowed_statuses:
             level = 'error' if phase in (Status.FAILED.value, Status.ERROR.value) else 'info'
-            # try to terminate flow if monitoring crashed
-            if stage == 'monitoring' and level == 'error' and self.has_load_tests and not self.flow_terminated:
-                logger.info('Monitoring crashed (flow has load_tests). Start terminating flow')
-                ok, _ = TestrunTerminate.terminate_flow(self.argo_id)
-                if ok:
-                    self.flow_terminated = True
-                    self.update_execution_status(Status.FAILED.value)
-                    self.execution_status = Status.FAILED.value
-            # try to terminate flow if load tests crashed
-            if stage == 'load_tests' and level == 'error' and self.has_monitoring and not self.flow_terminated:
-                logger.info('Load tests crashed (flow has monitoring). Start terminating flow')
-                ok, _ = TestrunTerminate.terminate_flow(self.argo_id)
-                if ok:
-                    self.flow_terminated = True
-                    self.update_execution_status(Status.FAILED.value)
-                    self.execution_status = Status.FAILED.value
             self.insert_execution_stage_log(stage, level, phase)
 
     def parse_common_status(self, flow_status, build_status, monitoring_status, load_tests_status):
