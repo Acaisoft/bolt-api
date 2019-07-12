@@ -9,6 +9,9 @@ from services import const, gql_util
 from services import validators
 from services.hasura import hce
 from services.testruns.defaults import DEFAULT_CHART_CONFIGURATION
+from services.logger import setup_custom_logger
+
+logger = setup_custom_logger(__file__)
 
 
 class CreateValidate(graphene.Mutation):
@@ -78,7 +81,8 @@ class CreateValidate(graphene.Mutation):
             'sourceId': str(test_source_id) or "",
             'fetchSource': bool(test_source_id),
         }
-
+        logger.info('-------------- Starting creating repo ')
+        logger.info(repo_query)
         repo = hce(current_app.config, '''query (
                 $confName:String, $sourceId:uuid!, $fetchSource:Boolean!, 
                 $projId:uuid!, $userId:uuid!, $type_slug:String!
@@ -140,6 +144,7 @@ class CreateValidate(graphene.Mutation):
                 id
             }
         }''', repo_query)
+        logger.info(repo_query)
 
         if role not in (const.ROLE_ADMIN, const.ROLE_TENANT_ADMIN):
             assert repo.get('user_project', None), \

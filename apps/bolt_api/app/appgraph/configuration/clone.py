@@ -4,6 +4,9 @@ from flask import current_app
 
 from services.hasura import hce
 from services import gql_util
+from services.logger import setup_custom_logger
+
+logger = setup_custom_logger(__file__)
 
 
 class CloneInterface(graphene.Interface):
@@ -86,6 +89,10 @@ class Clone(graphene.Mutation):
 
     def mutate(self, info, configuration_id, configuration_name=None):
         cloned_configuration_data = Clone.get_cloned_configuration(configuration_id)
+        logger.info(' ----------- Start cloning configuration')
+        logger.info(cloned_configuration_data)
+        logger.info(configuration_id)
+        logger.info(configuration_name)
         if configuration_name is not None:
             cloned_configuration_data['name'] = configuration_name
         else:
