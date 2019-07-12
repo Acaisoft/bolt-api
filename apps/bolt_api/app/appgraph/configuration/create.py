@@ -1,8 +1,9 @@
 import json
-
 import graphene
 import math
+
 from flask import current_app
+
 from apps.bolt_api.app.appgraph.configuration import types
 from services import const, gql_util
 from services import validators
