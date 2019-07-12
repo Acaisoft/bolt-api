@@ -4,7 +4,6 @@ from flask import current_app
 from services.hasura import hce
 from services.logger import setup_custom_logger
 
-from apps.bolt_api.app.appgraph.test_runs import TestrunTerminate
 from apps.bolt_api.app.appgraph.argo.enums import ArgoFlow, Status
 
 logger = setup_custom_logger(__file__)

@@ -25,6 +25,7 @@ class TestrunMutations(graphene.ObjectType):
     testrun_configuration_update = to_field(configuration.Update)
     testrun_configuration_update_validate = to_field(configuration.UpdateValidate)
     testrun_configuration_delete = to_field(configuration.Delete)
+    testrun_configuration_clone = to_field(configuration.Clone)
 
     # configuration extension
     testrun_extension_create = to_field(extension.Create)
