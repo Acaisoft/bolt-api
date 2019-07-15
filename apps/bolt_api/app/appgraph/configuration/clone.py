@@ -3,7 +3,7 @@ import graphene
 from flask import current_app
 
 from services.hasura import hce
-from services import gql_util
+from services import gql_util, const
 from services.logger import setup_custom_logger
 
 logger = setup_custom_logger(__file__)
@@ -88,8 +88,13 @@ class Clone(graphene.Mutation):
         return response['testrun_configuration_create']['returning'][0]
 
     def mutate(self, info, configuration_id, configuration_name=None):
+        role, user_id = gql_util.get_request_role_userid(
+            info,
+            (const.ROLE_ADMIN, const.ROLE_TENANT_ADMIN, const.ROLE_MANAGER, const.ROLE_TESTER)
+        )
         cloned_configuration_data = Clone.get_cloned_configuration(configuration_id)
         logger.info(' ----------- Start cloning configuration')
+        logger.info(f'USER ID {user_id}')
         logger.info(cloned_configuration_data)
         logger.info(configuration_id)
         logger.info(configuration_name)
