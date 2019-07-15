@@ -162,6 +162,7 @@ def start(app_config, conf_id, user_id, no_cache):
     else:
         raise Exception(f'invalid code source value {code_source}')
 
+    test_config.pop('monitoring_chart_configuration')  # delete monitoring chart from dict
     initial_state['id'] = str(execution_id)
     initial_state['configuration_snapshot'] = test_config
     exec_result = hce(app_config, '''mutation ($data:[execution_insert_input!]!) {
