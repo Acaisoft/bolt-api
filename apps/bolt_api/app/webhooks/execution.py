@@ -1,7 +1,6 @@
 from flask import Blueprint, request, jsonify, current_app
 
 from services import const
-from services.deployer.utils import get_test_run_status
 from services.hasura import hce
 from services.logger import setup_custom_logger
 
@@ -15,15 +14,9 @@ def execution_update():
     req_body = request.get_json()
     event = req_body.get('event')
     assert event and event.get('op') == 'UPDATE', f'invalid event input: {str(event)}'
-
-    old = event.get('data', {}).get('old')
     new = event.get('data', {}).get('new')
-
-    if new.get('status') != old.get('status'):
-        # execution has entered running phase through locust-wrapper, fetch job info once, in case user hasn't had chance
-        output = get_test_run_status(new.get('id'))
-
-    if new.get('status') in (const.TESTRUN_FINISHED, const.TESTRUN_SUCCEEDED):
+    if new.get('status') in (const.TESTRUN_FINISHED, const.TESTRUN_SUCCEEDED,
+                             const.TESTRUN_FAILED, const.TESTRUN_ERROR, const.TESTRUN_TERMINATED):
         # mark as performed successfully
         resp = hce(current_app.config, '''mutation ($confId:uuid!) {
             update_configuration(_set:{performed:true}, where:{id:{_eq:$confId}}) { affected_rows }
@@ -35,7 +28,6 @@ def execution_update():
         err = update_execution_totals_per_request(current_app.config, new.get('id'))
         if err is None:
             update_execution_totals(current_app.config, new.get('id'))
-
     return jsonify({})
 
 
@@ -75,9 +67,7 @@ def update_execution_totals_per_request(config, execution_id):
                 ]
             }
         ) { affected_rows }
-    }''', variable_values={
-        'data': data,
-    })
+    }''', variable_values={'data': data})
     err = totals_response.get('errors', None)
     if err is not None:
         logger.error(f'error inserting execution_request_totals: {str(err)}')
@@ -88,7 +78,6 @@ def update_execution_totals_per_request(config, execution_id):
 
 def update_execution_totals(config, execution_id):
     # aggregate execution_request_totals into execution fields
-
     response = hce(current_app.config, '''query ($execution_id:uuid!) {
         execution_request_totals_aggregate(where:{execution_id:{_eq:$execution_id}}){
             aggregate {
