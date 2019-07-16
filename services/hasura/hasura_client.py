@@ -69,6 +69,28 @@ def hasura_client(config=None):
     return _client
 
 
+def hasura_client_with_user(config=None, user_id=None, role=None):
+    if not config:
+        config = os.environ
+    target = config.get('HASURA_GQL')
+    assert target, 'HASURA_GQL is not set'
+    access_key = config.get('HASURA_GRAPHQL_ACCESS_KEY')
+    assert access_key, 'HASURA_GRAPHQL_ACCESS_KEY is not set'
+    client = Client(
+        retries=0,
+        transport=VerboseHTTPTransport(
+            url=target,
+            use_json=True,
+            headers={
+                'X-Hasura-Access-Key': access_key,
+                'X-Hasura-User-Id': user_id or const.HASURA_CLIENT_USER_ID,
+                'X-Hasura-Role': role or 'admin',
+            },
+        )
+    )
+    return client
+
+
 def hce(config, query, *args, **kwargs):
     if type(query) is str:
         if config.get('HCE_DEBUG', False):
@@ -77,3 +99,13 @@ def hce(config, query, *args, **kwargs):
             print(json.dumps(kwargs))
         query = gql(query)
     return hasura_client(config).execute(query, *args, **kwargs)
+
+
+def hce_with_user(config, query, user_id=None, role=None, *args, **kwargs):
+    if type(query) is str:
+        if config.get('HCE_DEBUG', False):
+            print(query)
+            print(json.dumps(args))
+            print(json.dumps(kwargs))
+        query = gql(query)
+    return hasura_client_with_user(config, user_id, role).execute(query, *args, **kwargs)

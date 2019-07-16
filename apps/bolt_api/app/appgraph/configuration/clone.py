@@ -2,7 +2,7 @@ import graphene
 
 from flask import current_app
 
-from services.hasura import hce
+from services.hasura import hce, hce_with_user
 from services import gql_util, const
 from services.logger import setup_custom_logger
 
@@ -52,7 +52,7 @@ class Clone(graphene.Mutation):
         return response['configuration'][0]
 
     @staticmethod
-    def insert_new_configuration(cloned_configuration_data):
+    def insert_new_configuration(cloned_configuration_data, user_id, role):
         query = '''
             mutation (
                 $name: String!, 
@@ -84,7 +84,8 @@ class Clone(graphene.Mutation):
                     }
             }
         '''
-        response = hce(current_app.config, query, variable_values=cloned_configuration_data)
+        response = hce_with_user(
+            current_app.config, query, user_id=user_id, role=role, variable_values=cloned_configuration_data)
         return response['testrun_configuration_create']['returning'][0]
 
     def mutate(self, info, configuration_id, configuration_name=None):
@@ -95,6 +96,7 @@ class Clone(graphene.Mutation):
         cloned_configuration_data = Clone.get_cloned_configuration(configuration_id)
         logger.info(' ----------- Start cloning configuration')
         logger.info(f'USER ID {user_id}')
+        logger.info(f'ROLE: {role}')
         logger.info(cloned_configuration_data)
         logger.info(configuration_id)
         logger.info(configuration_name)
@@ -102,7 +104,7 @@ class Clone(graphene.Mutation):
             cloned_configuration_data['name'] = configuration_name
         else:
             cloned_configuration_data['name'] = '{0} {1}'.format(cloned_configuration_data['name'], '(CLONED)')
-        new_configuration_data = Clone.insert_new_configuration(cloned_configuration_data)
+        new_configuration_data = Clone.insert_new_configuration(cloned_configuration_data, user_id, role)
         return gql_util.OutputValueFromFactory(Clone, {'returning': [{
             'name': new_configuration_data['name'],
             'cloned_configuration_id': configuration_id,
