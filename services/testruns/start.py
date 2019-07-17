@@ -41,6 +41,9 @@ def start(app_config, conf_id, user_id, no_cache):
             configuration_parameters {
                 parameter_slug
                 value
+                parameter {
+                    name
+                }
             }
             configuration_extensions {
                 type
