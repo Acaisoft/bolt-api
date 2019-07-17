@@ -7,7 +7,7 @@ def _even_select(sequence, num):
     length = len(sequence)
     if length > num:
         seq_no_first_last = sequence[1:-1]
-        return [sequence[0]] + [seq_no_first_last[int(ceil(i * length / (num - 2)))] for i in range(num - 2)] + [sequence[-1]]
+        return [sequence[0]] + [seq_no_first_last[int(ceil(i * length / num))] for i in range(num - 2)] + [sequence[-1]]
     else:
         return sequence
 
