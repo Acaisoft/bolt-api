@@ -89,3 +89,4 @@ EXTENSION_CHOICE = (EXTENSION_NFS,)
 
 # executions graphs
 MAX_GRAPH_POINTS = 1400
+
