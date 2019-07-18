@@ -49,14 +49,6 @@ class UpdateValidate(graphene.Mutation):
     Output = gql_util.ValidationInterface
 
     @staticmethod
-    def patch_query_data(query_data, patch_from, field_names):
-        for a in field_names:
-            if a not in patch_from:
-                raise RuntimeError(f'patch_query_data from arg missing "{a}" key')
-            query_data[a] = patch_from.get(a)
-        return query_data
-
-    @staticmethod
     def validate(
             info, id, name=None, type_slug=None, test_source_id=None, configuration_parameters=None,
             configuration_envvars=None, has_pre_test=None, has_post_test=None, has_load_tests=None,
@@ -91,20 +83,6 @@ class UpdateValidate(graphene.Mutation):
             }
         }''', {'confId': str(id), 'userId': user_id})
         assert len(original['configuration']), f'configuration does not exist'
-
-        # is_performed = original['configuration'][0]['performed']
-        # if is_performed:
-        #     # populate query data fields from db, leter overwrite if args are None
-        #     query_data = UpdateValidate.patch_query_data(
-        #         query_data,
-        #         original['configuration'][0],
-        #         [
-        #             'name', 'type_slug', 'test_source_id',
-        #             'has_pre_test', 'has_post_test', 'has_load_tests', 'has_monitoring'
-        #         ]
-        #     )
-        #     query_data['configuration_parameters'] = {'data': original['configuration'][0]['configuration_parameters']}
-        #     query_data['configuration_envvars'] = {'data': original['configuration'][0]['configuration_envvars']}
 
         if name:
             name = validators.validate_text(name)
@@ -359,5 +337,4 @@ class Update(UpdateValidate):
             'envs': envs,
         })
         assert conf_response['update_configuration'], f'cannot update configuration ({str(conf_response)})'
-
         return gql_util.OutputValueFromFactory(Update, conf_response['update_configuration'])

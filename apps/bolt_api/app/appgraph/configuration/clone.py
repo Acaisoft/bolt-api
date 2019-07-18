@@ -1,12 +1,10 @@
+import datetime
 import graphene
 
 from flask import current_app
 
 from services.hasura import hce, hce_with_user
 from services import gql_util, const
-from services.logger import setup_custom_logger
-
-logger = setup_custom_logger(__file__)
 
 
 class CloneInterface(graphene.Interface):
@@ -90,20 +88,12 @@ class Clone(graphene.Mutation):
 
     def mutate(self, info, configuration_id, configuration_name=None):
         role, user_id = gql_util.get_request_role_userid(
-            info,
-            (const.ROLE_ADMIN, const.ROLE_TENANT_ADMIN, const.ROLE_MANAGER, const.ROLE_TESTER)
-        )
+            info, (const.ROLE_ADMIN, const.ROLE_TENANT_ADMIN, const.ROLE_MANAGER, const.ROLE_TESTER))
         cloned_configuration_data = Clone.get_cloned_configuration(configuration_id)
-        logger.info(' ----------- Start cloning configuration')
-        logger.info(f'USER ID {user_id}')
-        logger.info(f'ROLE: {role}')
-        logger.info(cloned_configuration_data)
-        logger.info(configuration_id)
-        logger.info(configuration_name)
-        if configuration_name is not None:
-            cloned_configuration_data['name'] = configuration_name
-        else:
-            cloned_configuration_data['name'] = '{0} {1}'.format(cloned_configuration_data['name'], '(CLONED)')
+        if configuration_name is None:
+            date_now = datetime.datetime.now().strftime('%d/%m/%Y | %H:%M:%S')
+            configuration_name = '{0} {1}'.format(cloned_configuration_data['name'], date_now)
+        cloned_configuration_data['name'] = configuration_name
         new_configuration_data = Clone.insert_new_configuration(cloned_configuration_data, user_id, role)
         return gql_util.OutputValueFromFactory(Clone, {'returning': [{
             'name': new_configuration_data['name'],
