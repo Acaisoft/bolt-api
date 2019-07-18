@@ -1,5 +1,6 @@
 import graphene
 import math
+
 from flask import current_app
 
 from apps.bolt_api.app.appgraph.configuration import types
@@ -9,12 +10,10 @@ from services.hasura import hce
 
 
 class UpdateValidate(graphene.Mutation):
-    """Updates configuration for a testrun.
-    All fields are optional.
-    Only name can be updated if configuration testrun has been performed.
     """
-
-    class Arguments():
+    Updates configuration for a testrun. All fields are optional.
+    """
+    class Arguments:
         id = graphene.UUID(
             description='Configuration object id')
         name = graphene.String(
@@ -64,9 +63,7 @@ class UpdateValidate(graphene.Mutation):
             has_monitoring=None):
 
         role, user_id = gql_util.get_request_role_userid(
-            info,
-            (const.ROLE_ADMIN, const.ROLE_TENANT_ADMIN, const.ROLE_MANAGER, const.ROLE_TESTER)
-        )
+            info, (const.ROLE_ADMIN, const.ROLE_TENANT_ADMIN, const.ROLE_MANAGER, const.ROLE_TESTER))
 
         query_data = {
             'configuration_parameters': {'data': []}
@@ -97,9 +94,6 @@ class UpdateValidate(graphene.Mutation):
 
         is_performed = original['configuration'][0]['performed']
         if is_performed:
-            assert not any((type_slug, test_source_id, configuration_parameters, has_pre_test, has_post_test,
-                            has_load_tests, has_monitoring)), \
-                f'configuration {str(id)} has already been performed, only name and envvars are editable'
             # populate query data fields from db, leter overwrite if args are None
             query_data = UpdateValidate.patch_query_data(
                 query_data,
