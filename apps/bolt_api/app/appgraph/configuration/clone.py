@@ -91,8 +91,8 @@ class Clone(graphene.Mutation):
             info, (const.ROLE_ADMIN, const.ROLE_TENANT_ADMIN, const.ROLE_MANAGER, const.ROLE_TESTER))
         cloned_configuration_data = Clone.get_cloned_configuration(configuration_id)
         if configuration_name is None:
-            date_now = datetime.datetime.now().strftime('%d/%m/%Y | %H:%M:%S')
-            configuration_name = '{0} {1}'.format(cloned_configuration_data['name'], date_now)
+            date_now = datetime.datetime.now().strftime('%d/%m/%Y - %H:%M:%S')
+            configuration_name = '{0} (Cloned at {1})'.format(cloned_configuration_data['name'], date_now)
         cloned_configuration_data['name'] = configuration_name
         new_configuration_data = Clone.insert_new_configuration(cloned_configuration_data, user_id, role)
         return gql_util.OutputValueFromFactory(Clone, {'returning': [{
