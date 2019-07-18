@@ -92,19 +92,19 @@ class UpdateValidate(graphene.Mutation):
         }''', {'confId': str(id), 'userId': user_id})
         assert len(original['configuration']), f'configuration does not exist'
 
-        is_performed = original['configuration'][0]['performed']
-        if is_performed:
-            # populate query data fields from db, leter overwrite if args are None
-            query_data = UpdateValidate.patch_query_data(
-                query_data,
-                original['configuration'][0],
-                [
-                    'name', 'type_slug', 'test_source_id',
-                    'has_pre_test', 'has_post_test', 'has_load_tests', 'has_monitoring'
-                ]
-            )
-            query_data['configuration_parameters'] = {'data': original['configuration'][0]['configuration_parameters']}
-            query_data['configuration_envvars'] = {'data': original['configuration'][0]['configuration_envvars']}
+        # is_performed = original['configuration'][0]['performed']
+        # if is_performed:
+        #     # populate query data fields from db, leter overwrite if args are None
+        #     query_data = UpdateValidate.patch_query_data(
+        #         query_data,
+        #         original['configuration'][0],
+        #         [
+        #             'name', 'type_slug', 'test_source_id',
+        #             'has_pre_test', 'has_post_test', 'has_load_tests', 'has_monitoring'
+        #         ]
+        #     )
+        #     query_data['configuration_parameters'] = {'data': original['configuration'][0]['configuration_parameters']}
+        #     query_data['configuration_envvars'] = {'data': original['configuration'][0]['configuration_envvars']}
 
         if name:
             name = validators.validate_text(name)
