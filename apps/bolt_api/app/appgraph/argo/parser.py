@@ -181,11 +181,13 @@ class ArgoFlowParser(object):
                 elif value['type'] == ArgoFlow.RETRY.value and display_name == ArgoFlow.MONITORING.value:
                     logger.info(f'Detected monitoring argo retry {value}')
                     monitoring_status = value.get('phase')
-                    self.parse_stage_status_for('monitoring', value)
+                    if monitoring_status != Status.RUNNING.value:
+                        self.parse_stage_status_for('monitoring', value)
                 elif value.get('templateName') == ArgoFlow.LOAD_TESTS_MASTER.value:
                     logger.info(f'Detected master argo pod {value}')
                     load_tests_status = value.get('phase')
-                    self.parse_stage_status_for('load_tests', value)
+                    if load_tests_status != Status.RUNNING.value:
+                        self.parse_stage_status_for('load_tests', value)
         # update execution status
         self.parse_common_status(flow_status.upper(), build_status, monitoring_status, load_tests_status)
 
