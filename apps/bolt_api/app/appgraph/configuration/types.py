@@ -62,6 +62,10 @@ class ConfigurationInterface(graphene.Interface):
     configuration_parameters = graphene.List(
         ConfigurationParameterInterface,
         description='Default parameter types overrides.')
+    monitoring_chart_configuration = graphene.JSONString(
+        required=False,
+        description='List of monitoring chart configurations'
+    )
 
 
 class ConfigurationType(graphene.ObjectType):
