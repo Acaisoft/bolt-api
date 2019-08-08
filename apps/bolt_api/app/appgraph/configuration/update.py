@@ -45,6 +45,10 @@ class UpdateValidate(graphene.Mutation):
         has_monitoring = graphene.Boolean(
             required=False,
             description='Test has monitoring hooks.')
+        monitoring_chart_configuration = graphene.JSONString(
+            required=False,
+            description='Monitoring charts definition'
+        )
 
     Output = gql_util.ValidationInterface
 
@@ -52,7 +56,7 @@ class UpdateValidate(graphene.Mutation):
     def validate(
             info, id, name=None, type_slug=None, test_source_id=None, configuration_parameters=None,
             configuration_envvars=None, has_pre_test=None, has_post_test=None, has_load_tests=None,
-            has_monitoring=None):
+            has_monitoring=None, monitoring_chart_configuration=None):
 
         role, user_id = gql_util.get_request_role_userid(
             info, (const.ROLE_ADMIN, const.ROLE_TENANT_ADMIN, const.ROLE_MANAGER, const.ROLE_TESTER))
@@ -80,6 +84,7 @@ class UpdateValidate(graphene.Mutation):
                 has_post_test 
                 has_load_tests 
                 has_monitoring
+                monitoring_chart_configuration
             }
         }''', {'confId': str(id), 'userId': user_id})
         assert len(original['configuration']), f'configuration does not exist'
@@ -166,12 +171,15 @@ class UpdateValidate(graphene.Mutation):
             query_data['has_load_tests'] = has_load_tests
         if has_monitoring is not None:
             query_data['has_monitoring'] = has_monitoring
+        if monitoring_chart_configuration is not None:
+            query_data['monitoring_chart_configuration'] = monitoring_chart_configuration
 
         sections = [x for x in (
             query_data.get('has_pre_test', None),
             query_data.get('has_post_test', None),
             query_data.get('has_load_tests', None),
             query_data.get('has_monitoring', None),
+            query_data.get('monitoring_chart_configuration', None)
         ) if x is not None]
         assert len(sections), \
             f'At least one section is required'
@@ -242,6 +250,11 @@ class UpdateValidate(graphene.Mutation):
                 } for x in configuration_envvars]
             }
 
+        if monitoring_chart_configuration:
+            assert validators.validate_monitoring_chart_configuration(monitoring_chart_configuration), \
+                f"monitoring chart configuration doesn't have required format"
+
+
         return query_data
 
     def mutate(self, info, id, name=None, type_slug=None, test_source_id=None, configuration_parameters=None,
@@ -262,10 +275,10 @@ class Update(UpdateValidate):
     def mutate(
             self, info, id, name=None, type_slug=None, test_source_id=None, configuration_parameters=None,
             configuration_envvars=None, has_pre_test=None, has_post_test=None, has_load_tests=None,
-            has_monitoring=None):
+            has_monitoring=None, monitoring_chart_configuration=None):
         query_params = UpdateValidate.validate(
             info, id, name, type_slug, test_source_id, configuration_parameters, configuration_envvars,
-            has_pre_test, has_post_test, has_load_tests, has_monitoring
+            has_pre_test, has_post_test, has_load_tests, has_monitoring, monitoring_chart_configuration
         )
 
         params = query_params.pop('configuration_parameters', {'data': []})['data']
@@ -326,6 +339,7 @@ class Update(UpdateValidate):
                     has_monitoring
                     configuration_envvars { name value }
                     configuration_parameters { parameter_slug value }
+                    monitoring_chart_configuration
                 } 
             }
         }'''
