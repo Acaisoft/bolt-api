@@ -7,9 +7,11 @@ from flask import current_app
 from services import const
 from services.deployer import clients
 from services.hasura import hce
+from services.logger import setup_custom_logger
 
 
 DEPLOYER_TIMEOUT = 6
+logger = setup_custom_logger(__file__)
 
 
 def get_test_run_status(execution_id: str):
@@ -63,6 +65,7 @@ def can_refresh_test_preparation_job_status():
 
 def get_test_preparation_job_status(execution_id: str, test_preparation_job_id: str):
     response = clients.images(current_app.config).image_builds_task_id_get(task_id=test_preparation_job_id)
+    logger.info(f'Response status: {response.status}')
 
     err = None
     test_job_id = None
