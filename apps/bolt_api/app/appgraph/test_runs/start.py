@@ -6,10 +6,6 @@ from flask import current_app
 from services import const, gql_util, testruns
 
 
-from services.logger import setup_custom_logger
-logger = setup_custom_logger(__file__)
-
-
 class TestrunStartInterface(graphene.Interface):
     """Holds testrun_start response."""
     execution_id = graphene.UUID(description='id of started execution')
@@ -42,13 +38,9 @@ class TestrunStart(graphene.Mutation):
         execution_id, hasura_token = testruns.start(current_app.config, str(conf_id), user_id, no_cache)
 
         out = TestrunStartObject(execution_id=execution_id)
-        logger.info(f'DEBUG: type(out): {type(out)}')
-        logger.info(f'DEBUG: execution_id = {execution_id}, hasura_token = {hasura_token}')
-        # TODO: delete logger after successfull debuging
         if debug and role == const.ROLE_ADMIN:
             os.unsetenv('SELFSIGNED_TOKEN_FOR_TESTRUNNER')
 
         if role == const.ROLE_ADMIN:
             out.hasura_token = hasura_token
-        logger.info(f'DEBUG: mutate() method for TestrunStart completed')
         return out

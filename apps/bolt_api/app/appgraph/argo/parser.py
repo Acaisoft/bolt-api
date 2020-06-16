@@ -121,7 +121,6 @@ class ArgoFlowParser(object):
 
     def get_current_status_for(self, stage):
         try:
-            logger.debug(f'DEBUG: self.current_statuses = {self.current_statuses}')
             status = [status for status in self.current_statuses if stage == status['stage']][0]['msg']
             logger.info(f'Extracted current status {status} for {stage}')
             return status
@@ -131,14 +130,10 @@ class ArgoFlowParser(object):
 
     def parse_stage_status_for(self, stage, data):
         current_status = self.get_current_status_for(stage)
-        logger.debug(f'DEBUG: current_status = {current_status}')
         phase = data.get('phase', 'UNKNOWN').upper()
-        logger.debug(f'DEBUG: phase = {phase}')
         allowed_statuses = self.status_mapper[current_status]
-        logger.debug(f'DEBUG: allowed_statuses = {allowed_statuses}')
         if phase != current_status and phase in allowed_statuses:
             level = 'error' if phase in (Status.FAILED.value, Status.ERROR.value) else 'info'
-            logger.debug(f'DEBUG: level = {level}')
             self.insert_execution_stage_log(stage, level, phase)
 
     def parse_common_status(self, flow_status, build_status, monitoring_status, load_tests_status):
