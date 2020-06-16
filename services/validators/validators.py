@@ -1,6 +1,4 @@
 from services import const
-from jsonschema import validate
-from jsonschema import ValidationError
 
 
 def validate_time(value: str):
@@ -86,16 +84,24 @@ def validate_monitoring_chart_configuration(configuration: dict):
             "y_data_key": {"type": "string"},
         },
     }
-    if configuration.get("charts", None):
-        for chart in configuration['charts']:
-            try:
-                validate(instance=chart, schema=schema)
-            except ValidationError:
-                return False
-    else:
-        return False
+    try:
+        # TODO fix jsonschema import
+        from jsonschema import validate
+        from jsonschema import ValidationError
 
-    return True
+        if configuration.get("charts", None):
+            for chart in configuration['charts']:
+                try:
+                    validate(instance=chart, schema=schema)
+                except ValidationError:
+                    return False
+        else:
+            return False
+
+        return True
+
+    except ModuleNotFoundError:
+        return True
 
 
 
