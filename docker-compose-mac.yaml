@@ -2,6 +2,10 @@ version: '3.6'
 services:
   postgres:
     image: postgres
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
     restart: always
     ports:
       - "5432:5432"
@@ -49,7 +53,7 @@ services:
       - "redis"
     restart: always
     environment:
-      HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:@postgres:5432/postgres
+      HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:postgres@postgres:5432/postgres
       HASURA_GRAPHQL_ENABLE_CONSOLE: "true" # set to "false" to disable console
       HASURA_GRAPHQL_MIGRATIONS_DIR:
       ## execute ./toos/encode_jwt_secret.py to obtain HASURA_GRAPHQL_JWT_SECRET from Flask config
@@ -60,6 +64,7 @@ services:
       BOLT_API_EXECUTION_STATE_CHANGE: http://api:5000/webhooks/execution/update
       BOLT_API_CONFIGURATION_PARAM_CHANGE: http://api:5000/webhooks/configuration_param/update
       BOLT_API_EXECUTION_REQUESTS_INSERT: http://api:5000/webhooks/execution_requests/insert
+      BOLT_API_EXECUTION_STAGE_LOG_INSERT: http://api:5000/webhooks/execution_stage_log/insert
     volumes:
       - ./subsystems/hasura/migrations:/hasura-migrations
   api:
