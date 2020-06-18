@@ -124,6 +124,7 @@ def start(app_config, conf_id, user_id, no_cache):
             ][0]
         except IndexError:
             branch = 'master'
+
         workflow_data = {
             'tenant_id': '1',
             'project_id': test_config['project_id'],
@@ -142,8 +143,19 @@ def start(app_config, conf_id, user_id, no_cache):
         if test_config['has_pre_test']:
             workflow_data['job_pre_start'] = {'env_vars': {}}
         # load tests
+        try:
+            users = [
+                parameter['value']
+                for parameter in test_config['configuration_parameters']
+                if parameter['parameter']['name'] == 'users'
+            ][0]
+        except IndexError:
+            users = 0
+
         if test_config['has_load_tests']:
-            workflow_data['job_load_tests'] = {'env_vars': {}, 'workers': test_config['instances']}
+            workflow_data['job_load_tests'] = {
+                'env_vars': {}, 'workers': test_config['instances'], 'users': users,
+            }
         # monitoring
         if test_config['has_monitoring']:
             workflow_data['job_monitoring'] = {'env_vars': {}}
