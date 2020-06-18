@@ -118,10 +118,17 @@ def start(app_config, conf_id, user_id, no_cache):
     if code_source == const.CONF_SOURCE_REPO:
         hasura_token, execution_id = hasura_token_for_testrunner(app_config)
         # common workflow fields
+        try:
+            branch = [
+                envvar['value'] for envvar in test_config['configuration_envvars'] if envvar['name'] == 'branch'
+            ][0]
+        except IndexError:
+            branch = 'master'
         workflow_data = {
             'tenant_id': '1',
             'project_id': test_config['project_id'],
             'repository_url': test_config['test_source']['repository']['url'],
+            'branch': branch,
             'execution_id': execution_id,
             'auth_token': hasura_token,
             'duration_seconds': 123,
