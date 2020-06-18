@@ -120,7 +120,7 @@ def start(app_config, conf_id, user_id, no_cache):
         # common workflow fields
         try:
             branch = [
-                envvar['value'] for envvar in test_config['configuration_envvars'] if envvar['name'] == 'branch'
+                envvar['value'] for envvar in test_config['configuration_envvars'] if envvar['name'] == 'BRANCH'
             ][0]
         except IndexError:
             branch = 'master'
