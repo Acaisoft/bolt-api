@@ -154,7 +154,7 @@ def start(app_config, conf_id, user_id, no_cache):
 
         if test_config['has_load_tests']:
             workflow_data['job_load_tests'] = {
-                'env_vars': {}, 'workers': test_config['instances'], 'users': users,
+                'env_vars': {}, 'workers': test_config['instances'], 'users': int(users),
             }
         # monitoring
         if test_config['has_monitoring']:
