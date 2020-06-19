@@ -216,6 +216,6 @@ def get_host_and_port(parameters: list) -> tuple:
     try:
         host, port = testrun_url.split(":")
     except ValueError:
-        return testrun_url.lstrip('http://').lstrip('https://'), None
+        return testrun_url, None
     else:
-        return host.lstrip('http://').lstrip('https://'), int(port)
+        return host, int(port)
