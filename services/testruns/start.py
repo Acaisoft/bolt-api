@@ -143,18 +143,14 @@ def start(app_config, conf_id, user_id, no_cache):
         if test_config['has_pre_test']:
             workflow_data['job_pre_start'] = {'env_vars': {}}
         # load tests
-        try:
-            users = [
-                parameter['value']
-                for parameter in test_config['configuration_parameters']
-                if parameter['parameter']['name'] == 'users'
-            ][0]
-        except IndexError:
-            users = 0
-
         if test_config['has_load_tests']:
+            host, port = get_host_and_port(test_config['configuration_parameters'])
             workflow_data['job_load_tests'] = {
-                'env_vars': {}, 'workers': test_config['instances'], 'users': int(users),
+                'env_vars': {},
+                'workers': test_config['instances'],
+                'users': get_users_num(test_config['configuration_parameters']),
+                'host': host,
+                'port': port,
             }
         # monitoring
         if test_config['has_monitoring']:
@@ -193,3 +189,35 @@ def start(app_config, conf_id, user_id, no_cache):
         }''', variable_values={'data': initial_state})
     assert exec_result['insert_execution'], f'execution creation failed ({str(exec_result)}'
     return str(execution_id), hasura_token
+
+
+def get_users_num(parameters: list) -> int:
+    users = [
+        parameter['value']
+        for parameter in parameters
+        if parameter['parameter']['name'] == 'users'
+    ]
+    try:
+        return int(users[0])
+    except IndexError:
+        return 0
+
+
+def get_host_and_port(parameters: list) -> tuple:
+    try:
+        testrun_url = [
+            parameter['value']
+            for parameter in parameters
+            if parameter['parameter']['name'] == 'host'
+        ][0]
+    except IndexError:
+        return None, None
+
+    testrun_url = testrun_url.lstrip('http://').lstrip('https://')
+    try:
+        host, port = testrun_url.split(":")
+        port = int(port)
+    except ValueError:
+        return testrun_url, None
+    else:
+        return host, port
