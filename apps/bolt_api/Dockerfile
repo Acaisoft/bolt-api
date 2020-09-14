@@ -1,7 +1,7 @@
 FROM python:3.6.8-alpine3.9 as base
 RUN apk --update upgrade
 RUN apk add --no-cache libstdc++ libjpeg zlib
-RUN pip install --no-cache-dir -U pip
+# RUN pip install --no-cache-dir -U pip
 # ~20 MB
 
 FROM base as builder
