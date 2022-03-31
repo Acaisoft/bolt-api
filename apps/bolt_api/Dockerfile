@@ -1,4 +1,4 @@
-FROM python:3.6.8-alpine3.9 as base
+FROM python:3.10.4-alpine3.15 as base
 RUN apk --update upgrade
 RUN apk add --no-cache libstdc++ libjpeg zlib
 # RUN pip install --no-cache-dir -U pip
@@ -17,10 +17,10 @@ RUN curl -L https://github.com/argoproj/argo/releases/download/v2.3.0/argo-linux
 # ~205 MB
 # core requirements for hasura and graphql
 COPY apps/bolt_api/requirements/core.txt /requirements_core.txt
-RUN pip install --install-option="--prefix=/install" -r /requirements_core.txt
+RUN pip install --prefix=/install -r /requirements_core.txt
 # remove if deploying upload processor separately
 COPY apps/bolt_api/requirements/upload_processing.txt /requirements_upload_processing.txt
-RUN pip install --install-option="--prefix=/install" -r /requirements_upload_processing.txt
+RUN pip install --prefix=/install -r /requirements_upload_processing.txt
 RUN apk del .build-deps
 
 FROM base
