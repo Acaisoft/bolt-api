@@ -1,4 +1,4 @@
-FROM python:3.6.8-alpine3.9 as base
+FROM python:3.10.4-alpine3.15 as base
 RUN apk --update upgrade
 
 FROM base as metrics_builder
@@ -10,7 +10,7 @@ RUN apk add --no-cache openssl-dev
 RUN apk add --no-cache --virtual .build-deps gcc musl-dev libffi-dev
 COPY apps/bolt_metrics_api/requirements/core.txt /requirements.txt
 # RUN pip install --no-cache-dir -U pip
-RUN pip install --install-option="--prefix=/install" -r /requirements.txt
+RUN pip install --prefix=/install -r /requirements.txt
 RUN apk del .build-deps gcc musl-dev libffi-dev
 
 FROM base

@@ -8,7 +8,7 @@ from services.logger import setup_custom_logger
 
 logger = setup_custom_logger(__file__)
 
-grafana_bp = Blueprint('exports.grafana_simple_json', __name__)
+grafana_bp = Blueprint('grafana_simple_json', __name__)
 
 
 @grafana_bp.route('/<string:request_token>/grafana', methods=['GET'])

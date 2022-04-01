@@ -1,9 +1,9 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name='boltapi',
     version='0.2',
-    packages=['bolt_api', 'bolt_api.upstream', 'bolt_api.upstream.tests', 'dev_setup',],
+    packages=find_packages('upstream', 'upstream.tests', 'dev_setup'),
     url='https://bitbucket.org/acaisoft/bolt-api/',
     license='',
     author='piotr',

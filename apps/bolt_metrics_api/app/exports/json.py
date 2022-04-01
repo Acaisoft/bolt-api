@@ -8,7 +8,7 @@ from services.logger import setup_custom_logger
 
 logger = setup_custom_logger(__file__)
 
-json_bp = Blueprint('exports.json', __name__)
+json_bp = Blueprint('json', __name__)
 
 
 @json_bp.route('/<string:request_token>/json', methods=['GET'])
