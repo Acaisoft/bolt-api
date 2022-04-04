@@ -45,7 +45,8 @@ services:
       - /var/lib/docker/:/var/lib/docker:ro
   hasura:
 #    image: hasura/graphql-engine:v1.0.0-alpha44
-    image: hasura/graphql-engine:v1.0.0-alpha44.cli-migrations
+#    image: hasura/graphql-engine:v1.0.0-alpha44.cli-migrations
+    image: hasura/graphql-engine:v2.4.0
     ports:
       - "8080:8080"
     depends_on:
