@@ -9,7 +9,7 @@ services:
     restart: on-failure
   postgres:
 #    image: postgres:10.9
-    image: postgres
+    image: postgres:14.2
     restart: always
     ports:
       - "5432:5432"
