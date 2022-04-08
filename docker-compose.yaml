@@ -55,7 +55,7 @@ services:
   hasura:
 #    image: hasura/graphql-engine:v1.0.0-alpha44
 #    image: hasura/graphql-engine:v1.0.0-beta.2.cli-migrations
-    image: hasura/graphql-engine:v2.4.0.cli-migrations-v2
+    image: hasura/graphql-engine:v2.4.0.cli-migrations-v3
     ports:
       - "8080:8080"
     depends_on:
