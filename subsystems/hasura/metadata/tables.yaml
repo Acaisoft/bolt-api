@@ -1,0 +1,3174 @@
+- table: project
+  object_relationships: []
+  array_relationships:
+  - using:
+      foreign_key_constraint_on:
+        column: project_id
+        table: user_registration_token
+    name: user_registration_tokens
+    comment: null
+  - using:
+      foreign_key_constraint_on:
+        column: project_id
+        table: repository
+    name: repositories
+    comment: null
+  - using:
+      foreign_key_constraint_on:
+        column: project_id
+        table: test_source
+    name: test_sources
+    comment: null
+  - using:
+      foreign_key_constraint_on:
+        column: project_id
+        table: configuration
+    name: configurations
+    comment: null
+  - using:
+      foreign_key_constraint_on:
+        column: project_id
+        table: user_project
+    name: userProjects
+    comment: null
+  insert_permissions: []
+  select_permissions:
+  - role: reader
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - id
+      - name
+      - description
+      - image_url
+      - is_deleted
+      - created_by_id
+      filter:
+        _and:
+        - userProjects:
+            user_id:
+              _eq: X-Hasura-User-Id
+        - is_deleted:
+            _eq: false
+  - role: tester
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - id
+      - name
+      - description
+      - image_url
+      - is_deleted
+      - created_by_id
+      filter:
+        _and:
+        - userProjects:
+            user_id:
+              _eq: X-Hasura-User-Id
+        - is_deleted:
+            _eq: false
+  - role: tenantadmin
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - id
+      - name
+      - description
+      - image_url
+      - is_deleted
+      - created_by_id
+      filter:
+        _and:
+        - userProjects:
+            user_id:
+              _eq: X-Hasura-User-Id
+        - is_deleted:
+            _eq: false
+  - role: manager
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - id
+      - name
+      - description
+      - image_url
+      - is_deleted
+      - created_by_id
+      filter:
+        _and:
+        - userProjects:
+            user_id:
+              _eq: X-Hasura-User-Id
+        - is_deleted:
+            _eq: false
+  update_permissions: []
+  delete_permissions: []
+  event_triggers: []
+- table: test_creator
+  object_relationships:
+  - using:
+      foreign_key_constraint_on: project_id
+    name: project
+    comment: null
+  array_relationships:
+  - using:
+      foreign_key_constraint_on:
+        column: test_creator_id
+        table: test_source
+    name: test_sources
+    comment: null
+  insert_permissions: []
+  select_permissions:
+  - role: reader
+    comment: null
+    permission:
+      allow_aggregations: false
+      columns:
+      - created_at
+      - created_by_id
+      - data
+      - id
+      - max_wait
+      - min_wait
+      - name
+      - performed
+      - previous_version_id
+      - project_id
+      - test_source_id
+      - type_slug
+      filter:
+        _and:
+        - test_sources:
+            is_deleted:
+              _eq: false
+        - project:
+            is_deleted:
+              _eq: false
+        - project:
+            userProjects:
+              user_id:
+                _eq: X-Hasura-User-Id
+  - role: testrunner
+    comment: null
+    permission:
+      allow_aggregations: false
+      columns:
+      - id
+      - data
+      - created_by_id
+      - created_at
+      - max_wait
+      - min_wait
+      - name
+      - project_id
+      - previous_version_id
+      - performed
+      - test_source_id
+      filter:
+        test_sources:
+          configurations:
+            executions:
+              id:
+                _eq: X-Hasura-Testruner-Id
+  - role: tester
+    comment: null
+    permission:
+      allow_aggregations: false
+      columns:
+      - created_at
+      - created_by_id
+      - data
+      - id
+      - max_wait
+      - min_wait
+      - name
+      - performed
+      - previous_version_id
+      - project_id
+      - test_source_id
+      - type_slug
+      filter:
+        _and:
+        - test_sources:
+            is_deleted:
+              _eq: false
+        - project:
+            is_deleted:
+              _eq: false
+        - project:
+            userProjects:
+              user_id:
+                _eq: X-Hasura-User-Id
+  - role: tenantadmin
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - created_at
+      - created_by_id
+      - data
+      - id
+      - max_wait
+      - min_wait
+      - name
+      - performed
+      - previous_version_id
+      - project_id
+      - test_source_id
+      - type_slug
+      filter:
+        _and:
+        - test_sources:
+            is_deleted:
+              _eq: false
+        - project:
+            is_deleted:
+              _eq: false
+        - project:
+            userProjects:
+              user_id:
+                _eq: X-Hasura-User-Id
+  - role: manager
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - created_at
+      - created_by_id
+      - data
+      - id
+      - max_wait
+      - min_wait
+      - name
+      - performed
+      - previous_version_id
+      - project_id
+      - test_source_id
+      - type_slug
+      filter:
+        _and:
+        - test_sources:
+            is_deleted:
+              _eq: false
+        - project:
+            is_deleted:
+              _eq: false
+        - project:
+            userProjects:
+              user_id:
+                _eq: X-Hasura-User-Id
+  update_permissions: []
+  delete_permissions: []
+  event_triggers: []
+- table: argo_execution_log
+  object_relationships: []
+  array_relationships: []
+  insert_permissions:
+  - role: testrunner
+    comment: null
+    permission:
+      set: {}
+      check: {}
+      columns:
+      - argo_id
+      - created_at
+      - data
+      - id
+  - role: manager
+    comment: null
+    permission:
+      set: {}
+      check: {}
+      columns:
+      - argo_id
+      - created_at
+      - data
+      - id
+  - role: reader
+    comment: null
+    permission:
+      set: {}
+      check: {}
+      columns:
+      - argo_id
+      - created_at
+      - data
+      - id
+  - role: tenantadmin
+    comment: null
+    permission:
+      set: {}
+      check: {}
+      columns:
+      - argo_id
+      - created_at
+      - data
+      - id
+  - role: tester
+    comment: null
+    permission:
+      set: {}
+      check: {}
+      columns:
+      - argo_id
+      - created_at
+      - data
+      - id
+  select_permissions:
+  - role: manager
+    comment: null
+    permission:
+      allow_aggregations: false
+      columns:
+      - argo_id
+      - created_at
+      - data
+      - id
+      filter: {}
+  - role: reader
+    comment: null
+    permission:
+      allow_aggregations: false
+      columns:
+      - argo_id
+      - created_at
+      - data
+      - id
+      filter: {}
+  - role: tenantadmin
+    comment: null
+    permission:
+      allow_aggregations: false
+      columns:
+      - argo_id
+      - created_at
+      - data
+      - id
+      filter: {}
+  - role: tester
+    comment: null
+    permission:
+      allow_aggregations: false
+      columns:
+      - argo_id
+      - created_at
+      - data
+      - id
+      filter: {}
+  - role: testrunner
+    comment: null
+    permission:
+      allow_aggregations: false
+      columns:
+      - argo_id
+      - created_at
+      - data
+      - id
+      filter: {}
+  update_permissions: []
+  delete_permissions: []
+  event_triggers: []
+- table: configuration_parameter
+  object_relationships:
+  - using:
+      foreign_key_constraint_on: parameter_slug
+    name: parameter
+    comment: null
+  - using:
+      foreign_key_constraint_on: configuration_id
+    name: configuration
+    comment: null
+  array_relationships: []
+  insert_permissions:
+  - role: manager
+    comment: null
+    permission:
+      set: {}
+      check:
+        configuration:
+          project:
+            userProjects:
+              user_id:
+                _eq: X-HASURA-USER-ID
+      columns:
+      - configuration_id
+      - parameter_slug
+      - value
+  select_permissions:
+  - role: testrunner
+    comment: null
+    permission:
+      allow_aggregations: false
+      columns:
+      - id
+      - configuration_id
+      - value
+      - parameter_slug
+      filter:
+        configuration:
+          executions:
+            id:
+              _eq: X-Hasura-Testruner-Id
+  - role: reader
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - configuration_id
+      - id
+      - parameter_slug
+      - value
+      filter:
+        _and:
+        - configuration:
+            is_deleted:
+              _eq: false
+        - configuration:
+            project:
+              is_deleted:
+                _eq: false
+        - configuration:
+            project:
+              userProjects:
+                user_id:
+                  _eq: X-Hasura-User-Id
+  - role: tester
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - configuration_id
+      - id
+      - parameter_slug
+      - value
+      filter:
+        _and:
+        - configuration:
+            is_deleted:
+              _eq: false
+        - configuration:
+            project:
+              is_deleted:
+                _eq: false
+        - configuration:
+            project:
+              userProjects:
+                user_id:
+                  _eq: X-Hasura-User-Id
+  - role: tenantadmin
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - id
+      - configuration_id
+      - value
+      - parameter_slug
+      filter:
+        _and:
+        - configuration:
+            is_deleted:
+              _eq: false
+        - configuration:
+            project:
+              is_deleted:
+                _eq: false
+        - configuration:
+            project:
+              userProjects:
+                user_id:
+                  _eq: X-Hasura-User-Id
+  - role: manager
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - id
+      - configuration_id
+      - value
+      - parameter_slug
+      filter:
+        _and:
+        - configuration:
+            is_deleted:
+              _eq: false
+        - configuration:
+            project:
+              is_deleted:
+                _eq: false
+        - configuration:
+            project:
+              userProjects:
+                user_id:
+                  _eq: X-Hasura-User-Id
+  update_permissions:
+  - role: manager
+    comment: null
+    permission:
+      columns:
+      - value
+      filter:
+        configuration:
+          project:
+            userProjects:
+              user_id:
+                _eq: X-HASURA-USER-ID
+  delete_permissions:
+  - role: manager
+    comment: null
+    permission:
+      filter:
+        configuration:
+          project:
+            userProjects:
+              user_id:
+                _eq: X-HASURA-USER-ID
+  event_triggers:
+  - webhook_from_env: BOLT_API_CONFIGURATION_PARAM_CHANGE
+    headers: []
+    name: BOLT_API_CONFIGURATION_PARAM_CHANGE
+    definition:
+      update:
+        columns:
+        - id
+        - configuration_id
+        - value
+        - parameter_slug
+    retry_conf:
+      timeout_sec: 60
+      num_retries: 0
+      interval_sec: 10
+- table: execution_errors
+  object_relationships:
+  - using:
+      foreign_key_constraint_on: execution_id
+    name: execution
+    comment: null
+  array_relationships: []
+  insert_permissions:
+  - role: testrunner
+    comment: null
+    permission:
+      set:
+        execution_id: x-hasura-Testruner-Id
+      check: {}
+      columns:
+      - id
+      - execution_id
+      - timestamp
+      - identifier
+      - method
+      - name
+      - exception_data
+      - number_of_occurrences
+  select_permissions:
+  - role: manager
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - id
+      - execution_id
+      - timestamp
+      - identifier
+      - method
+      - name
+      - exception_data
+      - number_of_occurrences
+      filter: {}
+  - role: reader
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - id
+      - number_of_occurrences
+      - exception_data
+      - identifier
+      - method
+      - name
+      - timestamp
+      - execution_id
+      filter: {}
+  - role: tenantadmin
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - id
+      - number_of_occurrences
+      - exception_data
+      - identifier
+      - method
+      - name
+      - timestamp
+      - execution_id
+      filter: {}
+  - role: tester
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - id
+      - number_of_occurrences
+      - exception_data
+      - identifier
+      - method
+      - name
+      - timestamp
+      - execution_id
+      filter: {}
+  update_permissions: []
+  delete_permissions: []
+  event_triggers: []
+- table: execution_instance
+  object_relationships:
+  - using:
+      foreign_key_constraint_on: execution_id
+    name: execution
+    comment: null
+  array_relationships: []
+  insert_permissions:
+  - role: testrunner
+    comment: null
+    permission:
+      set:
+        execution_id: x-hasura-Testruner-Id
+      check:
+        execution_id:
+          _eq: X-Hasura-Testruner-Id
+      columns:
+      - created_at
+      - execution_id
+      - expect_slaves
+      - host
+      - instance_type
+      - job_id
+      - port
+      - status
+      - updated_at
+  select_permissions:
+  - role: testrunner
+    comment: null
+    permission:
+      allow_aggregations: false
+      columns:
+      - created_at
+      - execution_id
+      - expect_slaves
+      - host
+      - id
+      - instance_type
+      - job_id
+      - port
+      - status
+      - updated_at
+      filter:
+        execution_id:
+          _eq: X-Hasura-Testruner-Id
+  update_permissions:
+  - role: testrunner
+    comment: null
+    permission:
+      set: {}
+      columns:
+      - created_at
+      - expect_slaves
+      - host
+      - instance_type
+      - job_id
+      - port
+      - status
+      - updated_at
+      filter:
+        execution_id:
+          _eq: X-Hasura-Testruner-Id
+  delete_permissions: []
+  event_triggers: []
+- table: execution_request_totals
+  object_relationships:
+  - using:
+      foreign_key_constraint_on: execution_id
+    name: execution
+    comment: null
+  array_relationships: []
+  insert_permissions: []
+  select_permissions:
+  - role: manager
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - execution_id
+      - timestamp
+      - method
+      - name
+      - num_requests
+      - num_failures
+      - median_response_time
+      - average_response_time
+      - min_response_time
+      - max_response_time
+      - average_content_size
+      - requests_per_second
+      - identifier
+      - min_content_size
+      - max_content_size
+      filter:
+        _and:
+        - execution:
+            configuration:
+              project:
+                userProjects:
+                  user_id:
+                    _eq: X-Hasura-User-Id
+        - execution:
+            configuration:
+              project:
+                is_deleted:
+                  _eq: false
+  - role: reader
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - execution_id
+      - timestamp
+      - method
+      - name
+      - num_requests
+      - num_failures
+      - median_response_time
+      - average_response_time
+      - min_response_time
+      - max_response_time
+      - average_content_size
+      - requests_per_second
+      - identifier
+      - min_content_size
+      - max_content_size
+      filter:
+        _and:
+        - execution:
+            configuration:
+              project:
+                userProjects:
+                  user_id:
+                    _eq: X-Hasura-User-Id
+        - execution:
+            configuration:
+              project:
+                is_deleted:
+                  _eq: false
+  - role: tenantadmin
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - average_content_size
+      - average_response_time
+      - execution_id
+      - identifier
+      - max_content_size
+      - max_response_time
+      - median_response_time
+      - method
+      - min_content_size
+      - min_response_time
+      - name
+      - num_failures
+      - num_requests
+      - requests_per_second
+      - timestamp
+      filter:
+        _and:
+        - execution:
+            configuration:
+              project:
+                userProjects:
+                  user_id:
+                    _eq: X-Hasura-User-Id
+        - execution:
+            configuration:
+              project:
+                is_deleted:
+                  _eq: false
+  - role: tester
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - average_content_size
+      - average_response_time
+      - execution_id
+      - identifier
+      - max_content_size
+      - max_response_time
+      - median_response_time
+      - method
+      - min_content_size
+      - min_response_time
+      - name
+      - num_failures
+      - num_requests
+      - requests_per_second
+      - timestamp
+      filter:
+        _and:
+        - execution:
+            configuration:
+              project:
+                userProjects:
+                  user_id:
+                    _eq: X-Hasura-User-Id
+        - execution:
+            configuration:
+              project:
+                is_deleted:
+                  _eq: false
+  update_permissions: []
+  delete_permissions: []
+  event_triggers: []
+- table: extension_params
+  object_relationships:
+  - using:
+      foreign_key_constraint_on: configuration_extension_id
+    name: configuration_extension
+    comment: null
+  array_relationships: []
+  insert_permissions: []
+  select_permissions: []
+  update_permissions: []
+  delete_permissions: []
+  event_triggers: []
+- table: result_aggregate
+  object_relationships:
+  - using:
+      foreign_key_constraint_on: execution_id
+    name: execution
+    comment: null
+  array_relationships: []
+  insert_permissions:
+  - role: testrunner
+    comment: null
+    permission:
+      set:
+        execution_id: x-hasura-Testruner-Id
+      check:
+        execution:
+          id:
+            _eq: X-Hasura-Testruner-Id
+      columns:
+      - average_response_size
+      - average_response_time
+      - number_of_errors
+      - number_of_fails
+      - number_of_successes
+      - number_of_users
+      - timestamp
+  select_permissions:
+  - role: tester
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - average_response_size
+      - average_response_time
+      - execution_id
+      - id
+      - number_of_errors
+      - number_of_fails
+      - number_of_successes
+      - number_of_users
+      - timestamp
+      filter:
+        _and:
+        - execution:
+            configuration:
+              project:
+                userProjects:
+                  user_id:
+                    _eq: X-Hasura-User-Id
+        - execution:
+            configuration:
+              project:
+                is_deleted:
+                  _eq: false
+  - role: reader
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - average_response_size
+      - average_response_time
+      - execution_id
+      - id
+      - number_of_errors
+      - number_of_fails
+      - number_of_successes
+      - number_of_users
+      - timestamp
+      filter:
+        _and:
+        - execution:
+            configuration:
+              project:
+                userProjects:
+                  user_id:
+                    _eq: X-Hasura-User-Id
+        - execution:
+            configuration:
+              project:
+                is_deleted:
+                  _eq: false
+  - role: tenantadmin
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - average_response_size
+      - average_response_time
+      - execution_id
+      - id
+      - number_of_errors
+      - number_of_fails
+      - number_of_successes
+      - number_of_users
+      - timestamp
+      filter:
+        _and:
+        - execution:
+            configuration:
+              project:
+                userProjects:
+                  user_id:
+                    _eq: X-Hasura-User-Id
+        - execution:
+            configuration:
+              project:
+                is_deleted:
+                  _eq: false
+  - role: manager
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - average_response_size
+      - average_response_time
+      - execution_id
+      - id
+      - number_of_errors
+      - number_of_fails
+      - number_of_successes
+      - number_of_users
+      - timestamp
+      filter:
+        _and:
+        - execution:
+            configuration:
+              project:
+                userProjects:
+                  user_id:
+                    _eq: X-Hasura-User-Id
+        - execution:
+            configuration:
+              project:
+                is_deleted:
+                  _eq: false
+  update_permissions: []
+  delete_permissions: []
+  event_triggers: []
+- table: execution_users
+  object_relationships:
+  - using:
+      foreign_key_constraint_on: execution_id
+    name: execution
+    comment: null
+  array_relationships: []
+  insert_permissions:
+  - role: testrunner
+    comment: null
+    permission:
+      set:
+        execution_id: x-hasura-Testruner-Id
+      check:
+        execution_id:
+          _eq: X-Hasura-Testruner-Id
+      columns:
+      - execution_id
+      - instance_id
+      - timestamp
+      - users_count
+  select_permissions:
+  - role: tester
+    comment: null
+    permission:
+      allow_aggregations: false
+      columns:
+      - execution_id
+      - id
+      - instance_id
+      - timestamp
+      - users_count
+      filter:
+        _and:
+        - execution:
+            configuration:
+              project:
+                userProjects:
+                  user_id:
+                    _eq: X-Hasura-User-Id
+        - execution:
+            configuration:
+              is_deleted:
+                _eq: false
+        - execution:
+            configuration:
+              project:
+                is_deleted:
+                  _eq: false
+  - role: reader
+    comment: null
+    permission:
+      allow_aggregations: false
+      columns:
+      - execution_id
+      - id
+      - instance_id
+      - timestamp
+      - users_count
+      filter:
+        _and:
+        - execution:
+            configuration:
+              project:
+                userProjects:
+                  user_id:
+                    _eq: X-Hasura-User-Id
+        - execution:
+            configuration:
+              is_deleted:
+                _eq: false
+        - execution:
+            configuration:
+              project:
+                is_deleted:
+                  _eq: false
+  - role: testrunner
+    comment: null
+    permission:
+      allow_aggregations: false
+      columns:
+      - execution_id
+      - id
+      - instance_id
+      - timestamp
+      - users_count
+      filter:
+        execution_id:
+          _eq: X-Hasura-Testruner-Id
+  - role: tenantadmin
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - execution_id
+      - timestamp
+      - users_count
+      - instance_id
+      - id
+      filter:
+        _and:
+        - execution:
+            configuration:
+              project:
+                userProjects:
+                  user_id:
+                    _eq: X-Hasura-User-Id
+        - execution:
+            configuration:
+              is_deleted:
+                _eq: false
+        - execution:
+            configuration:
+              project:
+                is_deleted:
+                  _eq: false
+  - role: manager
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - execution_id
+      - timestamp
+      - users_count
+      - instance_id
+      - id
+      filter:
+        _and:
+        - execution:
+            configuration:
+              project:
+                userProjects:
+                  user_id:
+                    _eq: X-Hasura-User-Id
+        - execution:
+            configuration:
+              is_deleted:
+                _eq: false
+        - execution:
+            configuration:
+              project:
+                is_deleted:
+                  _eq: false
+  update_permissions: []
+  delete_permissions: []
+  event_triggers: []
+- table: execution_distribution
+  object_relationships:
+  - using:
+      foreign_key_constraint_on: execution_id
+    name: execution
+    comment: null
+  array_relationships: []
+  insert_permissions:
+  - role: testrunner
+    comment: null
+    permission:
+      set:
+        execution_id: x-hasura-Testruner-Id
+      check: {}
+      columns:
+      - id
+      - execution_id
+      - timestamp
+      - identifier
+      - method
+      - name
+      - num_requests
+      - p50
+      - p66
+      - p75
+      - p80
+      - p90
+      - p95
+      - p98
+      - p99
+      - p100
+  select_permissions:
+  - role: reader
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - execution_id
+      - id
+      - identifier
+      - method
+      - name
+      - num_requests
+      - p100
+      - p50
+      - p66
+      - p75
+      - p80
+      - p90
+      - p95
+      - p98
+      - p99
+      - timestamp
+      filter:
+        _and:
+        - execution:
+            configuration:
+              project:
+                userProjects:
+                  user_id:
+                    _eq: X-Hasura-User-Id
+        - execution:
+            configuration:
+              is_deleted:
+                _eq: false
+        - execution:
+            configuration:
+              project:
+                is_deleted:
+                  _eq: false
+  - role: tester
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - execution_id
+      - id
+      - identifier
+      - method
+      - name
+      - num_requests
+      - p100
+      - p50
+      - p66
+      - p75
+      - p80
+      - p90
+      - p95
+      - p98
+      - p99
+      - timestamp
+      filter:
+        _and:
+        - execution:
+            configuration:
+              project:
+                userProjects:
+                  user_id:
+                    _eq: X-Hasura-User-Id
+        - execution:
+            configuration:
+              is_deleted:
+                _eq: false
+        - execution:
+            configuration:
+              project:
+                is_deleted:
+                  _eq: false
+  - role: tenantadmin
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - id
+      - execution_id
+      - timestamp
+      - identifier
+      - method
+      - name
+      - num_requests
+      - p50
+      - p66
+      - p75
+      - p80
+      - p90
+      - p95
+      - p98
+      - p99
+      - p100
+      filter:
+        _and:
+        - execution:
+            configuration:
+              project:
+                userProjects:
+                  user_id:
+                    _eq: X-Hasura-User-Id
+        - execution:
+            configuration:
+              is_deleted:
+                _eq: false
+        - execution:
+            configuration:
+              project:
+                is_deleted:
+                  _eq: false
+  - role: manager
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - id
+      - execution_id
+      - timestamp
+      - identifier
+      - method
+      - name
+      - num_requests
+      - p50
+      - p66
+      - p75
+      - p80
+      - p90
+      - p95
+      - p98
+      - p99
+      - p100
+      filter:
+        _and:
+        - execution:
+            configuration:
+              project:
+                userProjects:
+                  user_id:
+                    _eq: X-Hasura-User-Id
+        - execution:
+            configuration:
+              is_deleted:
+                _eq: false
+        - execution:
+            configuration:
+              project:
+                is_deleted:
+                  _eq: false
+  update_permissions: []
+  delete_permissions: []
+  event_triggers: []
+- table: execution_metrics_metadata
+  object_relationships:
+  - using:
+      foreign_key_constraint_on: execution_id
+    name: execution
+    comment: null
+  array_relationships: []
+  insert_permissions:
+  - role: testrunner
+    comment: null
+    permission:
+      set:
+        execution_id: x-hasura-Testrunner-Id
+      check:
+        execution:
+          id:
+            _eq: X-Hasura-Testrunner-Id
+      columns:
+      - chart_configuration
+  select_permissions:
+  - role: tester
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - chart_configuration
+      - execution_id
+      - id
+      filter:
+        _and:
+        - execution:
+            configuration:
+              is_deleted:
+                _eq: false
+        - execution:
+            configuration:
+              project:
+                is_deleted:
+                  _eq: false
+  - role: reader
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - chart_configuration
+      - execution_id
+      - id
+      filter:
+        _and:
+        - execution:
+            configuration:
+              is_deleted:
+                _eq: false
+        - execution:
+            configuration:
+              project:
+                is_deleted:
+                  _eq: false
+  - role: tenantadmin
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - chart_configuration
+      - execution_id
+      - id
+      filter:
+        _and:
+        - execution:
+            configuration:
+              is_deleted:
+                _eq: false
+        - execution:
+            configuration:
+              project:
+                is_deleted:
+                  _eq: false
+  - role: manager
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - chart_configuration
+      - execution_id
+      - id
+      filter:
+        _and:
+        - execution:
+            configuration:
+              is_deleted:
+                _eq: false
+        - execution:
+            configuration:
+              project:
+                is_deleted:
+                  _eq: false
+  update_permissions: []
+  delete_permissions: []
+  event_triggers: []
+- table: execution_export_token
+  object_relationships:
+  - using:
+      foreign_key_constraint_on: execution_id
+    name: execution
+    comment: null
+  - using:
+      foreign_key_constraint_on: project_id
+    name: project
+    comment: null
+  array_relationships: []
+  insert_permissions: []
+  select_permissions: []
+  update_permissions: []
+  delete_permissions: []
+  event_triggers: []
+- table: execution_metrics_data
+  object_relationships:
+  - using:
+      foreign_key_constraint_on: execution_id
+    name: execution
+    comment: null
+  array_relationships: []
+  insert_permissions:
+  - role: testrunner
+    comment: null
+    permission:
+      set:
+        execution_id: x-hasura-Testruner-Id
+      check: {}
+      columns:
+      - id
+      - execution_id
+      - timestamp
+      - data
+  select_permissions:
+  - role: reader
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - data
+      - execution_id
+      - id
+      - timestamp
+      filter:
+        _and:
+        - execution:
+            configuration:
+              is_deleted:
+                _eq: false
+        - execution:
+            configuration:
+              project:
+                is_deleted:
+                  _eq: false
+  - role: tester
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - data
+      - execution_id
+      - id
+      - timestamp
+      filter:
+        _and:
+        - execution:
+            configuration:
+              is_deleted:
+                _eq: false
+        - execution:
+            configuration:
+              project:
+                is_deleted:
+                  _eq: false
+  - role: tenantadmin
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - id
+      - execution_id
+      - timestamp
+      - data
+      filter:
+        _and:
+        - execution:
+            configuration:
+              is_deleted:
+                _eq: false
+        - execution:
+            configuration:
+              project:
+                is_deleted:
+                  _eq: false
+  - role: manager
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - id
+      - execution_id
+      - timestamp
+      - data
+      filter:
+        _and:
+        - execution:
+            configuration:
+              is_deleted:
+                _eq: false
+        - execution:
+            configuration:
+              project:
+                is_deleted:
+                  _eq: false
+  update_permissions: []
+  delete_permissions: []
+  event_triggers: []
+- table: configuration_extension
+  object_relationships:
+  - using:
+      foreign_key_constraint_on: configuration_id
+    name: configuration
+    comment: null
+  array_relationships:
+  - using:
+      foreign_key_constraint_on:
+        column: configuration_extension_id
+        table: extension_params
+    name: extension_params
+    comment: null
+  insert_permissions: []
+  select_permissions:
+  - role: tester
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - id
+      - configuration_id
+      - type
+      filter:
+        _and:
+        - configuration:
+            is_deleted:
+              _eq: false
+        - configuration:
+            project:
+              is_deleted:
+                _eq: false
+        - configuration:
+            project:
+              userProjects:
+                user_id:
+                  _eq: X-Hasura-User-Id
+  - role: reader
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - configuration_id
+      - id
+      - type
+      filter:
+        _and:
+        - configuration:
+            is_deleted:
+              _eq: false
+        - configuration:
+            project:
+              is_deleted:
+                _eq: false
+        - configuration:
+            project:
+              userProjects:
+                user_id:
+                  _eq: X-Hasura-User-Id
+  - role: manager
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns: []
+      filter:
+        _and:
+        - configuration:
+            is_deleted:
+              _eq: false
+        - configuration:
+            project:
+              is_deleted:
+                _eq: false
+        - configuration:
+            project:
+              userProjects:
+                user_id:
+                  _eq: X-Hasura-User-Id
+  - role: tenantadmin
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - configuration_id
+      - id
+      - type
+      filter:
+        _and:
+        - configuration:
+            is_deleted:
+              _eq: false
+        - configuration:
+            project:
+              is_deleted:
+                _eq: false
+        - configuration:
+            project:
+              userProjects:
+                user_id:
+                  _eq: X-Hasura-User-Id
+  update_permissions: []
+  delete_permissions: []
+  event_triggers: []
+- table: result_error
+  object_relationships:
+  - using:
+      foreign_key_constraint_on: execution_id
+    name: execution
+    comment: null
+  array_relationships: []
+  insert_permissions:
+  - role: testrunner
+    comment: null
+    permission:
+      set:
+        execution_id: x-hasura-Testruner-Id
+      check: {}
+      columns:
+      - error_type
+      - exception_data
+      - name
+      - number_of_occurrences
+  select_permissions:
+  - role: manager
+    comment: null
+    permission:
+      allow_aggregations: false
+      columns:
+      - error_type
+      - exception_data
+      - execution_id
+      - id
+      - name
+      - number_of_occurrences
+      filter:
+        execution:
+          configuration:
+            project:
+              userProjects:
+                user_id:
+                  _eq: X-HASURA-USER-ID
+  - role: reader
+    comment: null
+    permission:
+      allow_aggregations: false
+      columns:
+      - error_type
+      - exception_data
+      - execution_id
+      - id
+      - name
+      - number_of_occurrences
+      filter:
+        execution:
+          configuration:
+            project:
+              userProjects:
+                user_id:
+                  _eq: X-HASURA-USER-ID
+  - role: tenantadmin
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns: []
+      filter:
+        _and:
+        - execution:
+            configuration:
+              project:
+                userProjects:
+                  user_id:
+                    _eq: X-Hasura-User-Id
+        - execution:
+            configuration:
+              project:
+                is_deleted:
+                  _eq: false
+  update_permissions: []
+  delete_permissions: []
+  event_triggers: []
+- table: user_registration_token
+  object_relationships:
+  - using:
+      foreign_key_constraint_on: project_id
+    name: project
+    comment: null
+  array_relationships: []
+  insert_permissions: []
+  select_permissions: []
+  update_permissions: []
+  delete_permissions: []
+  event_triggers: []
+- table: execution_additional_data
+  object_relationships: []
+  array_relationships: []
+  insert_permissions:
+  - role: testrunner
+    comment: null
+    permission:
+      set:
+        execution_id: x-hasura-Testruner-Id
+      check:
+        execution_id:
+          _eq: X-Hasura-Testruner-Id
+      columns:
+      - created_at
+      - data
+      - execution_id
+      - id
+      - name
+      - slug
+  select_permissions: []
+  update_permissions: []
+  delete_permissions: []
+  event_triggers: []
+- table: user_project
+  object_relationships:
+  - using:
+      foreign_key_constraint_on: project_id
+    name: project
+    comment: null
+  array_relationships: []
+  insert_permissions: []
+  select_permissions:
+  - role: reader
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - id
+      - project_id
+      - user_id
+      filter:
+        user_id:
+          _eq: X-HASURA-USER-ID
+  - role: tester
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - id
+      - project_id
+      - user_id
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
+  - role: tenantadmin
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - id
+      - user_id
+      - project_id
+      filter:
+        user_id:
+          _eq: X-HASURA-USER-ID
+  - role: manager
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - id
+      - user_id
+      - project_id
+      filter:
+        user_id:
+          _eq: X-HASURA-USER-ID
+  update_permissions: []
+  delete_permissions: []
+  event_triggers: []
+- table: test_source
+  object_relationships:
+  - using:
+      foreign_key_constraint_on: project_id
+    name: project
+    comment: null
+  - using:
+      foreign_key_constraint_on: repository_id
+    name: repository
+    comment: null
+  - using:
+      foreign_key_constraint_on: test_creator_id
+    name: test_creator
+    comment: null
+  array_relationships:
+  - using:
+      foreign_key_constraint_on:
+        column: test_source_id
+        table: configuration
+    name: configurations
+    comment: null
+  insert_permissions: []
+  select_permissions:
+  - role: testrunner
+    comment: null
+    permission:
+      allow_aggregations: false
+      columns:
+      - id
+      - project_id
+      - source_type
+      - repository_id
+      - test_creator_id
+      filter:
+        configurations:
+          executions:
+            id:
+              _eq: X-Hasura-Testruner-Id
+  - role: reader
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - id
+      - project_id
+      - source_type
+      - repository_id
+      - test_creator_id
+      - is_deleted
+      filter:
+        _and:
+        - is_deleted:
+            _eq: false
+        - project:
+            is_deleted:
+              _eq: false
+        - project:
+            userProjects:
+              user_id:
+                _eq: X-Hasura-User-Id
+  - role: tester
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - id
+      - project_id
+      - source_type
+      - repository_id
+      - test_creator_id
+      - is_deleted
+      filter:
+        _and:
+        - is_deleted:
+            _eq: false
+        - project:
+            is_deleted:
+              _eq: false
+        - project:
+            userProjects:
+              user_id:
+                _eq: X-Hasura-User-Id
+  - role: tenantadmin
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - id
+      - project_id
+      - source_type
+      - repository_id
+      - test_creator_id
+      - is_deleted
+      filter:
+        _and:
+        - is_deleted:
+            _eq: false
+        - project:
+            is_deleted:
+              _eq: false
+        - project:
+            userProjects:
+              user_id:
+                _eq: X-Hasura-User-Id
+  - role: manager
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - id
+      - project_id
+      - source_type
+      - repository_id
+      - test_creator_id
+      - is_deleted
+      filter:
+        _and:
+        - is_deleted:
+            _eq: false
+        - project:
+            is_deleted:
+              _eq: false
+        - project:
+            userProjects:
+              user_id:
+                _eq: X-Hasura-User-Id
+  update_permissions: []
+  delete_permissions: []
+  event_triggers: []
+- table: configuration_envvars
+  object_relationships:
+  - using:
+      foreign_key_constraint_on: configuration_id
+    name: configuration
+    comment: null
+  array_relationships: []
+  insert_permissions: []
+  select_permissions:
+  - role: testrunner
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - configuration_id
+      - name
+      - value
+      filter:
+        configuration:
+          executions:
+            id:
+              _eq: X-Hasura-Testruner-Id
+  - role: reader
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - configuration_id
+      - name
+      - value
+      filter:
+        _and:
+        - configuration:
+            is_deleted:
+              _eq: false
+        - configuration:
+            project:
+              is_deleted:
+                _eq: false
+        - configuration:
+            project:
+              userProjects:
+                user_id:
+                  _eq: X-Hasura-User-Id
+  - role: tester
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - configuration_id
+      - name
+      - value
+      filter:
+        _and:
+        - configuration:
+            is_deleted:
+              _eq: false
+        - configuration:
+            project:
+              is_deleted:
+                _eq: false
+        - configuration:
+            project:
+              userProjects:
+                user_id:
+                  _eq: X-Hasura-User-Id
+  - role: manager
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - configuration_id
+      - name
+      - value
+      filter:
+        _and:
+        - configuration:
+            is_deleted:
+              _eq: false
+        - configuration:
+            project:
+              is_deleted:
+                _eq: false
+        - configuration:
+            project:
+              userProjects:
+                user_id:
+                  _eq: X-Hasura-User-Id
+  - role: tenantadmin
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - configuration_id
+      - name
+      - value
+      filter:
+        _and:
+        - configuration:
+            is_deleted:
+              _eq: false
+        - configuration:
+            project:
+              is_deleted:
+                _eq: false
+        - configuration:
+            project:
+              userProjects:
+                user_id:
+                  _eq: X-Hasura-User-Id
+  update_permissions: []
+  delete_permissions: []
+  event_triggers: []
+- table: parameter
+  object_relationships:
+  - using:
+      foreign_key_constraint_on: type_slug
+    name: configuration_type
+    comment: null
+  array_relationships:
+  - using:
+      foreign_key_constraint_on:
+        column: parameter_slug
+        table: configuration_parameter
+    name: configuration_parameter
+    comment: null
+  insert_permissions: []
+  select_permissions:
+  - role: manager
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - default_value
+      - id
+      - name
+      - param_name
+      - param_type
+      - slug_name
+      - type_slug
+      filter: {}
+  - role: testrunner
+    comment: null
+    permission:
+      allow_aggregations: false
+      columns:
+      - id
+      - name
+      - param_type
+      - default_value
+      - param_name
+      - type_slug
+      - slug_name
+      filter:
+        configuration_parameter:
+          configuration:
+            executions:
+              id:
+                _eq: X-Hasura-Testruner-Id
+  - role: reader
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - default_value
+      - id
+      - name
+      - param_name
+      - param_type
+      - slug_name
+      - type_slug
+      filter: {}
+  - role: tester
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - default_value
+      - id
+      - name
+      - param_name
+      - param_type
+      - slug_name
+      - type_slug
+      filter: {}
+  - role: tenantadmin
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - id
+      - name
+      - param_type
+      - default_value
+      - param_name
+      - type_slug
+      - slug_name
+      filter: {}
+  update_permissions: []
+  delete_permissions: []
+  event_triggers: []
+- table: repository
+  object_relationships:
+  - using:
+      foreign_key_constraint_on: project_id
+    name: project
+    comment: null
+  - using:
+      foreign_key_constraint_on: type_slug
+    name: configuration_type
+    comment: null
+  array_relationships:
+  - using:
+      foreign_key_constraint_on:
+        column: repository_id
+        table: test_source
+    name: test_sources
+    comment: null
+  insert_permissions: []
+  select_permissions:
+  - role: reader
+    comment: null
+    permission:
+      allow_aggregations: false
+      columns:
+      - created_by_id
+      - id
+      - is_deleted
+      - name
+      - performed
+      - project_id
+      - type_slug
+      - url
+      filter:
+        _and:
+        - project:
+            userProjects:
+              user_id:
+                _eq: X-Hasura-User-Id
+        - project:
+            is_deleted:
+              _eq: false
+        - is_deleted:
+            _eq: false
+  - role: tester
+    comment: null
+    permission:
+      allow_aggregations: false
+      columns:
+      - created_by_id
+      - id
+      - is_deleted
+      - name
+      - performed
+      - project_id
+      - type_slug
+      - url
+      filter:
+        _and:
+        - project:
+            userProjects:
+              user_id:
+                _eq: X-Hasura-User-Id
+        - project:
+            is_deleted:
+              _eq: false
+        - is_deleted:
+            _eq: false
+  - role: tenantadmin
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - id
+      - name
+      - url
+      - project_id
+      - performed
+      - created_by_id
+      - type_slug
+      - is_deleted
+      filter:
+        _and:
+        - project:
+            userProjects:
+              user_id:
+                _eq: X-Hasura-User-Id
+        - project:
+            is_deleted:
+              _eq: false
+        - is_deleted:
+            _eq: false
+  - role: manager
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - id
+      - name
+      - url
+      - project_id
+      - performed
+      - created_by_id
+      - type_slug
+      - is_deleted
+      filter:
+        _and:
+        - project:
+            userProjects:
+              user_id:
+                _eq: X-Hasura-User-Id
+        - project:
+            is_deleted:
+              _eq: false
+        - is_deleted:
+            _eq: false
+  update_permissions: []
+  delete_permissions: []
+  event_triggers: []
+- table: execution
+  object_relationships:
+  - using:
+      foreign_key_constraint_on: configuration_id
+    name: configuration
+    comment: null
+  array_relationships:
+  - using:
+      foreign_key_constraint_on:
+        column: execution_id
+        table: execution_additional_data
+    name: execution_additional_data
+    comment: null
+  - using:
+      foreign_key_constraint_on:
+        column: execution_id
+        table: execution_instance
+    name: execution_instances
+    comment: null
+  - using:
+      foreign_key_constraint_on:
+        column: execution_id
+        table: execution_users
+    name: execution_users
+    comment: null
+  - using:
+      foreign_key_constraint_on:
+        column: execution_id
+        table: execution_export_token
+    name: execution_export_tokens
+    comment: null
+  - using:
+      foreign_key_constraint_on:
+        column: execution_id
+        table: execution_distribution
+    name: execution_distributions
+    comment: null
+  - using:
+      foreign_key_constraint_on:
+        column: execution_id
+        table: execution_requests
+    name: execution_requests
+    comment: null
+  - using:
+      foreign_key_constraint_on:
+        column: execution_id
+        table: execution_errors
+    name: execution_errors
+    comment: null
+  - using:
+      foreign_key_constraint_on:
+        column: execution_id
+        table: execution_metrics_metadata
+    name: execution_metrics_metadata
+    comment: null
+  - using:
+      foreign_key_constraint_on:
+        column: execution_id
+        table: execution_stage_log
+    name: execution_stage_logs
+    comment: null
+  - using:
+      foreign_key_constraint_on:
+        column: execution_id
+        table: execution_metrics_data
+    name: execution_metrics_data
+    comment: null
+  - using:
+      foreign_key_constraint_on:
+        column: execution_id
+        table: execution_request_totals
+    name: execution_request_totals
+    comment: null
+  - using:
+      foreign_key_constraint_on:
+        column: execution_id
+        table: result_error
+    name: result_errors
+    comment: null
+  - using:
+      foreign_key_constraint_on:
+        column: execution_id
+        table: result_aggregate
+    name: result_aggregate
+    comment: null
+  insert_permissions: []
+  select_permissions:
+  - role: manager
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - argo_name
+      - commit_hash
+      - configuration_id
+      - configuration_snapshot
+      - created_by_id
+      - end
+      - end_locust
+      - failed_requests
+      - id
+      - passed_requests
+      - start
+      - start_locust
+      - status
+      - test_job_error
+      - test_job_id
+      - test_preparation_job_error
+      - test_preparation_job_id
+      - test_preparation_job_status
+      - test_preparation_job_statuscheck_timestamp
+      - total_requests
+      filter:
+        _and:
+        - configuration:
+            is_deleted:
+              _eq: false
+        - configuration:
+            project:
+              is_deleted:
+                _eq: false
+        - configuration:
+            project:
+              userProjects:
+                user_id:
+                  _eq: X-Hasura-User-Id
+  - role: reader
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - argo_name
+      - commit_hash
+      - configuration_id
+      - configuration_snapshot
+      - created_by_id
+      - end
+      - end_locust
+      - id
+      - start
+      - start_locust
+      - status
+      - test_job_error
+      - test_job_id
+      - test_preparation_job_error
+      - test_preparation_job_id
+      - test_preparation_job_status
+      - test_preparation_job_statuscheck_timestamp
+      filter:
+        _and:
+        - configuration:
+            is_deleted:
+              _eq: false
+        - configuration:
+            project:
+              is_deleted:
+                _eq: false
+        - configuration:
+            project:
+              userProjects:
+                user_id:
+                  _eq: X-Hasura-User-Id
+  - role: tenantadmin
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - argo_name
+      - commit_hash
+      - configuration_id
+      - configuration_snapshot
+      - created_by_id
+      - end
+      - end_locust
+      - failed_requests
+      - id
+      - passed_requests
+      - start
+      - start_locust
+      - status
+      - test_job_error
+      - test_job_id
+      - test_preparation_job_error
+      - test_preparation_job_id
+      - test_preparation_job_status
+      - test_preparation_job_statuscheck_timestamp
+      - total_requests
+      filter:
+        _and:
+        - configuration:
+            is_deleted:
+              _eq: false
+        - configuration:
+            project:
+              is_deleted:
+                _eq: false
+        - configuration:
+            project:
+              userProjects:
+                user_id:
+                  _eq: X-Hasura-User-Id
+  - role: tester
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - argo_name
+      - commit_hash
+      - configuration_id
+      - configuration_snapshot
+      - created_by_id
+      - end
+      - end_locust
+      - id
+      - start
+      - start_locust
+      - status
+      - test_job_error
+      - test_job_id
+      - test_preparation_job_error
+      - test_preparation_job_id
+      - test_preparation_job_status
+      - test_preparation_job_statuscheck_timestamp
+      filter:
+        _and:
+        - configuration:
+            is_deleted:
+              _eq: false
+        - configuration:
+            project:
+              is_deleted:
+                _eq: false
+        - configuration:
+            project:
+              userProjects:
+                user_id:
+                  _eq: X-Hasura-User-Id
+  - role: testrunner
+    comment: null
+    permission:
+      allow_aggregations: false
+      columns:
+      - argo_name
+      - commit_hash
+      - configuration_id
+      - configuration_snapshot
+      - created_by_id
+      - end
+      - id
+      - start
+      - status
+      - test_job_error
+      - test_job_id
+      - test_preparation_job_error
+      - test_preparation_job_id
+      - test_preparation_job_status
+      - test_preparation_job_statuscheck_timestamp
+      filter:
+        id:
+          _eq: X-Hasura-Testruner-Id
+  update_permissions:
+  - role: testrunner
+    comment: null
+    permission:
+      set: {}
+      columns:
+      - end
+      - end_locust
+      - start
+      - start_locust
+      - status
+      filter:
+        id:
+          _eq: X-Hasura-Testruner-Id
+  delete_permissions: []
+  event_triggers:
+  - webhook_from_env: BOLT_API_EXECUTION_STATE_CHANGE
+    headers: []
+    name: execution_update
+    definition:
+      update:
+        columns:
+        - status
+    retry_conf:
+      timeout_sec: 10
+      num_retries: 1
+      interval_sec: 5
+- table: execution_stage_log
+  object_relationships:
+  - using:
+      foreign_key_constraint_on: execution_id
+    name: execution
+    comment: null
+  array_relationships: []
+  insert_permissions:
+  - role: testrunner
+    comment: null
+    permission:
+      set:
+        execution_id: x-hasura-Testruner-Id
+      check: {}
+      columns:
+      - id
+      - timestamp
+      - stage
+      - level
+      - msg
+      - execution_id
+      - job_name
+  select_permissions:
+  - role: testrunner
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - execution_id
+      - id
+      - level
+      - msg
+      - stage
+      - timestamp
+      filter:
+        execution_id:
+          _eq: X-Hasura-Testrunner-Id
+  - role: reader
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - execution_id
+      - id
+      - level
+      - msg
+      - stage
+      - timestamp
+      filter:
+        _and:
+        - execution:
+            configuration:
+              is_deleted:
+                _eq: false
+        - execution:
+            configuration:
+              project:
+                is_deleted:
+                  _eq: false
+  - role: tester
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - execution_id
+      - id
+      - level
+      - msg
+      - stage
+      - timestamp
+      filter:
+        _and:
+        - execution:
+            configuration:
+              is_deleted:
+                _eq: false
+        - execution:
+            configuration:
+              project:
+                is_deleted:
+                  _eq: false
+  - role: tenantadmin
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - id
+      - timestamp
+      - stage
+      - level
+      - msg
+      - execution_id
+      - job_name
+      filter:
+        _and:
+        - execution:
+            configuration:
+              is_deleted:
+                _eq: false
+        - execution:
+            configuration:
+              project:
+                is_deleted:
+                  _eq: false
+  - role: manager
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - id
+      - timestamp
+      - stage
+      - level
+      - msg
+      - execution_id
+      - job_name
+      filter:
+        _and:
+        - execution:
+            configuration:
+              is_deleted:
+                _eq: false
+        - execution:
+            configuration:
+              project:
+                is_deleted:
+                  _eq: false
+  update_permissions: []
+  delete_permissions: []
+  event_triggers:
+  - webhook_from_env: BOLT_API_EXECUTION_STAGE_LOG_INSERT
+    headers: []
+    name: BOLT_API_EXECUTION_STAGE_LOG_INSERT
+    definition:
+      insert:
+        columns: '*'
+      enable_manual: false
+    retry_conf:
+      timeout_sec: 60
+      num_retries: 0
+      interval_sec: 10
+- table: execution_stage_graph
+  object_relationships: []
+  array_relationships: []
+  insert_permissions: []
+  select_permissions:
+  - role: manager
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - id
+      - execution_id
+      - data
+      - timestamp
+      filter: {}
+  - role: reader
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - timestamp
+      - data
+      - execution_id
+      - id
+      filter: {}
+  - role: tenantadmin
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - timestamp
+      - data
+      - execution_id
+      - id
+      filter: {}
+  - role: tester
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - timestamp
+      - data
+      - execution_id
+      - id
+      filter: {}
+  - role: testrunner
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - timestamp
+      - data
+      - execution_id
+      - id
+      filter: {}
+  update_permissions: []
+  delete_permissions: []
+  event_triggers: []
+- table: execution_requests
+  object_relationships:
+  - using:
+      foreign_key_constraint_on: execution_id
+    name: execution
+    comment: null
+  array_relationships: []
+  insert_permissions:
+  - role: testrunner
+    comment: null
+    permission:
+      set:
+        execution_id: x-hasura-Testruner-Id
+      check: {}
+      columns:
+      - id
+      - execution_id
+      - timestamp
+      - identifier
+      - method
+      - name
+      - num_requests
+      - num_failures
+      - median_response_time
+      - average_response_time
+      - min_response_time
+      - max_response_time
+      - average_content_size
+      - requests_per_second
+  select_permissions:
+  - role: reader
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - average_content_size
+      - average_response_time
+      - execution_id
+      - id
+      - identifier
+      - max_response_time
+      - median_response_time
+      - method
+      - min_response_time
+      - name
+      - num_failures
+      - num_requests
+      - requests_per_second
+      - timestamp
+      filter:
+        _and:
+        - execution:
+            configuration:
+              project:
+                userProjects:
+                  user_id:
+                    _eq: X-Hasura-User-Id
+        - execution:
+            configuration:
+              is_deleted:
+                _eq: false
+        - execution:
+            configuration:
+              project:
+                is_deleted:
+                  _eq: false
+  - role: tester
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - average_content_size
+      - average_response_time
+      - execution_id
+      - id
+      - identifier
+      - max_response_time
+      - median_response_time
+      - method
+      - min_response_time
+      - name
+      - num_failures
+      - num_requests
+      - requests_per_second
+      - timestamp
+      filter:
+        _and:
+        - execution:
+            configuration:
+              project:
+                userProjects:
+                  user_id:
+                    _eq: X-Hasura-User-Id
+        - execution:
+            configuration:
+              is_deleted:
+                _eq: false
+        - execution:
+            configuration:
+              project:
+                is_deleted:
+                  _eq: false
+  - role: tenantadmin
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - id
+      - execution_id
+      - timestamp
+      - identifier
+      - method
+      - name
+      - num_requests
+      - num_failures
+      - median_response_time
+      - average_response_time
+      - min_response_time
+      - max_response_time
+      - average_content_size
+      - requests_per_second
+      filter:
+        _and:
+        - execution:
+            configuration:
+              project:
+                userProjects:
+                  user_id:
+                    _eq: X-Hasura-User-Id
+        - execution:
+            configuration:
+              is_deleted:
+                _eq: false
+        - execution:
+            configuration:
+              project:
+                is_deleted:
+                  _eq: false
+  - role: manager
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - id
+      - execution_id
+      - timestamp
+      - identifier
+      - method
+      - name
+      - num_requests
+      - num_failures
+      - median_response_time
+      - average_response_time
+      - min_response_time
+      - max_response_time
+      - average_content_size
+      - requests_per_second
+      filter:
+        _and:
+        - execution:
+            configuration:
+              project:
+                userProjects:
+                  user_id:
+                    _eq: X-Hasura-User-Id
+        - execution:
+            configuration:
+              is_deleted:
+                _eq: false
+        - execution:
+            configuration:
+              project:
+                is_deleted:
+                  _eq: false
+  update_permissions: []
+  delete_permissions: []
+  event_triggers: []
+- table: configuration_type
+  object_relationships: []
+  array_relationships:
+  - using:
+      foreign_key_constraint_on:
+        column: type_slug
+        table: configuration
+    name: configurations
+    comment: null
+  - using:
+      foreign_key_constraint_on:
+        column: type_slug
+        table: parameter
+    name: parameters
+    comment: null
+  - using:
+      foreign_key_constraint_on:
+        column: type_slug
+        table: repository
+    name: repositories
+    comment: null
+  insert_permissions: []
+  select_permissions:
+  - role: manager
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - id
+      - name
+      - description
+      - slug_name
+      filter: {}
+  - role: reader
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - description
+      - id
+      - name
+      - slug_name
+      filter: {}
+  - role: tester
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - description
+      - id
+      - name
+      - slug_name
+      filter: {}
+  - role: tenantadmin
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - id
+      - name
+      - description
+      - slug_name
+      filter: {}
+  update_permissions: []
+  delete_permissions: []
+  event_triggers: []
+- table: configuration
+  object_relationships:
+  - using:
+      foreign_key_constraint_on: test_source_id
+    name: test_source
+    comment: null
+  - using:
+      foreign_key_constraint_on: project_id
+    name: project
+    comment: null
+  - using:
+      foreign_key_constraint_on: type_slug
+    name: configuration_type
+    comment: null
+  array_relationships:
+  - using:
+      foreign_key_constraint_on:
+        column: configuration_id
+        table: configuration_envvars
+    name: configuration_envvars
+    comment: null
+  - using:
+      foreign_key_constraint_on:
+        column: configuration_id
+        table: configuration_extension
+    name: configuration_extensions
+    comment: null
+  - using:
+      foreign_key_constraint_on:
+        column: configuration_id
+        table: execution
+    name: executions
+    comment: null
+  - using:
+      foreign_key_constraint_on:
+        column: configuration_id
+        table: configuration_parameter
+    name: configuration_parameters
+    comment: null
+  insert_permissions: []
+  select_permissions:
+  - role: reader
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - id
+      - name
+      - project_id
+      - performed
+      - created_by_id
+      - type_slug
+      - test_source_id
+      - instances
+      - is_deleted
+      - has_pre_test
+      - has_post_test
+      - has_load_tests
+      - has_monitoring
+      - monitoring_chart_configuration
+      filter:
+        _and:
+        - project:
+            userProjects:
+              user_id:
+                _eq: X-Hasura-User-Id
+        - project:
+            is_deleted:
+              _eq: false
+        - is_deleted:
+            _eq: false
+  - role: tester
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - id
+      - name
+      - project_id
+      - performed
+      - created_by_id
+      - type_slug
+      - test_source_id
+      - instances
+      - is_deleted
+      - has_pre_test
+      - has_post_test
+      - has_load_tests
+      - has_monitoring
+      - monitoring_chart_configuration
+      filter:
+        _and:
+        - project:
+            userProjects:
+              user_id:
+                _eq: X-Hasura-User-Id
+        - project:
+            is_deleted:
+              _eq: false
+        - is_deleted:
+            _eq: false
+  - role: testrunner
+    comment: null
+    permission:
+      allow_aggregations: false
+      columns:
+      - created_by_id
+      - has_load_tests
+      - has_monitoring
+      - has_post_test
+      - has_pre_test
+      - id
+      - instances
+      - name
+      - performed
+      - project_id
+      - test_source_id
+      - type_slug
+      filter:
+        _and:
+        - executions:
+            id:
+              _eq: X-Hasura-Testruner-Id
+        - project:
+            is_deleted:
+              _eq: false
+        - is_deleted:
+            _eq: false
+  - role: tenantadmin
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - id
+      - name
+      - project_id
+      - performed
+      - created_by_id
+      - type_slug
+      - test_source_id
+      - instances
+      - is_deleted
+      - has_pre_test
+      - has_post_test
+      - has_load_tests
+      - has_monitoring
+      - monitoring_chart_configuration
+      filter:
+        _and:
+        - project:
+            userProjects:
+              user_id:
+                _eq: X-Hasura-User-Id
+        - project:
+            is_deleted:
+              _eq: false
+        - is_deleted:
+            _eq: false
+  - role: manager
+    comment: null
+    permission:
+      allow_aggregations: true
+      columns:
+      - id
+      - name
+      - project_id
+      - performed
+      - created_by_id
+      - type_slug
+      - test_source_id
+      - instances
+      - is_deleted
+      - has_pre_test
+      - has_post_test
+      - has_load_tests
+      - has_monitoring
+      - monitoring_chart_configuration
+      filter:
+        _and:
+        - project:
+            userProjects:
+              user_id:
+                _eq: X-Hasura-User-Id
+        - project:
+            is_deleted:
+              _eq: false
+        - is_deleted:
+            _eq: false
+  update_permissions: []
+  delete_permissions: []
+  event_triggers: []
