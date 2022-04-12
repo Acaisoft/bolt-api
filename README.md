@@ -303,3 +303,27 @@ var claims = {
   
 exports = claims;
 ```
+
+### Debugging
+
+You can debug API itself using latest version of PyCharm.
+First, a valid debug server needs to be running before you enable debugging in the API itself.
+
+1. Create new Python Debug Server configuration in PyCharm
+2. Set port to any open free port (use port `6060` if you don't want to specify custom port in step 7.)
+3. Set host to localhost
+4. Set path mapping so that project root is matched with literal docker root.
+For example, if your cloned repo root is in `~/Acai/bolt/bolt-api`, then set path mapping to `~/Acai/bolt/bolt-api=/`
+5. Save the configuration under the name of your choosing and run it in debug mode
+6. Open `instance/localhost-config.py` and add a new field named `DEBUG_SERVER` and set it to the literal IP address of
+native system that is parent to your running docker instance. For example `DEBUG_SERVER = '192.168.241.130'`
+7. (Optional) Add a new field named `DEBUG_PORT` and set the value to any port of your choosing as integer.
+For example `DEBUG_PORT = 3434`
+
+`DO NOT COMMIT THIS FILE`
+8. Restart bolt-api container or make any change to API script files while setting desired breakpoints, 
+as autoreloading is enabled by default.
+
+If running bolt-api instance is refusing to connect to your debug server, first check if you are running latest PyCharm 
+version. If not, upgrade it and try again. Otherwise please open Python Debug Server configuration, copy suggested `pydevd`
+version and update it in core API requirements file, then add it to your commit.

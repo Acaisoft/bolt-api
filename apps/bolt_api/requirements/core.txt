@@ -25,3 +25,4 @@ Flask-Limiter==2.2.0
 PyYAML==6.0
 numpy==1.22.3
 jsonschema==4.4.0
+pydevd-pycharm~=213.7172.26

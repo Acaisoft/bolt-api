@@ -19,6 +19,15 @@ def create_app(test_config=None):
 
     configure(app)
 
+    if app.config.get('DEBUG_SERVER') is not None:
+        import pydevd_pycharm
+        pydevd_pycharm.settrace(
+            app.config.get('DEBUG_SERVER'),
+            port=app.config.get('DEBUG_PORT', 6060),
+            stdoutToServer=True,
+            stderrToServer=True
+        )
+
     for handler in ('graphql.execution.executor', 'graphql.execution.utils'):
         ll = logging.getLogger(handler)
         if ll:
