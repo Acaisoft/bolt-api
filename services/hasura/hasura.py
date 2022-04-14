@@ -35,6 +35,12 @@ def hasura_token_for_testrunner(config):
     realm_name = config.get('KEYCLOAK_REALM_NAME')
     client_secret_key = config.get('KEYCLOAK_CLIENT_SECRET')
 
+    current_app.logger.info('Data:')
+    current_app.logger.info(server_url)
+    current_app.logger.info(client_id)
+    current_app.logger.info(realm_name)
+    current_app.logger.info(client_secret_key)
+
     k_client = KeycloakOpenID(
         server_url=server_url,
         client_id=client_id,

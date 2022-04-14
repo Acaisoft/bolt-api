@@ -59,7 +59,8 @@ services:
       HASURA_GRAPHQL_ENABLE_CONSOLE: "true" # set to "false" to disable console
       HASURA_GRAPHQL_MIGRATIONS_DIR:
       ## execute ./toos/encode_jwt_secret.py to obtain HASURA_GRAPHQL_JWT_SECRET from Flask config
-      HASURA_GRAPHQL_JWT_SECRET: '{"type": "HS256", "key": "slkd1o8wnO*#LUFHNO4islkd1o8wnO*#"}'
+#      HASURA_GRAPHQL_JWT_SECRET: '{"type": "HS256", "key": "slkd1o8wnO*#LUFHNO4islkd1o8wnO*#"}'
+      HASURA_GRAPHQL_JWT_SECRET: '{"type": "RS256", "key": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1h9OC3K+qotCs3gmpiSgFVFxhqtx1l2pM3GEaRH6jn4twF55Icm8obObLRo2j9IT5VnFJrAv762NAN+koXh03TgbDEi2WH57A/ZBv5CZJXs3HzCyNnAztIv9jQ2urxKnF29tmavTNvBgs6mzRPh/mMVaREpcWgZP8L2vr3/9Y9g+miVzEDt09QbYszC79mrDS/Vr9r1akacjJkFVCf+SXeSPFU9bHBhsk3oxdt+xRsQxEKTkXOMYn8HwWDZYm60T3eapuuqnRTWy2oFnTH1U+dk30DTh4tHx2bvcRmZ2LaozSoNsqlXC61l/LgD8YaOsJv7bqCjvGr2EbZSKeXOQ2QIDAQAB\n-----END PUBLIC KEY-----\n"}'
       ## uncomment next line to set an access key
       HASURA_GRAPHQL_ACCESS_KEY: devaccess
       BOLT_API_GRAPHQL: http://api:5000/graphql
