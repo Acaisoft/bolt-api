@@ -17,6 +17,7 @@ def hasura_token_for_testrunner(config):
     Token's generated through
     :param config: flask app config
     :param execution_id: resource ID to grant access to
+    :param execution_id: resource ID to grant access to
     :return: tuple: jwt token, testrunner id
     """
 
@@ -35,12 +36,6 @@ def hasura_token_for_testrunner(config):
     realm_name = config.get('KEYCLOAK_REALM_NAME')
     client_secret_key = config.get('KEYCLOAK_CLIENT_SECRET')
 
-    current_app.logger.info('Data:')
-    current_app.logger.info(server_url)
-    current_app.logger.info(client_id)
-    current_app.logger.info(realm_name)
-    current_app.logger.info(client_secret_key)
-
     k_client = KeycloakOpenID(
         server_url=server_url,
         client_id=client_id,
@@ -50,7 +45,7 @@ def hasura_token_for_testrunner(config):
     )
 
     token = k_client.token(grant_type='client_credentials')
-    claims = jwt.decode(token['access_token'], verify=False)
+    claims = jwt.decode(token['access_token'], options={"verify_signature": False})
     return token['access_token'], claims['https://hasura.io/jwt/claims']['x-hasura-testruner-id']
 
 
