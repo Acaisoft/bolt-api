@@ -17,6 +17,7 @@ def hasura_token_for_testrunner(config):
     Token's generated through
     :param config: flask app config
     :param execution_id: resource ID to grant access to
+    :param execution_id: resource ID to grant access to
     :return: tuple: jwt token, testrunner id
     """
 
@@ -44,7 +45,7 @@ def hasura_token_for_testrunner(config):
     )
 
     token = k_client.token(grant_type='client_credentials')
-    claims = jwt.decode(token['access_token'], verify=False)
+    claims = jwt.decode(token['access_token'], options={"verify_signature": False})
     return token['access_token'], claims['https://hasura.io/jwt/claims']['x-hasura-testruner-id']
 
 

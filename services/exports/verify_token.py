@@ -11,7 +11,7 @@ def verify_token(config, token):
     :param token: string
     :return: a two-tuple of (project_id, execution_id), execution_id may be None
     """
-    payload = jwt.decode(token, config.get(const.SECRET_KEY))
+    payload = jwt.decode(token, config.get(const.SECRET_KEY), options={"verify_signature": False})
     oid = payload[const.DATA_EXPORT_TOKEN_HANDLE_ID]
     # TODO: add a short cache here
 
