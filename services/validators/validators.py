@@ -108,7 +108,7 @@ def validate_monitoring_chart_configuration(configuration: dict):
 
 VALIDATORS = {
     '-t': validate_time,
-    '-c': validate_users,
+    '-u': validate_users,
     '-r': validate_rampup,
     '-H': validate_url,
     '-md': validate_duration,

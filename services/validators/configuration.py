@@ -131,7 +131,7 @@ def validate_load_test_params(params: list, defaults: list) -> dict:
     ...      { "value": "100", "parameter_slug": "monitoring_duration", },
     ...    ], [
     ...      {"slug_name": "load_tests_time", "name": "time", "default_value": "360", "param_name": "-t"},
-    ...      {"slug_name": "load_tests_users", "name": "users", "default_value": "1000", "param_name": "-c", "param_type": "int"},
+    ...      {"slug_name": "load_tests_users", "name": "users", "default_value": "1000", "param_name": "-u", "param_type": "int"},
     ...      {"slug_name": "load_tests_rampup", "name": "users/second", "default_value": "100", "param_name": "-r", "param_type": "int"},
     ...      {"slug_name": "load_tests_host", "name": "host", "default_value": "", "param_name": "-H", "param_type": "str"},
     ...      {"slug_name": "monitoring_duration", "name": "monitoring_duration", "default_value": "", "param_name": "-md", "param_type": "int"},
