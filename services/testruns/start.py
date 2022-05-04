@@ -120,7 +120,9 @@ def start(app_config, conf_id, user_id, no_cache):
         # common workflow fields
         try:
             branch = [
-                envvar['value'] for envvar in test_config['configuration_envvars'] if envvar['name'] == 'BRANCH'
+                parameter['value']
+                for parameter in test_config['configuration_parameters']
+                if parameter['parameter']['name'] == 'repository branch'
             ][0]
         except IndexError:
             branch = 'master'
@@ -151,6 +153,7 @@ def start(app_config, conf_id, user_id, no_cache):
                 'users': get_users_num(test_config['configuration_parameters']),
                 'host': host,
                 'port': port,
+                'file': get_file_path(test_config['configuration_parameters'])
             }
         # monitoring
         if test_config['has_monitoring']:
@@ -221,3 +224,16 @@ def get_host_and_port(parameters: list) -> tuple:
         return testrun_url, None
     else:
         return host, port
+
+
+def get_file_path(parameters: list) -> str:
+    try:
+        file_path = [
+            parameter['value']
+            for parameter in parameters
+            if parameter['parameter']['name'] == 'file path'
+        ][0]
+    except IndexError:
+        return "load_tests"
+
+    return file_path.rstrip('.py')

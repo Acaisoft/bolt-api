@@ -52,6 +52,27 @@ def validate_url(value: str, required=True, key='hostname'):
     return value
 
 
+def validate_file_path(value: str, required=True, key='file_path'):
+    value = value.strip()
+    if required:
+        assert value, f'{key} is required'
+    if value:
+        assert len(value) > 4, f'{key} too short'
+        assert not value.endswith('.py'), f'don\'t include extension in {key} ({value})'
+        assert ('/' not in value) and ('\\' not in value), f'don\'t include path separators in {key} ({value})'
+    return value
+
+
+def validate_repository_branch(value: str, required=True, key='repository_branch'):
+    value = value.strip()
+    if required:
+        assert value, f'{key} is required'
+    if value:
+        assert len(value) > 4, f'{key} too short'
+        assert ' ' not in value, f'spaces not allowed in {key}'
+    return value
+
+
 def validate_text(value: str, required=True, key='name'):
     value = value.strip()
     if required:
@@ -113,6 +134,8 @@ VALIDATORS = {
     '-H': validate_url,
     '-md': validate_duration,
     '-mi': validate_interval,
+    '-f': validate_file_path,
+    '-b': validate_repository_branch
 }
 
 if __name__ == '__main__':
