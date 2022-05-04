@@ -68,7 +68,7 @@ def validate_repository_branch(value: str, required=True, key='repository_branch
     if required:
         assert value, f'{key} is required'
     if value:
-        assert len(value) > 4, f'{key} too short'
+        assert len(value) > 2, f'{key} too short'
         assert ' ' not in value, f'spaces not allowed in {key}'
     return value
 
