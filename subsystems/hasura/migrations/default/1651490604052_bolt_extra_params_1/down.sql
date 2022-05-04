@@ -1,5 +1,5 @@
 -- Could not auto-generate a down migration.
 -- Please write an appropriate down migration for the SQL below:
 -- INSERT INTO parameter (name, param_name, param_type, slug_name, default_value) VALUES
---     ('file path', '-f', 'str', 'load_tests_file_path', 'tests/load_tests.py'),
+--     ('file path', '-f', 'str', 'load_tests_file_path', 'load_tests'),
 --     ('repository branch', '-b', 'str', 'load_tests_repository_branch', 'master');

@@ -129,7 +129,7 @@ def validate_load_test_params(params: list, defaults: list) -> dict:
     ...      { "value": "500", "parameter_slug": "load_tests_rampup", },
     ...      { "value": "http://wp.pl", "parameter_slug": "load_tests_host", },
     ...      { "value": "100", "parameter_slug": "monitoring_duration", },
-    ...      { "value": "tests/load_tests.py", "parameter_slug": "file_path", },
+    ...      { "value": "load_tests", "parameter_slug": "file_path", },
     ...      { "value": "master", "parameter_slug": "repository_branch", },
     ...    ], [
     ...      {"slug_name": "load_tests_time", "name": "time", "default_value": "360", "param_name": "-t"},
@@ -137,7 +137,7 @@ def validate_load_test_params(params: list, defaults: list) -> dict:
     ...      {"slug_name": "load_tests_rampup", "name": "users/second", "default_value": "100", "param_name": "-r", "param_type": "int"},
     ...      {"slug_name": "load_tests_host", "name": "host", "default_value": "", "param_name": "-H", "param_type": "str"},
     ...      {"slug_name": "monitoring_duration", "name": "monitoring_duration", "default_value": "", "param_name": "-md", "param_type": "int"},
-    ...      {"slug_name": "load_tests_file_path", "name": "file path", "default_value": "tests/load_tests.py", "param_name": "-f", "param_type": "str"},
+    ...      {"slug_name": "load_tests_file_path", "name": "file path", "default_value": "load_tests", "param_name": "-f", "param_type": "str"},
     ...      {"slug_name": "load_tests_repository_branch", "name": "repository_branch", "default_value": "master", "param_name": "-b", "param_type": "str"},
     ... ])
     {'load_tests_users': '5000', 'load_tests_rampup': '500', 'load_tests_host': 'http://wp.pl', 'load_tests_time': '360'}

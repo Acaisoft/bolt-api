@@ -58,7 +58,8 @@ def validate_file_path(value: str, required=True, key='file_path'):
         assert value, f'{key} is required'
     if value:
         assert len(value) > 4, f'{key} too short'
-        assert value.endswith('.py'), f'missing extension in {key} ({value})'
+        assert not value.endswith('.py'), f'don\'t include extension in {key} ({value})'
+        assert ('/' not in value) and ('\\' not in value), f'don\'t include path separators in {key} ({value})'
     return value
 
 
