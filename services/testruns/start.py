@@ -10,6 +10,7 @@ from services.validators import validate_extensions
 from services.validators.configuration import validate_test_configuration_by_id, validate_monitoring_params
 
 logger = setup_custom_logger(__file__)
+REQUEST_TIMEOUT = 5  # seconds
 
 
 def start(app_config, conf_id, user_id, no_cache):
@@ -163,7 +164,7 @@ def start(app_config, conf_id, user_id, no_cache):
             workflow_data['job_post_stop'] = {'env_vars': {}}
 
         logger.info(f'Workflow creator data {workflow_data}')
-        response = requests.post(app_config['WORKFLOW_CREATOR_ENDPOINT'], json=workflow_data)
+        response = requests.post(app_config['WORKFLOW_CREATOR_ENDPOINT'], json=workflow_data, timeout=REQUEST_TIMEOUT)
         logger.info(f'Workflow response {response}')
         logger.info(f'Workflow response text {response.text} | Status {response.status_code}')
         assert response.status_code == 200, f'Error during execution workflow creator. Response {response.status_code}'
