@@ -82,6 +82,7 @@ class Clone(graphene.Mutation):
                     }
             }
         '''
+        del cloned_configuration_data["monitoring_chart_configuration"]
         response = hce_with_user(
             current_app.config, query, user_id=user_id, role=role, variable_values=cloned_configuration_data)
         return response['testrun_configuration_create']['returning'][0]
@@ -94,6 +95,7 @@ class Clone(graphene.Mutation):
             date_now = datetime.datetime.now().strftime('%d/%m/%Y - %H:%M:%S')
             configuration_name = '{0} (Cloned at {1})'.format(cloned_configuration_data['name'], date_now)
         cloned_configuration_data['name'] = configuration_name
+        current_app.logger.info(cloned_configuration_data)
         new_configuration_data = Clone.insert_new_configuration(cloned_configuration_data, user_id, role)
         return gql_util.OutputValueFromFactory(Clone, {'returning': [{
             'name': new_configuration_data['name'],
