@@ -41,6 +41,8 @@ spec:
             mountPath: /etc/secrets
           - name: config
             mountPath: /etc/config
+          - name: ssh
+            mountPath: /root/.ssh
           env:
           - name: CONFIG_FILE_PATH
             value: /etc/config/config.py
@@ -54,6 +56,10 @@ spec:
       - name: secrets
         secret:
           secretName: bolt-secrets
+      - name: ssh
+        secret:
+          secretName: ssh-files
+          defaultMode: 0600
       - name: config
         configMap:
           name: bolt-config
