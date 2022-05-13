@@ -1,6 +1,6 @@
 # ACAI⚡BOLT API
 
-This repo holds the microservice gluing together the bolt-deployer, bolt-wrapper, hasura, database 
+This repo holds the microservice gluing together the bolt-wrapper, hasura, database 
 and keycloak services. 
 
 Note: Use `git clone --recurse-submodules <reponame>` to pull dependencies 
@@ -9,20 +9,12 @@ to fetch dependencies after cloning.
 
 ### Development
 
-Everything (except bolt-deployer - it lives inside cluster) needed to run bolt-api locally is contained in
+Everything needed to run bolt-api locally is contained in
 `docker-compose` file, it should be enough to just execute:
 
 ```
 docker-compose up
 ```
-
-in root directory of this repo, then forward a port to the `bolt-deployer` service:
-
-```
-kubectl -n bolt-deployer port-forward svc/bolt-deployer 7777:80
-``` 
-
-(Make sure you connect to bolt-deployer in dev/correct k8 environment).
 
 This starts hasura on http://localhost:8080 and bolt-api on http://localhost:5000 and basic monitoring.
 
@@ -65,8 +57,7 @@ Where hasura methods are insufficient, bolt-api provides a superset of methods:
 
 ###### Queries:
 
-* `testrun_repository_key` - returns id_rsa.pub key used by bolt-deployer
-* `testrun_status` - checks test execution status with bolt-deployer, updates `execution` table details accordingly
+* `testrun_repository_key` - returns id_rsa.pub key used by bolt-api
 
 ###### Mutations:
 
@@ -94,7 +85,6 @@ Hasura setup in docker-compose uses a token literal of `devaccess`, use that to 
     * `/apps/bolt_api/app/appgraph` - contains graphql mutations and queries
     * `/apps/bolt_api/app/webhooks` - contains public (!) endpoints for hasura to call on configured events, list with `flask routes`
 * `/apps/bolt_metrics_api/` - metrics exporter for offloading and separating heavy tasks
-* `/bolt-deployer/` - git submodule, enabes integration with bolt-api through `pip install bolt-deployer/sdk`
 * `/charts/` - helm deployment charts
 * `/cmds/` - helper flask commands list with `flask --help`  
 * `/instance/` - flask configuration, override with `CONFIG_FILE_PATH` and `SECRETS_FILE_PATH` env variables
@@ -145,11 +135,6 @@ adjust `endpoint` in `hasura/config.yaml` and execute hasura CLI tool:
 ###### Services:
 
 Start redis and db first, then api, then hasura, finally any monitoring.
-
-Port forward to bolt-deployer using:
-```
-kubectl -n dev-bolt-deployer port-forward svc/bolt-deployer 7777:80
-```
 
 Order is important.
 

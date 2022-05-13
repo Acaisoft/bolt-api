@@ -9,9 +9,6 @@ PORT = 5000
 HASURA_GQL = "http://hasura:8080/v1alpha1/graphql"
 HCE_DEBUG = False
 
-# BOLT_DEPLOYER_ADDR = 'localhost:7777'
-BOLT_DEPLOYER_ADDR = 'bolt-deployer:80'
-
 SELFSIGNED_TOKEN_FOR_TESTRUNNER = False
 
 REDIS_HOST = 'redis'

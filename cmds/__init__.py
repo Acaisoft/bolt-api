@@ -5,7 +5,6 @@ from . import users
 from .projects import project_setup_demo, project_teardown
 from .repositories import validate_repo
 from .sentry import sentry_check
-from .testrun_status import testrun_status
 from .tokens import job_token, execution_data_export_token, project_data_export_token
 
 if os.getenv('HTTP_DEBUG', False):
@@ -25,7 +24,6 @@ if os.getenv('HTTP_DEBUG', False):
 
 def register_commands(app):
     app.cli.add_command(sentry_check)
-    app.cli.add_command(testrun_status)
     app.cli.add_command(job_token)
     app.cli.add_command(execution_data_export_token)
     app.cli.add_command(project_data_export_token)

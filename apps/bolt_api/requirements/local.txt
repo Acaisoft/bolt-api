@@ -5,7 +5,6 @@ attrs==19.1.0
 Authlib==0.10
 backcall==0.1.0
 blinker==1.4
-bolt-deployer-cli==0.1.18
 certifi==2018.11.29
 cffi==1.11.5
 chardet==3.0.4

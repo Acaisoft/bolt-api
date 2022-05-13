@@ -1,7 +1,6 @@
 version: '3.6'
 services:
   postgres:
-#    image: postgres:10.9
     image: postgres:14.2
     environment:
       - POSTGRES_DB=postgres
@@ -87,7 +86,13 @@ services:
     environment:
       CONFIG_FILE_PATH: docker-compose-config.py
       FLASK_ENV: development
+      WDB_SOCKET_SERVER: wdb
+      WDB_NO_BROWSER_AUTO_OPEN: 'true'
     entrypoint: ["flask", "run", "--eager-loading", "--host", "0.0.0.0", "--port", "5000"]
+  wdb: # add wdb==3.3.0 to requirements in order to use the debugger
+    image: shepilovvladislav/wdb
+    ports:
+      - "1984:1984"
   metrics:
     build:
       context: .

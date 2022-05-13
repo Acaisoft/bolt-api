@@ -14,9 +14,6 @@ HASURA_GQL = "http://localhost:8080/v1alpha1/graphql"
 
 HCE_DEBUG = True
 
-# BOLT_DEPLOYER_ADDR = 'localhost:7777'
-BOLT_DEPLOYER_ADDR = 'bolt-deployer:80'
-
 REDIS_HOST = 'localhost'
 REDIS_PORT = 6379
 REDIS_DB = 0

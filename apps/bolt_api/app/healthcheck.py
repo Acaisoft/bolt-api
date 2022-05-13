@@ -25,17 +25,7 @@ def register_app(app):
             return False, 'missing root tables'
         return True, 'ok'
 
-    def deployer_up():
-        try:
-            response = app.services.deployer.clients.healthcheck(app.config).health_check_get()
-        except Exception as e:
-            return True, str(e)
-        if response.status != 'healthy':
-            return True, f'deployer is not healthy, it is {response.status}'
-        return True, 'ok'
-
     hc.add_check(redis_up)
     # hc.add_check(hasura_up)
-    hc.add_check(deployer_up)
 
     return hc

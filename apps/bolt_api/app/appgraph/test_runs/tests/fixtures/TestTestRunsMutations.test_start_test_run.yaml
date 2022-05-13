@@ -122,50 +122,6 @@
         {
             "request": {
                 "method": "POST",
-                "uri": "http://bolt-deployer/image-builds/",
-                "body": "{\"workers\": 2, \"project_id\": \"04ce4055-5278-4fd5-aab9-2148faa58cdd\", \"monitoring_deadline_secs\": 0, \"start_proper_job\": true, \"repo_url\": \"git@mockbitbucket.org:repo/two.git\", \"extensions\": [], \"job_auth_token\": \"b'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJodHRwczovL2hhc3VyYS5pby9qd3QvY2xhaW1zIjp7IngtaGFzdXJhLWFsbG93ZWQtcm9sZXMiOlsidGVzdHJ1bm5lciJdLCJ4LWhhc3VyYS1kZWZhdWx0LXJvbGUiOiJ0ZXN0cnVubmVyIiwieC1oYXN1cmEtdGVzdHJ1bmVyLWlkIjoiNzI2MmQ3NjUtNGQxOC00OGE5LTlkMDgtZGQxNDJjZThkYWI1In19.fopYFQH4kSRAY2RSncKmEQMnZZW-zQxV26z0K5E1vHY'\", \"no_cache\": false, \"run_monitoring\": false, \"run_load_test\": true, \"no_cache_kaniko\": false, \"test_run_execution_id\": \"7262d765-4d18-48a9-9d08-dd142ce8dab5\", \"tenant_id\": \"1\"}",
-                "headers": {
-                    "Accept": [
-                        "*/*"
-                    ],
-                    "User-Agent": [
-                        "OpenAPI-Generator/0.1.25/python"
-                    ],
-                    "Content-Type": [
-                        "application/json"
-                    ]
-                }
-            },
-            "response": {
-                "status": {
-                    "code": 200,
-                    "message": "OK"
-                },
-                "headers": {
-                    "Date": [
-                        "Wed, 29 May 2019 08:29:32 GMT"
-                    ],
-                    "content-length": [
-                        "82"
-                    ],
-                    "Server": [
-                        "gunicorn/19.9.0"
-                    ],
-                    "content-type": [
-                        "application/json; charset=UTF-8"
-                    ],
-                    "Connection": [
-                        "close"
-                    ]
-                },
-                "body": {
-                    "string": "{\"status\": \"PENDING\", \"state\": null, \"id\": \"9a6a89c6-3bac-4ea5-9844-2ee69f22ecf4\"}"
-                }
-            }
-        },
-        {
-            "request": {
-                "method": "POST",
                 "uri": "http://localhost:8080/v1alpha1/graphql",
                 "body": "{\"query\": \"mutation ($data: [execution_insert_input!]!) {\\n  insert_execution(objects: $data) {\\n    returning {\\n      id\\n    }\\n  }\\n}\\n\", \"variables\": {\"data\": {\"configuration_id\": \"7262d765-4d18-48a9-9d08-dd142ce8dab5\", \"status\": \"PENDING\", \"execution_metrics_metadata\": {\"data\": {\"chart_configuration\": {\"charts\": [{\"x_format\": \"number\", \"node_name\": \"global_throughput\", \"x_data_key\": \"timestamp\", \"y_format\": \"number\", \"y_label\": \"name\", \"title\": \"Global Throughput\", \"type\": \"line\", \"y_data_key\": \"value\"}, {\"x_format\": \"number\", \"node_name\": \"global_cpu\", \"x_data_key\": \"timestamp\", \"y_format\": \"percent\", \"y_label\": \"name\", \"title\": \"Global CPU usage\", \"type\": \"line\", \"y_data_key\": \"value\"}, {\"x_format\": \"number\", \"node_name\": \"global_memory\", \"x_data_key\": \"timestamp\", \"y_format\": \"bytes\", \"y_label\": \"name\", \"title\": \"Global Memory Usage\", \"type\": \"line\", \"y_data_key\": \"value\"}, {\"x_format\": \"number\", \"node_name\": \"global_disc_data\", \"x_data_key\": \"timestamp\", \"y_format\": \"bytes\", \"y_label\": \"name\", \"title\": \"Global Disk Usage\", \"type\": \"line\", \"y_data_key\": \"value\"}, {\"x_format\": \"number\", \"node_name\": \"apps_source_input\", \"x_data_key\": \"timestamp\", \"y_format\": \"number\", \"y_label\": \"app_name\", \"title\": \"Source Input per App\", \"type\": \"line\", \"y_data_key\": \"source_input\"}, {\"x_format\": \"number\", \"node_name\": \"apps_threads\", \"x_data_key\": \"timestamp\", \"y_format\": \"number\", \"y_label\": \"app_name\", \"title\": \"Threads per App\", \"type\": \"line\", \"y_data_key\": \"threads_num\"}, {\"x_format\": \"number\", \"node_name\": \"apps_cpu\", \"x_data_key\": \"timestamp\", \"y_format\": \"percent\", \"y_label\": \"app_name\", \"title\": \"CPU Usage per App\", \"type\": \"line\", \"y_data_key\": \"cpu\"}, {\"x_format\": \"number\", \"node_name\": \"apps_wactions\", \"x_data_key\": \"timestamp\", \"y_format\": \"number\", \"y_label\": \"app_name\", \"title\": \"WActions per App\", \"type\": \"line\", \"y_data_key\": \"wactions_created\"}, {\"x_format\": \"number\", \"node_name\": \"apps_latency\", \"x_data_key\": \"timestamp\", \"y_format\": \"number\", \"y_label\": \"app_component\", \"title\": \"Latency per App\", \"type\": \"line\", \"y_data_key\": \"latency\"}]}}}, \"id\": \"7262d765-4d18-48a9-9d08-dd142ce8dab5\"}}}",
                 "headers": {

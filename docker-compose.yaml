@@ -1,5 +1,4 @@
 version: '3.6'
-# starts all services, including monitoring, with notable exception of bolt-deployer
 # TODO: make test_runs executable inside
 services:
   dockerhost:

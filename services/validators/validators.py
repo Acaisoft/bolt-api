@@ -52,14 +52,15 @@ def validate_url(value: str, required=True, key='hostname'):
     return value
 
 
-def validate_file_path(value: str, required=True, key='file_path'):
+def validate_locustfile_name(value: str, required=True, key='locustfile_name'):
     value = value.strip()
     if required:
         assert value, f'{key} is required'
     if value:
         assert len(value) > 4, f'{key} too short'
-        assert not value.endswith('.py'), f'don\'t include extension in {key} ({value})'
-        assert ('/' not in value) and ('\\' not in value), f'don\'t include path separators in {key} ({value})'
+        assert value.endswith('.py'), f'extension not found in tests file name {key} ({value})'
+        assert ('/' not in value) and ('\\' not in value),\
+            f'tests file has to reside in repository root {key} ({value})'
     return value
 
 
@@ -134,7 +135,7 @@ VALIDATORS = {
     '-H': validate_url,
     '-md': validate_duration,
     '-mi': validate_interval,
-    '-f': validate_file_path,
+    '-f': validate_locustfile_name,
     '-b': validate_repository_branch
 }
 
