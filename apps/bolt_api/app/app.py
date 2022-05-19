@@ -2,7 +2,7 @@ import logging
 
 from flask import Flask
 
-from apps.bolt_api.app import appgraph, healthcheck, webhooks
+from apps.bolt_api.app import appgraph, healthcheck, webhooks, auth
 from services.configure import configure, validate
 from services.logger import setup_custom_logger
 from services import const
@@ -50,6 +50,9 @@ def create_app(test_config=None):
 
     ## webhooks
     webhooks.register_app(app)
+
+    ## auth
+    auth.register_app(app)
 
     logger.info('application ready')
     return app
