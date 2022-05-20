@@ -3,7 +3,7 @@ import jwt
 from datetime import datetime, timedelta
 
 from flask import Blueprint, request, render_template, flash, redirect, current_app, make_response
-from werkzeug.exceptions import Unauthorized, MethodNotAllowed
+from werkzeug.exceptions import Unauthorized, MethodNotAllowed, BadRequest
 from urllib.parse import urlparse
 
 from services import const
@@ -14,7 +14,9 @@ bp = Blueprint('auth-login', __name__)
 @bp.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        redirect_url = request.args.get('redirect_url')
+        redirect_url = request.args.get('redirect_url', False)
+        if not redirect_url:
+            return BadRequest('Expected <redirect_url> parameter in url')
         login = request.form['login']
         password = request.form['password']
 
