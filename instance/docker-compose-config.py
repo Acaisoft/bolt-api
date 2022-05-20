@@ -3,6 +3,7 @@ KEYCLOAK_URL = 'https://keycloak.bolt-us.acaisoft.io/auth/'
 KEYCLOAK_CLIENT_ID = 'test-runner'
 KEYCLOAK_REALM_NAME = 'Bolt'
 JWT_ALGORITHM = 'RS256'
+JWT_VALID_PERIOD = 24
 
 PORT = 5000
 

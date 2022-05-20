@@ -20,11 +20,11 @@ def login():
         login = request.form['login']
         password = request.form['password']
 
-        if login != const.AUTH_LOGIN or \
-                password != const.AUTH_PASSWORD:
+        if login != current_app.config.get(const.AUTH_LOGIN) or \
+                password != current_app.config.get(const.AUTH_PASSWORD):
             return Unauthorized('Invalid credentials')
 
-        expires = datetime.utcnow() + timedelta(hours=const.JWT_VALID_PERIOD)
+        expires = datetime.utcnow() + timedelta(hours=current_app.config.get(const.JWT_VALID_PERIOD))
         payload = {
             "exp": expires,
             "allowed-origins": [
@@ -76,7 +76,10 @@ def login():
         if not priv_key:
             return MethodNotAllowed('Service is not configured properly')
 
-        token = jwt.encode(payload, priv_key, algorithm='RS256')
+        algorithm = current_app.config.get(const.JWT_ALGORITHM, 'RS256')
+
+        token = jwt.encode(payload, priv_key, algorithm=algorithm)
+
         response = make_response(redirect(redirect_url))
         domain = urlparse(redirect_url).netloc
         if 'localhost' in domain and '.' not in domain:
