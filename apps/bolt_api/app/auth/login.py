@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 
 from flask import Blueprint, request, render_template, flash, redirect, current_app, make_response
 from werkzeug.exceptions import Unauthorized, MethodNotAllowed
+from urllib.parse import urlparse
 
 from services import const
 
@@ -13,10 +14,11 @@ bp = Blueprint('auth-login', __name__)
 @bp.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
+        redirect_url = request.args.get('redirect_url')
         login = request.form['login']
         password = request.form['password']
 
-        if login != const.AUTH_LOGIN and \
+        if login != const.AUTH_LOGIN or \
                 password != const.AUTH_PASSWORD:
             return Unauthorized('Invalid credentials')
 
@@ -73,9 +75,13 @@ def login():
             return MethodNotAllowed('Service is not configured properly')
 
         token = jwt.encode(payload, priv_key, algorithm='RS256')
+        response = make_response(redirect(redirect_url))
+        domain = urlparse(redirect_url).netloc
+        if 'localhost' in domain and '.' not in domain:
+            response.set_cookie('AUTH_TOKEN', token)
+        else:
+            response.set_cookie('AUTH_TOKEN', token, domain=domain)
 
-        response = make_response(redirect(const.REDIRECT_FRONT_URL))
-        response.set_cookie('AUTH_TOKEN', token)
         return response
 
     return render_template('auth/login.html')
