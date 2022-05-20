@@ -18,7 +18,7 @@ docker-compose up
 
 This starts hasura on http://localhost:8080 and bolt-api on http://localhost:5000 and basic monitoring.
 
-To start a minimal set of services (db+redis+hasura) use:
+To start a minimal set of services (db+hasura) use:
 ```bash
 docker-compose -f docker-compose-debug.yaml up
 ```
@@ -100,7 +100,6 @@ controlled by `CONFIG_FILE_PATH` and `SECRETS_FILE_PATH` env variables.
 Deployment requirements:
 
 * python >= 3.6 venv
-* redis
 * hasura
 * `pip install -r requirements.txt`
 * project configuration variables:
@@ -134,7 +133,7 @@ adjust `endpoint` in `hasura/config.yaml` and execute hasura CLI tool:
 
 ###### Services:
 
-Start redis and db first, then api, then hasura, finally any monitoring.
+Start db first, then api, then hasura, finally any monitoring.
 
 Order is important.
 

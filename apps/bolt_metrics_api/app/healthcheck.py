@@ -1,6 +1,5 @@
 from healthcheck import HealthCheck, EnvironmentDump
 
-from services.cache import get_cache
 from services.hasura import hasura_client, hce
 
 
@@ -10,10 +9,6 @@ def register_app(app):
 
     if app.debug:
         EnvironmentDump(app, '/env')
-
-    def redis_up():
-        info = get_cache(app.config).info()
-        return True, 'ok'
 
     def hasura_up():
         client = hasura_client(app.config)
@@ -25,7 +20,6 @@ def register_app(app):
             return False, 'missing root tables'
         return True, 'ok'
 
-    hc.add_check(redis_up)
     hc.add_check(hasura_up)
 
     return hc

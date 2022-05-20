@@ -14,10 +14,6 @@ HASURA_GQL = "http://localhost:8080/v1alpha1/graphql"
 
 HCE_DEBUG = True
 
-REDIS_HOST = 'localhost'
-REDIS_PORT = 6379
-REDIS_DB = 0
-
 BUCKET_PUBLIC_UPLOADS = 'media.bolt.acaisoft.io'
 BUCKET_PRIVATE_STORAGE = 'uploads-bolt-acaisoft'
 UPLOADS_PUBSUB_SUBSCRIPTION = 'uploads-bolt-acaisoft' # TODO: remove

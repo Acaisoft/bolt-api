@@ -11,10 +11,6 @@ HCE_DEBUG = False
 
 SELFSIGNED_TOKEN_FOR_TESTRUNNER = False
 
-REDIS_HOST = 'redis'
-REDIS_PORT = 6379
-REDIS_DB = 0
-
 BUCKET_PUBLIC_UPLOADS = 'media.bolt.acaisoft.io'
 BUCKET_PRIVATE_STORAGE = 'uploads-bolt-acaisoft'
 UPLOADS_PUBSUB_SUBSCRIPTION = 'uploads-bolt-acaisoft'

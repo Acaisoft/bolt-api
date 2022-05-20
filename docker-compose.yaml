@@ -18,10 +18,6 @@ services:
       - POSTGRES_DB=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_USER=postgres
-  redis:
-    image: redis:5-alpine
-    ports:
-      - "6379:6379"
   prom:
     image: prom/prometheus
     ports:
@@ -59,7 +55,6 @@ services:
       - "8080:8080"
     depends_on:
       - "postgres"
-      - "redis"
     restart: always
     environment:
       HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:postgres@postgres:5432/postgres
@@ -90,7 +85,6 @@ services:
     ports:
       - "5000:5000"
     depends_on:
-      - "redis"
       - "postgres"
     restart: always
     environment:
@@ -109,7 +103,6 @@ services:
     ports:
       - "5005:5005"
     depends_on:
-      - "redis"
       - "hasura"
     restart: always
     environment:

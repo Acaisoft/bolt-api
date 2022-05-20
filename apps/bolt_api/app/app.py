@@ -6,7 +6,6 @@ from apps.bolt_api.app import appgraph, healthcheck, webhooks
 from services.configure import configure, validate
 from services.logger import setup_custom_logger
 from services import const
-from services.cache import get_cache
 from services.hasura import hasura_client
 
 
@@ -38,8 +37,7 @@ def create_app(test_config=None):
 
     validate(app, const.REQUIRED_BOLT_API_CONFIG_VARS)
 
-    ## initialize cache and hasura clients
-    get_cache(app.config, app)
+    ## initialize the hasura client
     hasura_client(app.config)
 
     ## this app's graphs
