@@ -85,9 +85,9 @@ def login():
         response = make_response(redirect(redirect_url))
 
         if current_app.config.get(const.AUTH_LOCAL_DEV, False):
-            response.set_cookie('AUTH_TOKEN', token)
+            response.set_cookie('AUTH_TOKEN', token, samesite='None')
         else:
-            response.set_cookie('AUTH_TOKEN', token, domain=urlparse(redirect_url).netloc)
+            response.set_cookie('AUTH_TOKEN', token, domain=urlparse(redirect_url).netloc, samesite='None')
 
         return response
 
