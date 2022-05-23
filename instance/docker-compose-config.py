@@ -4,8 +4,6 @@ KEYCLOAK_CLIENT_ID = 'test-runner'
 KEYCLOAK_REALM_NAME = 'Bolt'
 JWT_ALGORITHM = 'RS256'
 
-PORT = 5000
-
 HASURA_GQL = "http://hasura:8080/v1alpha1/graphql"
 HCE_DEBUG = False
 

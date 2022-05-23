@@ -3,14 +3,11 @@ KEYCLOAK_URL = 'https://keycloak.dev.bolt.acaisoft.io/auth/'
 KEYCLOAK_CLIENT_ID = 'test-runner'
 KEYCLOAK_REALM_NAME = 'Bolt'
 
-PORT = 5000
-
 OAUTH_REDIRECT = 'http://localhost:5000'
 
 JWT_ALGORITHM = 'HS256'
 
 HASURA_GQL = "http://localhost:8080/v1alpha1/graphql"
-# HASURA_GQL = "https://hasura.dev.bolt.acaisoft.io/v1alpha1/graphql"
 
 HCE_DEBUG = True
 
