@@ -7,7 +7,9 @@ from werkzeug.exceptions import Unauthorized, MethodNotAllowed, BadRequest
 from urllib.parse import urlparse
 
 from services import const
+from services.logger import setup_custom_logger
 
+logger = setup_custom_logger(__file__)
 bp = Blueprint('auth-login', __name__)
 
 
@@ -81,11 +83,11 @@ def login():
         token = jwt.encode(payload, priv_key, algorithm=algorithm)
 
         response = make_response(redirect(redirect_url))
-        domain = urlparse(redirect_url).netloc
-        if 'localhost' in domain and '.' not in domain:
+
+        if current_app.config.get(const.AUTH_LOCAL_DEV, False):
             response.set_cookie('AUTH_TOKEN', token)
         else:
-            response.set_cookie('AUTH_TOKEN', token, domain=domain)
+            response.set_cookie('AUTH_TOKEN', token, domain=urlparse(redirect_url).netloc)
 
         return response
 
