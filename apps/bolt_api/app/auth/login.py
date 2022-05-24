@@ -77,7 +77,8 @@ def login():
 
             token = jwt.encode(payload, priv_key, algorithm=algorithm)
             parsed_url = urlparse(redirect_url)
-            app_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
+            base_url = urlparse(request.base_url)
+            app_url = f"{base_url.scheme}://{base_url.netloc}"
 
             response = make_response(redirect(redirect_url))
 
