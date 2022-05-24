@@ -81,13 +81,17 @@ def login():
         algorithm = current_app.config.get(const.JWT_ALGORITHM, 'RS256')
 
         token = jwt.encode(payload, priv_key, algorithm=algorithm)
+        parsed_url = urlparse(redirect_url)
+        app_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
 
         response = make_response(redirect(redirect_url))
 
         if current_app.config.get(const.AUTH_LOCAL_DEV, False):
             response.set_cookie('AUTH_TOKEN', token, samesite='None')
+            response.set_cookie('APP_URL', app_url, samesite='None')
         else:
-            response.set_cookie('AUTH_TOKEN', token, domain=urlparse(redirect_url).netloc, samesite='None')
+            response.set_cookie('AUTH_TOKEN', token, domain=parsed_url.netloc, samesite='None')
+            response.set_cookie('APP_URL', app_url, domain=parsed_url.netloc, samesite='None')
 
         return response
 
