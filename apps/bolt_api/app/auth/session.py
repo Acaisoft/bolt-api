@@ -23,4 +23,5 @@ def session():
         response.set_cookie('APP_URL', expires=0)
 
     response.headers.add("Access-Control-Allow-Origin", app_url)
+    response.headers.add("Access-Control-Allow-Credentials", True)
     return response
