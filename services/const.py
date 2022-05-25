@@ -68,11 +68,6 @@ DEFAULT_TEST_RUNNER_IMAGE = 'eu.gcr.io/acai-bolt/bolt-test-runner:0.1.31'
 # allows load tests setup/teardown to work without getting ratelimited by repository hosting
 MOCK_REPOSITORY = 'git@mockbitbucket.org:repo'
 
-DATA_EXPORT_TOKEN_HANDLE_ID = 'oid'
-EXPORT_SCOPE_PROJECT = 'project'
-EXPORT_SCOPE_EXECUTION = 'execution'
-EXPORT_SCOPE_CHOICE = (EXPORT_SCOPE_PROJECT, EXPORT_SCOPE_EXECUTION)
-
 # configuration extensions
 EXTENSION_NFS = 'nfs'
 EXTENSION_NFS_MAX_MOUNTS_PER_WORKER = 100

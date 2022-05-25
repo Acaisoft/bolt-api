@@ -6,9 +6,7 @@ import jwt
 from flask import current_app
 from flask.cli import with_appcontext
 
-from services.const import EXPORT_SCOPE_EXECUTION, EXPORT_SCOPE_PROJECT
 from services.hasura.hasura import hasura_token_for_testrunner, hasura_selfsignedtoken_for_testrunner
-from services.exports.data_export_token import issue_export_token
 
 
 @click.command(name='job_token')
@@ -29,35 +27,3 @@ def job_token(debug=False):
     print(f'> access_token:\n{token}')
     print('> claims:')
     print(json.dumps(claims, indent=4))
-
-
-@click.command(name='execution_data_export_token')
-@click.argument('execution_id', required=True)
-@click.argument('user_id', required=False)
-@with_appcontext
-def execution_data_export_token(execution_id, user_id=None):
-    """
-    Issue a token usable for data export to a Graphana instance. Use with Graphana's SimgpleJsonDatasource plugin.
-
-    EXECUTION_ID - execution to grant access to
-
-    [USER_ID] - user to grant access for
-    """
-    token = issue_export_token(current_app.config, EXPORT_SCOPE_EXECUTION, execution_id, user_id)
-    print(f'> token:\n{token}')
-
-
-@click.command(name='project_data_export_token')
-@click.argument('project_id', required=True)
-@click.argument('user_id', required=False)
-@with_appcontext
-def project_data_export_token(project_id, user_id=None):
-    """
-    Issue a token usable for data export to a Graphana instance. Use with Graphana's SimgpleJsonDatasource plugin.
-
-    PROJECT_ID - execution to grant access to
-
-    [USER_ID] - user to grant access for
-    """
-    token = issue_export_token(current_app.config, EXPORT_SCOPE_PROJECT, project_id, user_id)
-    print(f'> token:\n{token}')

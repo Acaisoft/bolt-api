@@ -3,7 +3,6 @@ import graphene
 from apps.bolt_api.app.appgraph import (
     argo,
     configuration,
-    data_export,
     execution_metrics,
     extension,
     project,
@@ -69,9 +68,6 @@ class TestrunMutations(graphene.ObjectType):
     # testrun management
     testrun_start = to_field(test_runs.TestrunStart)
     testrun_terminate = to_field(test_runs.TestrunTerminate)
-
-    # testrun (execution) data export
-    testrun_data_export = to_field(data_export.DataExportLink)
 
     # user management
     testrun_user_assign = to_field(users.UserAssignToProject)

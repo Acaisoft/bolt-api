@@ -32,11 +32,9 @@ services:
       - '--web.console.templates=/usr/share/prometheus/consoles'
     depends_on:
       - "cadvisor"
-      - "grafana"
     links:
       - cadvisor
       - api
-      - metrics
   cadvisor:
     image: google/cadvisor
     command: -port=9998
@@ -93,35 +91,7 @@ services:
     links:
       - hasura
     entrypoint: ["flask", "run", "--eager-loading", "--host", "0.0.0.0", "--port", "5000"]
-  metrics:
-    build:
-      context: .
-      dockerfile: apps/bolt_metrics_api/Dockerfile
-    volumes:
-      - ./apps:/apps
-      - ./services:/services
-    ports:
-      - "5005:5005"
-    depends_on:
-      - "hasura"
-    restart: always
-    environment:
-      CONFIG_FILE_PATH: docker-compose-config.py
-      FLASK_ENV: development
-    links:
-      - hasura
-    entrypoint: ["flask", "run", "--eager-loading", "--host", "0.0.0.0", "--port", "5005"]
-  grafana:
-    image: grafana/grafana
-    volumes:
-      - grafana_data:/var/lib/grafana
-    ports:
-      - "3000:3000"
-    environment:
-      GF_SECURITY_ADMIN_PASSWORD: 123
-      GF_INSTALL_PLUGINS: grafana-simple-json-datasource
 volumes:
   hasura_migrations:
   db_data:
-  grafana_data:
   prometheus_data:
