@@ -1,10 +1,7 @@
-import jwt
-
-from datetime import datetime, timedelta
-
 from flask import Blueprint, request, render_template, flash, redirect, current_app, make_response
 from urllib.parse import urlparse
 
+from apps.bolt_api.app.utils.token import generate_token
 from services import const
 from services.logger import setup_custom_logger
 
@@ -16,6 +13,7 @@ bp = Blueprint('auth-login', __name__)
 def login():
     redirect_url = request.args.get('redirect_url', False)
     priv_key = current_app.config.get(const.JWT_AUTH_PRIV_KEY, False)
+    logger.info(current_app.config.get(const.AUTH_LOGIN))
 
     if request.method == 'POST':
         login = request.form['login']
@@ -25,57 +23,8 @@ def login():
                 password != current_app.config.get(const.AUTH_PASSWORD):
             flash('Invalid credentials', 'error')
         else:
-            expires = datetime.utcnow() + timedelta(hours=current_app.config.get(const.JWT_VALID_PERIOD))
-            payload = {
-                "exp": expires,
-                "allowed-origins": [
-                    "*"
-                ],
-                "realm_access": {
-                    "roles": [
-                        "offline_access",
-                        "uma_authorization"
-                    ]
-                },
-                "resource_access": {
-                    "bolt-portal": {
-                        "roles": [
-                            "manager",
-                            "reader",
-                            "tester",
-                            "tenantadmin"
-                        ]
-                    },
-                    "account": {
-                        "roles": [
-                            "manage-account",
-                            "manage-account-links",
-                            "view-profile"
-                        ]
-                    }
-                },
-                "scope": "openid profile email",
-                "email_verified": True,
-                "https://hasura.io/jwt/claims": {
-                    "x-hasura-default-role": "tenantadmin",
-                    "x-hasura-allowed-roles": [
-                        "tenantadmin",
-                        "manager",
-                        "tester",
-                        "reader"
-                    ],
-                    "x-hasura-user-id": "96fa4735-f862-4cb9-b0df-f09c008e02e4"
-                },
-                "name": "Bolt Dev",
-                "preferred_username": "bolt+dev@acaisoft.com",
-                "given_name": "Bolt",
-                "family_name": "Dev",
-                "email": "bolt+dev@acaisoft.com"
-            }
+            token = generate_token(current_app.config, priv_key)
 
-            algorithm = current_app.config.get(const.JWT_ALGORITHM, 'RS256')
-
-            token = jwt.encode(payload, priv_key, algorithm=algorithm)
             parsed_url = urlparse(redirect_url)
             app_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
             base_url = urlparse(request.base_url)
