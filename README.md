@@ -1,4 +1,4 @@
-# ACAI⚡BOLT API
+# AcaiBolt API - 1.0.0-beta
 
 This repo holds the microservice gluing together the bolt-wrapper, hasura, database 
 and keycloak services. 
