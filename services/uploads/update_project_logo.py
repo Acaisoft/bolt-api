@@ -1,8 +1,9 @@
+from services import const
 from services.hasura import hce
 
 
-def get_object_public_url(config, object_id):
-    public_bucket_name = config.get('BUCKET_PUBLIC_UPLOADS', None)
+def get_object_public_url(object_id):
+    public_bucket_name = const.BUCKET_PUBLIC_UPLOADS
     path = f'https://storage.googleapis.com/{public_bucket_name}/{object_id}'
     return path
 
@@ -17,7 +18,7 @@ def update_project_logo(config, object_id):
     :return: None
     """
     # update matching project, ignore errors or invalid objects
-    path = get_object_public_url(config, object_id)
+    path = get_object_public_url(object_id)
     resp = hce(config, '''mutation ($id:uuid!, $path:String!) {
         update_project(
             where:{ id:{ _eq:$id } }
