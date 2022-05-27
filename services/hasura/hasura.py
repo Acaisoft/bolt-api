@@ -70,7 +70,7 @@ def hasura_token_for_testrunner(config):
 
 def hasura_selfsignedtoken_for_testrunner(config):
     """
-    Returns a token for use by a testrunner, granting access to a single execution. Signed by config.SECRET_KEY, good for local tests.
+    Returns a token for use by a testrunner, granting access to a single execution. Signed by config.TEST_SECRET_KEY, good for local tests.
     :param config: flask app config
     :param execution_id: resource ID to grant access to
     :return: str: jwt token
@@ -87,6 +87,7 @@ def hasura_selfsignedtoken_for_testrunner(config):
     }}
 
     algo = config.get(const.JWT_ALGORITHM, 'HS256')
-    secret = config.get(const.SECRET_KEY)
-    assert secret, 'SECRET_KEY not defined'
+    secret_key_variable_name = const.SECRET_KEY
+    secret = config.get(secret_key_variable_name)
+    assert secret, f'{secret_key_variable_name} not defined'
     return jwt.encode(payload, secret, algorithm=algo), execution_id

@@ -24,6 +24,7 @@ from google.cloud import storage
 from google.cloud import pubsub_v1
 from google.cloud.pubsub_v1.subscriber.message import Message
 
+from services import const
 from services.uploads.image_processor import process_image_bucket
 
 from services.logger import setup_custom_logger
@@ -96,8 +97,8 @@ def register_upload_processor(config, test_delivery=False):
     Call this at start of flask app, pass app.config
     """
 
-    pubsub_name = config.get('UPLOADS_PUBSUB_SUBSCRIPTION')
-    dst_bucket = config.get('BUCKET_PUBLIC_UPLOADS', None)
+    pubsub_name = const.UPLOADS_PUBSUB_SUBSCRIPTION
+    dst_bucket = const.BUCKET_PUBLIC_UPLOADS
     worker_id = str(uuid.uuid4())
     test_payload = bytes(f'{SELF_TEST_MSG} {worker_id}'.encode('utf-8'))
 
