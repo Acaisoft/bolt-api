@@ -1,3 +1,22 @@
+# Copyright (c) 2022 Acaisoft
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy of
+# this software and associated documentation files (the "Software"), to deal in
+# the Software without restriction, including without limitation the rights to
+# use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+# the Software, and to permit persons to whom the Software is furnished to do so,
+# subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+# FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+# COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+# IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 from services import const
 
 
@@ -49,6 +68,28 @@ def validate_url(value: str, required=True, key='hostname'):
     if value:
         assert len(value) > 10, f'{key} too short'
         assert value.startswith('http://') or value.startswith('https://'), f'missing protocol in {key} ({value})'
+    return value
+
+
+def validate_locustfile_name(value: str, required=True, key='locustfile_name'):
+    value = value.strip()
+    if required:
+        assert value, f'{key} is required'
+    if value:
+        assert len(value) > 4, f'{key} too short'
+        assert value.endswith('.py'), f'extension not found in tests file name {key} ({value})'
+        assert ('/' not in value) and ('\\' not in value),\
+            f'tests file has to reside in repository root {key} ({value})'
+    return value
+
+
+def validate_repository_branch(value: str, required=True, key='repository_branch'):
+    value = value.strip()
+    if required:
+        assert value, f'{key} is required'
+    if value:
+        assert len(value) > 2, f'{key} too short'
+        assert ' ' not in value, f'spaces not allowed in {key}'
     return value
 
 
@@ -108,11 +149,13 @@ def validate_monitoring_chart_configuration(configuration: dict):
 
 VALIDATORS = {
     '-t': validate_time,
-    '-c': validate_users,
+    '-u': validate_users,
     '-r': validate_rampup,
     '-H': validate_url,
     '-md': validate_duration,
     '-mi': validate_interval,
+    '-f': validate_locustfile_name,
+    '-b': validate_repository_branch
 }
 
 if __name__ == '__main__':

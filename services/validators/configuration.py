@@ -1,3 +1,22 @@
+# Copyright (c) 2022 Acaisoft
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy of
+# this software and associated documentation files (the "Software"), to deal in
+# the Software without restriction, including without limitation the rights to
+# use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+# the Software, and to permit persons to whom the Software is furnished to do so,
+# subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+# FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+# COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+# IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 from flask import current_app
 
 from services import const
@@ -129,12 +148,16 @@ def validate_load_test_params(params: list, defaults: list) -> dict:
     ...      { "value": "500", "parameter_slug": "load_tests_rampup", },
     ...      { "value": "http://wp.pl", "parameter_slug": "load_tests_host", },
     ...      { "value": "100", "parameter_slug": "monitoring_duration", },
+    ...      { "value": "load_tests.py", "parameter_slug": "locustfile_name", },
+    ...      { "value": "master", "parameter_slug": "repository_branch", },
     ...    ], [
     ...      {"slug_name": "load_tests_time", "name": "time", "default_value": "360", "param_name": "-t"},
-    ...      {"slug_name": "load_tests_users", "name": "users", "default_value": "1000", "param_name": "-c", "param_type": "int"},
+    ...      {"slug_name": "load_tests_users", "name": "users", "default_value": "1000", "param_name": "-u", "param_type": "int"},
     ...      {"slug_name": "load_tests_rampup", "name": "users/second", "default_value": "100", "param_name": "-r", "param_type": "int"},
     ...      {"slug_name": "load_tests_host", "name": "host", "default_value": "", "param_name": "-H", "param_type": "str"},
     ...      {"slug_name": "monitoring_duration", "name": "monitoring_duration", "default_value": "", "param_name": "-md", "param_type": "int"},
+    ...      {"slug_name": "load_tests_file_name", "name": "file name", "default_value": "load_tests.py", "param_name": "-f", "param_type": "str"},
+    ...      {"slug_name": "load_tests_repository_branch", "name": "repository_branch", "default_value": "master", "param_name": "-b", "param_type": "str"},
     ... ])
     {'load_tests_users': '5000', 'load_tests_rampup': '500', 'load_tests_host': 'http://wp.pl', 'load_tests_time': '360'}
     """

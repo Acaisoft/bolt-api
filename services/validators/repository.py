@@ -1,12 +1,31 @@
+# Copyright (c) 2022 Acaisoft
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy of
+# this software and associated documentation files (the "Software"), to deal in
+# the Software without restriction, including without limitation the rights to
+# use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+# the Software, and to permit persons to whom the Software is furnished to do so,
+# subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+# FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+# COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+# IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+import os
 import re
 
-import deployer_cli
+import flask
+import marshmallow
 
 from services import const
-from services.cache import get_cache
 from services.logger import setup_custom_logger
-from services.deployer import clients
-
+from services.validators import schemas
 
 logger = setup_custom_logger(__name__)
 
@@ -55,10 +74,7 @@ def is_user_project_valid(user_id, project_config):
     raise AssertionError('user has no access to project')
 
 
-def validate_accessibility(app_config, repository_url:str):
-    """
-    Validate repo is accessible using the key provided by upstream bolt-deployer
-    """
+def validate_accessibility(app_config: flask.config.Config, repository_url: str) -> str:
     if repository_url.startswith(const.MOCK_REPOSITORY):
         return repository_url
 
@@ -66,27 +82,20 @@ def validate_accessibility(app_config, repository_url:str):
     regex = '((git|ssh|http(s)?)|(git@[\w\.]+))(:(//)?)([\w\.@\:/\-~]+)(\.git)(/)?'
     assert re.match(regex, repository_url), f'invalid repository url ({repository_url})'
 
-    c = get_cache(app_config)
-    cn = f'validate_accessibility_{hash(repository_url)}'
-    repo_checked = c.get(cn)
-    if not repo_checked:
-        logger.info(f'validating repository is accessible {repository_url}')
-        req = deployer_cli.ValidateRepositorySchema(repository_url=repository_url)
-        try:
-            # TODO: add a timeout on bolt-deployer end, should be lower than hasura-to-api itmeout (~10s)
-            # NOTE: assume remote is invalid if it cannot be contacted in less than 5 seconds
-            response = clients.management(app_config).management_validate_repository_post(
-                validate_repository_schema=req,
-                _request_timeout=20,
-            )
-        except Exception as e:
-            # catches remote not reachable/resolvable
-            logger.info(f'repo connectivity check failure: {str(e)}')
-            raise AssertionError('repository is not reachable')
-        else:
-            # catches remote not accessible
-            assert response.is_valid, f'repository is not accessible'
-            c.set(cn, 1, 60)
+
+    logger.info(f'validating repository is accessible {repository_url}')
+    input_data = {'repository_url': repository_url}
+    try:
+        schemas.ValidateRepositorySchema().load(data=input_data)
+    except marshmallow.ValidationError as e:
+        # catches remote not reachable/resolvable
+        logger.info(f'repo connectivity check failure: {str(e)}')
+        raise AssertionError('repository is not reachable')
+    else:
+        # catches remote not accessible
+        return_code = os.system(f'git ls-remote {repository_url}')
+        is_repository_valid = return_code == 0
+        assert is_repository_valid, f'repository is not accessible'
 
     return repository_url
 

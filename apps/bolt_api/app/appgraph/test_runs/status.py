@@ -1,8 +1,25 @@
-import graphene
-from flask import current_app
+# Copyright (c) 2022 Acaisoft
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy of
+# this software and associated documentation files (the "Software"), to deal in
+# the Software without restriction, including without limitation the rights to
+# use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+# the Software, and to permit persons to whom the Software is furnished to do so,
+# subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+# FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+# COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+# IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-from services.deployer import clients
-from services.testruns.status import get_test_run_status
+import pathlib
+
+import graphene
 
 
 class StatusResponseInterface(graphene.Interface):
@@ -17,22 +34,12 @@ class StatusResponse(graphene.ObjectType):
 
 
 class TestrunQueries(graphene.ObjectType):
-    testrun_status = graphene.Field(
-        StatusResponseInterface,
-        name='testrun_status',
-        description='Check tests status, requires connection to bolt-deployer. Writes error details to execution table.',
-        execution_id=graphene.UUID(description='Execution to check status of.')
-    )
-
     testrun_repository_key = graphene.String(
         name='testrun_repository_key',
         description='Returns id rsa public key. Use it to give Bolt access to repository containing tests.'
     )
 
-    def resolve_testrun_status(self, info, execution_id):
-        status, debug = get_test_run_status(str(execution_id))
-        return StatusResponse(status=status, debug=debug)
-
     def resolve_testrun_repository_key(self, info, **kwargs):
-        response = clients.management(current_app.config).management_id_rsa_pub_get()
-        return response.id_rsa_pub
+        with pathlib.Path.home().joinpath('.ssh', 'id_rsa.pub').open() as fd:
+            public_ssh_key = fd.read().strip()
+        return public_ssh_key

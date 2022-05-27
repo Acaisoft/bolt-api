@@ -1,3 +1,22 @@
+# Copyright (c) 2022 Acaisoft
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy of
+# this software and associated documentation files (the "Software"), to deal in
+# the Software without restriction, including without limitation the rights to
+# use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+# the Software, and to permit persons to whom the Software is furnished to do so,
+# subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+# FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+# COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+# IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 import json
 import requests
 
@@ -10,6 +29,7 @@ from services.validators import validate_extensions
 from services.validators.configuration import validate_test_configuration_by_id, validate_monitoring_params
 
 logger = setup_custom_logger(__file__)
+REQUEST_TIMEOUT = 5  # seconds
 
 
 def start(app_config, conf_id, user_id, no_cache):
@@ -120,7 +140,9 @@ def start(app_config, conf_id, user_id, no_cache):
         # common workflow fields
         try:
             branch = [
-                envvar['value'] for envvar in test_config['configuration_envvars'] if envvar['name'] == 'BRANCH'
+                parameter['value']
+                for parameter in test_config['configuration_parameters']
+                if parameter['parameter']['name'] == 'repository branch'
             ][0]
         except IndexError:
             branch = 'master'
@@ -151,6 +173,7 @@ def start(app_config, conf_id, user_id, no_cache):
                 'users': get_users_num(test_config['configuration_parameters']),
                 'host': host,
                 'port': port,
+                'file': get_file_path(test_config['configuration_parameters'])
             }
         # monitoring
         if test_config['has_monitoring']:
@@ -160,7 +183,7 @@ def start(app_config, conf_id, user_id, no_cache):
             workflow_data['job_post_stop'] = {'env_vars': {}}
 
         logger.info(f'Workflow creator data {workflow_data}')
-        response = requests.post(app_config['WORKFLOW_CREATOR_ENDPOINT'], json=workflow_data)
+        response = requests.post(app_config['WORKFLOW_CREATOR_ENDPOINT'], json=workflow_data, timeout=REQUEST_TIMEOUT)
         logger.info(f'Workflow response {response}')
         logger.info(f'Workflow response text {response.text} | Status {response.status_code}')
         assert response.status_code == 200, f'Error during execution workflow creator. Response {response.status_code}'
@@ -221,3 +244,16 @@ def get_host_and_port(parameters: list) -> tuple:
         return testrun_url, None
     else:
         return host, port
+
+
+def get_file_path(parameters: list) -> str:
+    try:
+        file_path = [
+            parameter['value']
+            for parameter in parameters
+            if parameter['parameter']['name'] == 'file path'
+        ][0]
+    except IndexError:
+        return "load_tests"
+
+    return file_path.rstrip('.py')
