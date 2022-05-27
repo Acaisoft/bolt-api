@@ -1,17 +1,37 @@
+# Copyright (c) 2022 Acaisoft
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy of
+# this software and associated documentation files (the "Software"), to deal in
+# the Software without restriction, including without limitation the rights to
+# use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+# the Software, and to permit persons to whom the Software is furnished to do so,
+# subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+# FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+# COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+# IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 import os
 
 from PIL import Image
 from google.cloud import storage
 
+from services import const
 from services.logger import setup_custom_logger
 from services.uploads.thumbnails import SIZES, DEFAULT_SIZE, MAX_ORIGINAL_BYTES
 
 logger = setup_custom_logger(__name__)
 
 
-def process_image(app_config, src_object_id, dst_object_id):
-    src_bucket = app_config.get('BUCKET_PRIVATE_STORAGE', None)
-    dst_bucket = app_config.get('BUCKET_PUBLIC_UPLOADS', None)
+def process_image(src_object_id, dst_object_id):
+    src_bucket = const.BUCKET_PRIVATE_STORAGE
+    dst_bucket = const.BUCKET_PUBLIC_UPLOADS
     process_image_bucket(src_bucket, src_object_id, dst_bucket, dst_object_id)
 
 
@@ -80,8 +100,3 @@ def process_image_bucket(src_bucket_name, src_object_id, dst_bucket_name, dst_ob
     else:
         logger.warn(f'not copying original image at {src_bucket_name}/{src_object_id}: file size too large: {src_blob.size}')
     os.unlink(src_file)
-
-
-if __name__ == '__main__':
-    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = '/home/piotr/bitbucket.org/acaisoft/bolt-api/instance/acai-bolt-356aea83d223.json'
-    process_image('uploads-bolt-acaisoft', 'media.bolt.acaisoft.io', 'ffa05917-f812-4f87-9895-55e78317f100')

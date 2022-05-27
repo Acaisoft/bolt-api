@@ -1,13 +1,45 @@
+# Copyright (c) 2022 Acaisoft
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy of
+# this software and associated documentation files (the "Software"), to deal in
+# the Software without restriction, including without limitation the rights to
+# use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+# the Software, and to permit persons to whom the Software is furnished to do so,
+# subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+# FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+# COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+# IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 import graphene
 
-from apps.bolt_api.app.appgraph import configuration, project, repository, test_creator, uploads, users, test_runs, \
-    data_export, extension, argo, execution_metrics
+from apps.bolt_api.app.appgraph import (
+    argo,
+    configuration,
+    execution_metrics,
+    extension,
+    project,
+    repository,
+    test_creator,
+    test_runs,
+    uploads,
+    users,
+)
 from apps.bolt_api.app.appgraph.project import demo
 from services import gql_util
 
 
-class TestrunQuery(users.UserList, test_runs.TestrunQueries,
-                   project.TestrunQueries, execution_metrics.ExecutionMetricsQueries):
+class TestrunQuery(
+    test_runs.TestrunQueries,
+    project.TestrunQueries,
+    execution_metrics.ExecutionMetricsQueries,
+):
     pass
 
 
@@ -56,9 +88,6 @@ class TestrunMutations(graphene.ObjectType):
     testrun_start = to_field(test_runs.TestrunStart)
     testrun_terminate = to_field(test_runs.TestrunTerminate)
 
-    # testrun (execution) data export
-    testrun_data_export = to_field(data_export.DataExportLink)
-
     # user management
     testrun_user_assign = to_field(users.UserAssignToProject)
     testrun_user_roles = to_field(users.UserAddRole)
@@ -85,12 +114,9 @@ AppSchema = graphene.Schema(
         test_runs.TestrunStartObject,
         test_runs.TestrunTerminateObject,
         test_runs.StatusResponse,
-        users.UserListType,
-        users.UserListItemType,
         gql_util.ValidationResponse,
         project.SummaryResponse,
-        execution_metrics.ExecutionMetricsDataResponse
+        execution_metrics.ExecutionMetricsDataResponse,
     ],
     auto_camelcase=False,
 )
-

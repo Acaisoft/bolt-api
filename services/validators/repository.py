@@ -1,3 +1,22 @@
+# Copyright (c) 2022 Acaisoft
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy of
+# this software and associated documentation files (the "Software"), to deal in
+# the Software without restriction, including without limitation the rights to
+# use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+# the Software, and to permit persons to whom the Software is furnished to do so,
+# subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+# FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+# COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+# IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 import os
 import re
 
@@ -5,7 +24,6 @@ import flask
 import marshmallow
 
 from services import const
-from services.cache import get_cache
 from services.logger import setup_custom_logger
 from services.validators import schemas
 
@@ -64,25 +82,20 @@ def validate_accessibility(app_config: flask.config.Config, repository_url: str)
     regex = '((git|ssh|http(s)?)|(git@[\w\.]+))(:(//)?)([\w\.@\:/\-~]+)(\.git)(/)?'
     assert re.match(regex, repository_url), f'invalid repository url ({repository_url})'
 
-    cache = get_cache(app_config)
-    cache_key = f'validate_accessibility_{hash(repository_url)}'
-    is_repo_checked = cache.get(cache_key)
 
-    if not is_repo_checked:
-        logger.info(f'validating repository is accessible {repository_url}')
-        input_data = {'repository_url': repository_url}
-        try:
-            schemas.ValidateRepositorySchema().load(data=input_data)
-        except marshmallow.ValidationError as e:
-            # catches remote not reachable/resolvable
-            logger.info(f'repo connectivity check failure: {str(e)}')
-            raise AssertionError('repository is not reachable')
-        else:
-            # catches remote not accessible
-            return_code = os.system(f'git ls-remote {repository_url}')
-            is_repository_valid = return_code == 0
-            assert is_repository_valid, f'repository is not accessible'
-            cache.set(cache_key, 1, 60)
+    logger.info(f'validating repository is accessible {repository_url}')
+    input_data = {'repository_url': repository_url}
+    try:
+        schemas.ValidateRepositorySchema().load(data=input_data)
+    except marshmallow.ValidationError as e:
+        # catches remote not reachable/resolvable
+        logger.info(f'repo connectivity check failure: {str(e)}')
+        raise AssertionError('repository is not reachable')
+    else:
+        # catches remote not accessible
+        return_code = os.system(f'git ls-remote {repository_url}')
+        is_repository_valid = return_code == 0
+        assert is_repository_valid, f'repository is not accessible'
 
     return repository_url
 

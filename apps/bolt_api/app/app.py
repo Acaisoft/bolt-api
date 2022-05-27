@@ -1,3 +1,22 @@
+# Copyright (c) 2022 Acaisoft
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy of
+# this software and associated documentation files (the "Software"), to deal in
+# the Software without restriction, including without limitation the rights to
+# use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+# the Software, and to permit persons to whom the Software is furnished to do so,
+# subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+# FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+# COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+# IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 import logging
 
 from flask import Flask
@@ -6,7 +25,6 @@ from apps.bolt_api.app import appgraph, healthcheck, webhooks, auth
 from services.configure import configure, validate
 from services.logger import setup_custom_logger
 from services import const
-from services.cache import get_cache
 from services.hasura import hasura_client
 
 
@@ -38,8 +56,7 @@ def create_app(test_config=None):
 
     validate(app, const.REQUIRED_BOLT_API_CONFIG_VARS)
 
-    ## initialize cache and hasura clients
-    get_cache(app.config, app)
+    ## initialize the hasura client
     hasura_client(app.config)
 
     ## this app's graphs

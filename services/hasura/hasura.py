@@ -1,3 +1,23 @@
+# Copyright (c) 2022 Acaisoft
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy of
+# this software and associated documentation files (the "Software"), to deal in
+# the Software without restriction, including without limitation the rights to
+# use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+# the Software, and to permit persons to whom the Software is furnished to do so,
+# subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+# FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+# COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+# IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+import logging
 import os
 import uuid
 
@@ -62,7 +82,7 @@ def hasura_token_for_testrunner(config):
 #TODO: can be removed once AUTH_KC-driven approach above is tested
 def hasura_selfsignedtoken_for_testrunner(config):
     """
-    Returns a token for use by a testrunner, granting access to a single execution. Signed by config.SECRET_KEY, good for local tests.
+    Returns a token for use by a testrunner, granting access to a single execution. Signed by config.TEST_SECRET_KEY, good for local tests.
     :param config: flask app config
     :param execution_id: resource ID to grant access to
     :return: str: jwt token
@@ -79,6 +99,7 @@ def hasura_selfsignedtoken_for_testrunner(config):
     }}
 
     algo = config.get(const.JWT_ALGORITHM, 'HS256')
-    secret = config.get(const.SECRET_KEY)
-    assert secret, 'SECRET_KEY not defined'
+    secret_key_variable_name = const.SECRET_KEY
+    secret = config.get(secret_key_variable_name)
+    assert secret, f'{secret_key_variable_name} not defined'
     return jwt.encode(payload, secret, algorithm=algo), execution_id

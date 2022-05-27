@@ -57,7 +57,6 @@ python-git==2018.2.1
 python-mimeparse==1.6.0
 pyzmq==17.1.2
 raven==6.10.0
-redis==3.1.0
 requests==2.21.0
 Rx==1.6.1
 schematics==2.1.0
